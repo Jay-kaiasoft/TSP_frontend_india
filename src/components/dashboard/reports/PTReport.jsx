@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Tabs } from "../../common/tabs/tabs";
 import { getEmployeePFReport } from "../../../service/companyEmployee/companyEmployeeService";
 import DataTable from "../../common/table/table";
 import Select from "../../common/select/select";
@@ -17,9 +16,8 @@ const filterOptions = [
     { id: 4, title: 'Last 1 Year', value: 12 }
 ];
 
-const Reports = () => {
+const PTReport = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const [selectedTab, setSelectedTab] = useState(0);
     const [employees, setEmployees] = useState([]);
     const [filter, setFilter] = useState(filterOptions[0]);
     const [loadingPdf, setLoadingPdf] = useState(false);
@@ -189,4 +187,4 @@ const Reports = () => {
     );
 };
 
-export default Reports;
+export default PTReport;

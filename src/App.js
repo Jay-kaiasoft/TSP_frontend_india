@@ -31,8 +31,8 @@ import MuiThemeProvider from './components/common/muiTheme/muiTheme'
 import CompanyTheme from "./components/dashboard/settings/companyTheme/companyTheme";
 import ManageShift from "./components/dashboard/companyShift/manageShift";
 import DetailedPDFTable from "./components/dashboard/timeCard/timeCardPDF/detailedPDFTable";
-import Reports from "./components/dashboard/reports/reports";
 import PFReport from "./components/dashboard/reports/PFReport";
+import PTReport from "./components/dashboard/reports/PTReport";
 
 library.add(fas, far)
 
@@ -153,7 +153,7 @@ function App() {
         },
         {
           path: "ptreport",
-          element: <Reports />,
+          element: <PTReport />,
         },
       ]
     },
