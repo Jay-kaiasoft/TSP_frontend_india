@@ -62,8 +62,13 @@ const payScheduleOptions = [
     { id: 4, title: "Yearly" },
 ]
 
+const CanteenTypeOptions = [
+    { id: 1, title: "Office Type" },
+    { id: 2, title: "Labour Type" }
+]
+
 const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
-    const { isContractor, companyId, id } = useParams();
+    const { companyId, id } = useParams();
     const navigate = useNavigate();
     const theme = useTheme()
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
@@ -135,14 +140,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             contactPhone: "",
             relationship: "",
             departmentId: "",
-            contractorId: "",
             employeeTypeId: "",
             payPeriod: "",
             hiredDate: new Date(),
             isActive: 1,
-            isContractor: parseInt(isContractor),
-            workState: "",
-            workLocation: "",
             checkGeofence: true,
             isPf: false,
             pfPercentage: 0,
@@ -151,6 +152,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             ptAmount: 0,
             basicSalary: "",
             grossSalary: "",
+            canteenType: "",
+            canteenAmount: "",
 
             accountId: "",
             accountType: "",
@@ -278,6 +281,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 reset(res?.data?.result);
                 setValue("gender", res?.data?.result?.gender === "Male" ? 1 : (res?.data?.result?.gender !== "" && res?.data?.result?.gender !== null) ? 2 : "")
                 setValue("companyLocation", res?.data?.result?.companyLocation ? JSON.parse(res?.data?.result?.companyLocation) : [])
+                setValue("canteenType", res?.data?.result?.canteenType ? CanteenTypeOptions?.filter((row) => row?.title === res?.data?.result?.canteenType)?.[0]?.id : null)
             }
             if (res?.data?.result?.bankAccountId) {
                 const response = await getEmployeeBankInfo(res?.data?.result?.bankAccountId)
@@ -572,9 +576,9 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         const saveAndExit = submitType === "saveAndExit";
         const newData = {
             ...data,
+            canteenType: data?.canteenType ? CanteenTypeOptions?.filter((row) => row?.id === data?.canteenType)?.[0]?.title : null,
             companyId: companyId,
             employeeId: id || watch("employeeId"),
-            isContractor: parseInt(isContractor),
             gender: parseInt(watch("gender")) === 1 ? "Male" : watch("gender") !== null ? "Female" : "",
             accountType: accountTypeOptions?.filter((row) => row?.id === watch("accountType"))?.[0]?.title || null,
             depositDistribution: depositDistributionOptions?.filter((row) => row?.id === watch("depositDistribution"))?.[0]?.title || null,
@@ -650,10 +654,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     }
 
     useEffect(() => {
-        if (parseInt(isContractor) === 1) {
-            const updatedSteps = steps.filter(step => step !== "Tax Info");
-            setSteps(updatedSteps)
-        }
         if (id) {
             const updatedSteps = steps.filter(step => step !== "Face Registration");
             setSteps(updatedSteps)
@@ -1534,8 +1534,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 />
                                             </div>
 
-
-                                            <div>
+                                            <div className='col-span-2'>
                                                 <Controller
                                                     name="isPt"
                                                     control={control}
@@ -1571,10 +1570,63 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                                         field.onChange(value);
                                                                     }
                                                                 }}
+                                                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                                             />
                                                         )}
                                                     />
                                                 </div>
+                                            </div>
+
+                                            <div>
+                                                <Controller
+                                                    name="canteenType"
+                                                    control={control}
+                                                    rules={{
+                                                        required: "Canteen Type is required"
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            options={CanteenTypeOptions}
+                                                            label={"Canteen Type"}
+                                                            placeholder="Select canteen type"
+                                                            value={parseInt(watch("canteenType")) || null}
+                                                            onChange={(_, newValue) => {
+                                                                if (newValue?.id) {
+                                                                    field.onChange(newValue.id);
+                                                                } else {
+                                                                    setValue("canteenType", null);
+                                                                }
+                                                            }}
+                                                            error={errors?.canteenType}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <Controller
+                                                    name="canteenAmount"
+                                                    control={control}
+                                                    rules={{
+                                                        required: watch("canteenType") ? "Canteen amount is required" : false,                                                    
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <Input
+                                                            {...field}
+                                                            label={watch("canteenType") === 1 ? "Amount Cut From Salary" : watch("canteenType") === 2 ? "Amount Cut(Per Plate) From Daly Wages" : ""}
+                                                            type={`text`}
+                                                            error={errors?.canteenAmount}
+                                                            disabled={!watch("canteenType")}
+                                                            onChange={(e) => {
+                                                                let value = e.target.value;
+                                                                if (/^\d*\.?\d*$/.test(value)) {
+                                                                    field.onChange(value);
+                                                                }
+                                                            }}
+                                                            endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                        />
+                                                    )}
+                                                />
                                             </div>
                                         </div>
                                     </>
@@ -1635,19 +1687,34 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 <Controller
                                                     name="ifscCode"
                                                     control={control}
+                                                    rules={{
+                                                        validate: (value) => {
+                                                            if (value === "") return true; // ✅ No error when empty
+                                                            const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+                                                            return ifscPattern.test(value) || "(4 letters, 0, 6 alphanumeric characters) (e.g., HDFC0001234)";
+                                                        },
+                                                    }}
                                                     render={({ field }) => (
                                                         <Input
                                                             {...field}
                                                             label="IFSC Code"
-                                                            type={`text`}
+                                                            type="text"
                                                             onChange={(e) => {
-                                                                const numericValue = e.target.value.replace(/[^A-Z0-9]/g, '');
-                                                                field.onChange(numericValue);
+                                                                // Clean the input to match IFSC code format
+                                                                if (e.target.value) {
+                                                                    const cleaned = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                                                                    field.onChange(cleaned);
+                                                                } else {
+                                                                    field.onChange("");
+                                                                }
                                                             }}
+                                                            error={errors?.ifscCode}
+                                                            helperText={errors?.ifscCode ? errors.ifscCode.message : ""}
                                                         />
                                                     )}
                                                 />
                                             </div>
+
 
                                             <div>
                                                 <Controller

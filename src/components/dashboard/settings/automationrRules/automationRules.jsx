@@ -1,0 +1,42 @@
+import React from 'react'
+import CustomIcons from '../../../common/icons/CustomIcons'
+import { useTheme } from '@mui/material';
+import { NavLink } from 'react-router-dom';
+
+const AutomationRules = () => {
+    const theme = useTheme();
+
+    return (
+        <>
+            <div className='px-4 lg:px-0'>
+                <div className='border rounded-lg bg-white w-screen lg:w-full p-4'>
+                    <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
+                        <div style={{ color: theme.palette.primary.main }}>
+                            <CustomIcons iconName={'fa-solid fa-clock'} css='cursor-pointer h-6 w-6' />
+                        </div>
+                        <div className='grow'>
+                            <h2 className='text-lg font-semibold'>Overtime Rules</h2>
+                            <p className='text-gray-600'>
+                                Automate Oovertime for employees who work beyond their scheduled hours.
+                            </p>
+                        </div>
+                        <div>
+                            <NavLink to={'/dashboard/automationrules/overtimerules'}>
+                                <div className='flex justify-center items-center gap-2'>
+                                    <p>
+                                        <span style={{ color: theme.palette.primary.main }} className='font-semibold'>View All</span>
+                                    </p>
+                                    <div>
+                                        <CustomIcons iconName={'fa-solid fa-angle-right'} css='cursor-pointer text-gray-500 h-4 w-4' />
+                                    </div>
+                                </div>
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    )
+}
+
+export default AutomationRules

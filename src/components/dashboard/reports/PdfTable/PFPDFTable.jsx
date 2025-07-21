@@ -18,11 +18,11 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                 <div className='flex justify-start items-center mb-5'>
                     <div className='grow'>
                         <div>
-                            <p className='font-bold text-xl'>Company: {companyInfo?.companyName}</p>
+                            <p className='font-semibold text-lg'>Company: {companyInfo?.companyName}</p>
                         </div>
                     </div>
                     <div>
-                        <h1 className='font-bold text-xl text-center'>From: &nbsp;&nbsp;&nbsp; {filter?.title}</h1>
+                        <h1 className='font-semibold text-lg text-center'>From: &nbsp;&nbsp;&nbsp; {filter?.title}</h1>
                     </div>
                 </div>
 

@@ -124,6 +124,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
         icon: <CustomIcons iconName={'fa-solid fa-gear'} css=' cursor-pointer' />,
         child: [
           { name: "Profile", icon: <CustomIcons iconName={'fa-solid fa-circle'} css=' cursor-pointer' /> },
+          { name: "Automation Rules", icon: <CustomIcons iconName={'fa-solid fa-circle'} css=' cursor-pointer' /> },
           // ((userInfo?.roleName === "Admin" || userInfo?.roleName === "Owner") && userInfo?.companyId) &&
           // { name: "Company Theme", icon: <CustomIcons iconName={'fa-solid fa-circle'} css=' cursor-pointer' /> },
         ].filter(Boolean)
@@ -247,7 +248,6 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
     </div>
   );
 
-  console.log("title", title)
   useEffect(() => {
     mapPermissionsToItems()
   }, [])

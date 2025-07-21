@@ -1,9 +1,8 @@
-import React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import Input from '../input/input';
-import Button from '../buttons/button';
+// import Button from '../buttons/button';
 import { useTheme } from '@mui/material';
-import PermissionWrapper from '../permissionWrapper/PermissionWrapper';
+// import PermissionWrapper from '../permissionWrapper/PermissionWrapper';
 import CustomIcons from '../icons/CustomIcons';
 
 const paginationModel = { page: 0, pageSize: 10 };
@@ -56,7 +55,7 @@ export default function DataTable({ checkboxSelection = false, showSearch = fals
                 // disableColumnSorting
                 getRowId={getRowId}
                 // hideFooter
-                loading={rows?.length > 0 ? false : true}
+                // loading={loading}
                 checkboxSelection={checkboxSelection}
                 sx={{
                     maxHeight: height || "full",

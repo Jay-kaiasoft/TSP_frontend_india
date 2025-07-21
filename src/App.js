@@ -33,6 +33,8 @@ import ManageShift from "./components/dashboard/companyShift/manageShift";
 import DetailedPDFTable from "./components/dashboard/timeCard/timeCardPDF/detailedPDFTable";
 import PFReport from "./components/dashboard/reports/PFReport";
 import PTReport from "./components/dashboard/reports/PTReport";
+import AutomationRules from "./components/dashboard/settings/automationrRules/automationRules";
+import OvertimeRules from "./components/dashboard/settings/automationrRules/overtimeRules/overtimeRules";
 
 library.add(fas, far)
 
@@ -88,11 +90,11 @@ function App() {
           element: <ManageEmployees />,
         },
         {
-          path: "manageemployees/add/:isContractor/:companyId",
+          path: "manageemployees/add/:companyId",
           element: <AddEmployeeComponent />,
         },
         {
-          path: "manageemployees/update/:isContractor/:companyId/:id",
+          path: "manageemployees/update/:companyId/:id",
           element: <AddEmployeeComponent />,
         },
         {
@@ -154,6 +156,14 @@ function App() {
         {
           path: "ptreport",
           element: <PTReport />,
+        },
+        {
+          path: "automationrules",
+          element: <AutomationRules />,
+        },
+        {
+          path: "automationrules/overtimerules",
+          element: <OvertimeRules />,
         },
       ]
     },

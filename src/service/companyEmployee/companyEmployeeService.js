@@ -1,9 +1,9 @@
 import { companyEmployeeURL } from "../../config/apiConfig/apiConfig"
 import axiosInterceptor from "../axiosInterceptor/axiosInterceptor"
 
-export const getAllCompanyEmployee = async (companyId, id) => {
+export const getAllCompanyEmployee = async (companyId) => {
     try {
-        const response = axiosInterceptor().get(`${companyEmployeeURL}/getAllCompanyEmployee/${companyId}/${id}`)
+        const response = axiosInterceptor().get(`${companyEmployeeURL}/getAllCompanyEmployee/${companyId}`)
         return response
 
     } catch (error) {
