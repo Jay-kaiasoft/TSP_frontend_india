@@ -35,12 +35,17 @@ import PFReport from "./components/dashboard/reports/PFReport";
 import PTReport from "./components/dashboard/reports/PTReport";
 import AutomationRules from "./components/dashboard/settings/automationrRules/automationRules";
 import OvertimeRules from "./components/dashboard/settings/automationrRules/overtimeRules/overtimeRules";
+import SalarySlip from "./SalarySlip";
 
 library.add(fas, far)
 
 function App() {
 
   const router = createBrowserRouter([
+     {
+      path: "/salarySlip",
+      element: <SalarySlip />,
+    },
     {
       path: "*",
       element: <PageNotFound />,

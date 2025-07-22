@@ -137,8 +137,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
             companyLocation: [],
             emergencyContact: "",
-            contactPhone: "",
-            relationship: "",
             departmentId: "",
             employeeTypeId: "",
             payPeriod: "",
