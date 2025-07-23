@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import AlertDialog from '../../common/alertDialog/alertDialog';
-import { Controller,useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { createShift, deleteShift, getAllShifts, getShift, updateShift } from '../../../service/companyShift/companyShiftService';
 import PermissionWrapper from '../../common/permissionWrapper/PermissionWrapper';
 import Components from '../../muiComponents/components';
@@ -48,8 +48,8 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
             shiftName: "",
             shiftType: "",
             shiftTypeId: "",
-            timeStart: null,
-            timeEnd: null,
+            startTime: null,
+            endTime: null,
             hours: "",
             totalHours: 0,
         },
@@ -59,11 +59,12 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
         const payload = {
             ...data,
             companyId: userInfo?.companyId,
-            timeStart: data.timeStart
-                ? new Date(data.timeStart).toISOString()
+            totalHours: parseInt(data.totalHours) || 0,
+            startTime: data.startTime
+                ? new Date(data.startTime).toISOString()
                 : null,
-            timeEnd: data.timeEnd
-                ? new Date(data.timeEnd).toISOString()
+            endTime: data.endTime
+                ? new Date(data.endTime).toISOString()
                 : null,
         };
 
@@ -160,11 +161,11 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                 setValue("shiftName", result?.shiftName);
                 setValue("shiftType", result?.shiftType);
                 setValue("shiftTypeId", type.find(item => item.title === result?.shiftType)?.id);
-                if (result?.timeStart) {
-                    setValue("timeStart", dayjs(result?.timeStart))
+                if (result?.startTime) {
+                    setValue("startTime", dayjs(result?.startTime))
                 }
-                if (result?.timeEnd) {
-                    setValue("timeEnd", dayjs(result?.timeEnd))
+                if (result?.endTime) {
+                    setValue("endTime", dayjs(result?.endTime))
                 }
                 setValue("hours", result?.hours);
                 setValue("totalHours", result?.totalHours || 0);
@@ -188,9 +189,9 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
     }, [shiftId])
 
     useEffect(() => {
-        if (watch("timeStart") && watch("timeEnd")) {
-            const start = dayjs(watch("timeStart"));
-            const end = dayjs(watch("timeEnd"));
+        if (watch("startTime") && watch("endTime")) {
+            const start = dayjs(watch("startTime"));
+            const end = dayjs(watch("endTime"));
 
             let diff = end.diff(start, "minute");
 
@@ -209,7 +210,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                 setValue("totalHours", 0);
             }
         }
-    }, [watch("timeStart"), watch("timeEnd")]);
+    }, [watch("startTime"), watch("endTime")]);
 
     const columns = [
         {
@@ -228,7 +229,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
             minWidth: 150
         },
         {
-            field: 'timeStart',
+            field: 'startTime',
             headerName: 'duration',
             sortable: false,
             headerClassName: 'uppercase',
@@ -237,7 +238,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
             renderCell: (params) => {
                 return (
                     <div>
-                        {params.row.timeStart ? dayjs(params.row?.timeStart).format("hh:mm A") : ""} - {params.row.timeEnd ? dayjs(params.row?.timeEnd).format("hh:mm A") : ""}
+                        {params.row.startTime ? dayjs(params.row?.startTime).format("hh:mm A") : ""} - {params.row.endTime ? dayjs(params.row?.endTime).format("hh:mm A") : ""}
                     </div>
                 );
             },
@@ -248,11 +249,11 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
             headerClassName: 'uppercase',
             flex: 1,
             minWidth: 120,
-            sortable: false,    
+            sortable: false,
             renderCell: (params) => {
                 return (
                     <div>
-                        {params.row.totalHours?.toFixed(2)}
+                        {parseInt(params.row.totalHours)}
                     </div>
                 );
             },
@@ -362,14 +363,14 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                                                             setValue("shiftType", newValue?.title || null);
                                                             setValue("shiftTypeId", newValue?.id || null);
                                                             if (newValue?.title === "Hourly") {
-                                                                setValue("timeStart", null);
-                                                                setValue("timeEnd", null);
+                                                                setValue("startTime", null);
+                                                                setValue("endTime", null);
                                                             } else if (newValue?.title === "Time Based") {
                                                                 setValue("hours", 0);
                                                             } else {
                                                                 setValue("hours", 0);
-                                                                setValue("timeStart", null);
-                                                                setValue("timeEnd", null);
+                                                                setValue("startTime", null);
+                                                                setValue("endTime", null);
                                                             }
                                                         }}
                                                     />
@@ -392,15 +393,9 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                                                         error={errors.hours}
                                                         value={field.value}
                                                         onChange={(e) => {
-                                                            const input = e.target.value;
-                                                            const floatRegex = /^\d{0,2}(\.\d{0,2})?$/;
-                                                            if (floatRegex.test(input)) {
-                                                                const number = parseFloat(input);
-                                                                if (number <= 24 || input === "") {
-                                                                    field.onChange(input);
-                                                                    setValue("totalHours", input);
-                                                                }
-                                                            }
+                                                            const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                            field.onChange(numericValue);
+                                                            setValue("totalHours", numericValue);
                                                         }}
                                                         disabled={watch("shiftTypeId") !== 1}
                                                     />
@@ -411,26 +406,26 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                                         <div>
                                             <InputTimePicker
                                                 label="Start Time"
-                                                name="timeStart"
+                                                name="startTime"
                                                 control={control}
                                                 disabled={watch("shiftTypeId") !== 2 ? true : false}
                                                 rules={{
                                                     required: watch("shiftTypeId") === 2 ? "Start time is required" : null,
                                                 }}
-                                                maxTime={watch("timeEnd")}
+                                                maxTime={watch("endTime")}
                                             />
                                         </div>
 
                                         <div>
                                             <InputTimePicker
                                                 label="End Time"
-                                                name="timeEnd"
+                                                name="endTime"
                                                 control={control}
                                                 disabled={watch("shiftTypeId") !== 2 ? true : false}
                                                 rules={{
                                                     required: watch("shiftTypeId") === 2 ? "End time is required" : null,
                                                 }}
-                                                minTime={watch("timeStart")}
+                                                minTime={watch("startTime")}
                                             />
                                         </div>
 
@@ -460,13 +455,13 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                                         </div>
                                     </div>
                                 </div>
-                            </form>                         
+                            </form>
                         </div>
                     )
                 }
             </div>
             <div className='border rounded-lg bg-white w-full lg:w-full '>
-                <DataTable columns={columns} rows={shifts} getRowId={getRowId} height={380} showButtons={true} buttons={actionButtons}/>
+                <DataTable columns={columns} rows={shifts} getRowId={getRowId} height={380} showButtons={true} buttons={actionButtons} />
             </div>
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteShift} handleClose={handleCloseDialog} loading={loading} />
         </div>

@@ -734,7 +734,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     return (
         <>
-            <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white relative z-50'>
+            <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
                 <div className='mb-4 relative'>
                     <div className='grid grid-col-12 md:grid-cols-4 gap-3 items-center'>
                         <div className='flex justify-start items-center gap-6'>

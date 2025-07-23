@@ -43,6 +43,7 @@ export const companyFunctionalityURL = baseURL + '/companyFunctionality'
 export const companyModuleURL = baseURL + '/companyModule'
 export const companyActionsURL = baseURL + '/companyActions'
 export const overtimeRulesURL = baseURL + '/overtimerules'
+export const employeeSalaryStatementURL = baseURL + '/employee/statement'
 
 export const countryURL = baseURL + '/country'
 export const stateURL = baseURL + '/state'
