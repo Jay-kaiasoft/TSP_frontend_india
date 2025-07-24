@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Tabs } from "../../common/tabs/tabs";
 import { getEmployeePFReport } from "../../../service/companyEmployee/companyEmployeeService";
 import DataTable from "../../common/table/table";
 import Select from "../../common/select/select";

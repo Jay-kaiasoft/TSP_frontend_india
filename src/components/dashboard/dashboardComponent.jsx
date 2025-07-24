@@ -20,7 +20,6 @@ const DashboardComponent = ({ handleSetTitle, handleSetTimeIn, timeIn }) => {
   const [isRunning, setIsRunning] = useState(false);
 
   const [data, setData] = useState(null)
-  const [dialogEmployee, setDialogEmployee] = useState({ open: false, title: '', message: '', actionButtonText: '' });
   
   const {
     setValue,

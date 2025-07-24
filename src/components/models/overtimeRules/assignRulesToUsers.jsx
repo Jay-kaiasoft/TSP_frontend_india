@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { styled, useTheme } from '@mui/material/styles';
 import Components from '../../muiComponents/components';
 import Button from '../../common/buttons/button';
-import { Controller, set, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';

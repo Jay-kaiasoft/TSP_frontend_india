@@ -32,34 +32,6 @@ const ResetPassword = ({ setAlert }) => {
         },
     });
 
-    const [passwordError, setPasswordError] = useState([
-        {
-            condition: (value) => value.length >= 8,
-            message: 'Minimum 8 characters long',
-            showError: true,
-        },
-        {
-            condition: (value) => /[a-z]/.test(value),
-            message: 'At least one lowercase character',
-            showError: true,
-        },
-        {
-            condition: (value) => /[\d@$!%*?&\s]/.test(value),
-            message: 'At least one number, symbol, or whitespace character',
-            showError: true,
-        },
-    ]);
-
-    const validatePassword = (value) => {
-        const updatedErrors = passwordError.map((error) => ({
-            ...error,
-            showError: !error.condition(value),
-        }));
-        setPasswordError(updatedErrors);
-        return updatedErrors.every((error) => !error.showError) || 'Password does not meet all requirements.';
-    };
-
-
     const togglePasswordVisibility = () => {
         setIsPasswordVisible((prev) => !prev);
     };

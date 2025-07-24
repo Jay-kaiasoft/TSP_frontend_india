@@ -40,7 +40,6 @@ function FaceRegistration({ setAlert, open, handleClose, employeeId, type = null
     const faceFrameRef = useRef(null);
     const webcamDisplayRef = useRef(null);
     const capturedDisplayRef = useRef(null);
-    const prevIsWithinFrameRef = useRef(false);
     const countdownActiveRef = useRef(false);
     const faceDetectionIntervalRef = useRef(null);
 

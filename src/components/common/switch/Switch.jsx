@@ -1,9 +1,6 @@
-import React from "react";
 import Components from "../../muiComponents/components";
-import { useTheme } from "@mui/material";
 
 const Switch = ({ text, onChange, checked = false, size }) => {
-    const theme = useTheme();
 
     return (
         <Components.FormGroup>

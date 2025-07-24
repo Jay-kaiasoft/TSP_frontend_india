@@ -17,7 +17,6 @@ import AlertDialog from '../../common/alertDialog/alertDialog';
 import AddLocationModel from '../../models/location/addLocationModel';
 import { deleteLocation, getAllLocationsByCompanyId } from '../../../service/location/locationService';
 import { useTheme } from '@mui/material';
-import PermissionWrapper from '../../common/permissionWrapper/PermissionWrapper';
 import AddGeofences from '../../models/geofencesModel/addGeofences';
 
 const getCurrentDate = () => {

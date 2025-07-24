@@ -9,16 +9,6 @@ import { connect } from 'react-redux';
 import { handleSetTitle, setAlert } from '../../../../redux/commonReducers/commonReducers';
 import AlertDialog from '../../../common/alertDialog/alertDialog';
 import Button from '../../../common/buttons/button';
-import { Tabs } from '../../../common/tabs/tabs';
-
-const tabData = [
-    {
-        label: 'Employees',
-    },
-    {
-        label: 'Contractors',
-    }
-]
 
 const ManageEmployees = ({ handleSetTitle, setAlert }) => {
     const navigate = useNavigate()

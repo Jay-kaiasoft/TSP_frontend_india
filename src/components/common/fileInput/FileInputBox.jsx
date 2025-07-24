@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import CustomIcons from '../icons/CustomIcons';
 
 export default function FileInputBox({ onFileSelect, value, onRemove, text }) {

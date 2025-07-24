@@ -30,7 +30,6 @@ import axios from 'axios';
 import { faceRecognitionAPIBaseURL } from '../../../../config/apiConfig/apiConfig';
 import FileInputBox from '../../../common/fileInput/FileInputBox';
 import Checkbox from '../../../common/checkBox/checkbox';
-import { getRowsStateFromCache } from '@mui/x-data-grid/hooks/features/rows/gridRowsUtils';
 
 const GenderOptions = [
     { id: 1, title: "Male" },

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Controller, useForm } from "react-hook-form";
 import Input from '../../common/input/input';
 import Button from '../../common/buttons/button';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { generateResetPasswordLink } from '../../../service/users/usersServices';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import { connect } from 'react-redux';
@@ -11,7 +11,6 @@ import { useTheme } from '@mui/material';
 
 const ForgotPassword = ({ setAlert }) => {
     const theme = useTheme();
-    const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const {
         handleSubmit,

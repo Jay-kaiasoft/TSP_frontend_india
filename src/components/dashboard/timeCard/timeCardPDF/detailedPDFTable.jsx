@@ -306,7 +306,7 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
                                         })
                                     }
                                     <tr className="border border-gray-500">
-                                        <td className="border border-gray-500 text-center text-sm h-10 text-end pr-5" colSpan={3}>
+                                        <td className="border border-gray-500 text-sm h-10 text-end pr-5" colSpan={3}>
                                             <strong>Totals:</strong>
                                         </td>
                                         <td className="border border-gray-500 text-center text-sm h-10">
