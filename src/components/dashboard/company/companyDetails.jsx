@@ -95,7 +95,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
     const handleOpenLocationModal = (id = null) => {
         if (id) {
             setEditLocationId(id);
-    }
+        }
         setLocationModal(true)
     }
 
@@ -154,7 +154,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
 
                     if (!newValue) {
                         error = true;
-                        errorMessage = `${currentName} is required`;
+                        errorMessage = `${currentName === "ein" ? "GST Number" : currentName} is required`;
                     }
 
                     if (currentName === "phone" && newValue) {
@@ -173,14 +173,14 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                     }
 
                     if (currentName === "ein" && newValue) {
-                        const sanitizedValue = newValue.trim();
+                        const sanitizedValue = newValue.trim().toUpperCase();
                         data[currentName] = sanitizedValue;
 
-                        const einRegex = /^\d{2}-\d{7}$/;
+                        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
-                        if (!einRegex.test(sanitizedValue)) {
+                        if (!gstRegex.test(sanitizedValue)) {
                             error = true;
-                            errorMessage = "Invalid EIN format. Expected format: ##-#######";
+                            errorMessage = "Invalid GST format. (e.g., 27ABCDE1234F1Z5)";
                         }
                     }
 
@@ -228,14 +228,17 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                             ))}
                         </select>
                     ) : (
-                        <input
-                            style={{ color: theme.palette.primary.text.main }}
-                            className={`border ${currentField?.error ? "border-red-600 focus:border-red-600" : "border-gray-300 focus:border-gray-300"} text-black focus:outline-none`}
-                            type="text"
-                            value={currentField.value || selectdCompanyDetails[name] || ""}
-                            onBlur={handleBlur}
-                            onChange={(e) => handleChange(e, name)}
-                        />
+                        <div className='grid grid-rows-2 gap-1'>
+                            <input
+                                style={{ color: theme.palette.primary.text.main }}
+                                className={`border ${currentField?.error ? "border-red-600 focus:border-red-600" : "border-gray-300 focus:border-gray-300"} text-black focus:outline-none`}
+                                type="text"
+                                value={currentField.value || selectdCompanyDetails[name] || ""}
+                                onBlur={handleBlur}
+                                onChange={(e) => handleChange(e, name)}
+                            />
+                            <span>{currentField?.error && <span className="text-red-600">{currentField.errorMessage}</span>}</span>
+                        </div>
                     )
                 ) : (
                     <PermissionWrapper
@@ -954,7 +957,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                         <span style={{ color: theme.palette.primary.text.main, }}>{selectdCompanyDetails?.companyNo ? selectdCompanyDetails?.companyNo : "-"}</span>
                                                     </div>
                                                     {CustomText("Company Name ", selectdCompanyDetails?.companyName, "companyName")}
-                                                    {CustomText("EIN ", selectdCompanyDetails?.ein, "ein")}
+                                                    {CustomText("GST Number ", selectdCompanyDetails?.ein, "ein")}
                                                     {CustomText("Organization Type ", selectdCompanyDetails?.organizationType, "organizationType")}
                                                     {CustomText("DBA ", selectdCompanyDetails?.dba, "dba")}
                                                     {CustomText("Industry ", selectdCompanyDetails?.industryName, "industryName")}
@@ -1248,8 +1251,8 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                     }
                 </div>
             </div>
-            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteCompany} handleClose={handleCloseDialog} loading={loading} note="Company deactivation will automatically disable access for all associated users and archive all company-related data."/>
-            <AlertDialog open={dialogEmployee.open} title={dialogEmployee.title} message={dialogEmployee.message} actionButtonText={dialogEmployee.actionButtonText} handleAction={handleDeleteEmployee} handleClose={handleCloseEmployeeDialog} loading={loading}/>
+            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteCompany} handleClose={handleCloseDialog} loading={loading} note="Company deactivation will automatically disable access for all associated users and archive all company-related data." />
+            <AlertDialog open={dialogEmployee.open} title={dialogEmployee.title} message={dialogEmployee.message} actionButtonText={dialogEmployee.actionButtonText} handleAction={handleDeleteEmployee} handleClose={handleCloseEmployeeDialog} loading={loading} />
             <AlertDialog open={dialogLocation.open} title={dialogLocation.title} message={dialogLocation.message} actionButtonText={dialogLocation.actionButtonText} handleAction={handleDeleteLocation} handleClose={handleCloseLocationDialog} loading={loading} />
             <AlertDialog open={dialogGeofence.open} title={dialogGeofence.title} message={dialogGeofence.message} actionButtonText={dialogGeofence.actionButtonText} handleAction={handleCloseGeofencesDialog} handleClose={handleCloseGeofencesDialog} loading={loading} />
             <AddGeofences open={showGeofencesModel} handleClose={handleCloseGeofencesModel} selectedLocationRow={selectedGeofences} companyId={companyId} handleGetLocations={handleGetAllLocationsByCompanyId} />

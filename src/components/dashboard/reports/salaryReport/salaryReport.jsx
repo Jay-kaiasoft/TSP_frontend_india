@@ -12,6 +12,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import SalaryStatementPDFTable from "../PdfTable/salaryStatementPDFTable";
 import { getCompanyDetails } from "../../../../service/companyDetails/companyDetailsService";
+import SalarySlip from "../PdfTable/salarySlip";
 
 const filterOptions = [
     { id: 1, title: 'Last 1 Month', value: 1 },
@@ -27,7 +28,11 @@ const SalaryReport = () => {
     const [filter, setFilter] = useState(filterOptions[0]);
     const [row, setRow] = useState([]); // This will hold the raw data from the API
     const [loadingPdf, setLoadingPdf] = useState(false);
+    const [loadingSalarySlipPdf, setLoadingSalarySlipPdf] = useState(false);
+
     const [showPdfContent, setShowPdfContent] = useState(false);
+    const [showSalarySlipPdfContent, setSalarySlipPdfContent] = useState(false);
+
     const [companyInfo, setCompanyInfo] = useState();
 
     const {
@@ -162,18 +167,17 @@ const SalaryReport = () => {
     // Calculate overall totals (this is still used for the PDF, but not for display in this component)
     const overallTotals = useMemo(() => calculateTotals(row), [row]);
 
-
     // Function to create a special total row object for DataGrid
-    const createDataGridTotalRow = (totals, deptLabel, idPrefix) => {
+    const createDataGridTotalRow = (totals, idPrefix) => {
         const uniqueId = `${idPrefix}-total-row`;
         return {
             id: uniqueId, // DataGrid requires an 'id' field
             rowId: 'Total', // This will appear in the '#' column
-            employeeName: deptLabel, // This will appear in the 'Employee Name' column
+            employeeName: null, // This will appear in the 'Employee Name' column
             departmentName: '', // Empty for total row
             basicSalary: null,
             otAmount: null,
-            pfAmount: null,
+            totalPfAmount: null,
             ptAmount: null,
             totalEarnings: totals.totalEarnings,
             totalDeductions: totals.totalDeductions,
@@ -195,7 +199,7 @@ const SalaryReport = () => {
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
         },
         {
-            field: 'pfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
         },
         {
@@ -216,11 +220,7 @@ const SalaryReport = () => {
         }
     ];
 
-    // DataGrid requires 'id' for rows. Your data has 'rowId' (index+1) and 'employeeSalaryStatementId'.
-    // Ensure that 'id' is unique for each row, including the synthetic total row.
-    // The previous update in handleGetStatements already sets 'id'.
     const getRowIdForDataGrid = (rowItem) => rowItem.id;
-
 
     const generatePDF = async () => {
         setShowPdfContent(true);
@@ -231,18 +231,23 @@ const SalaryReport = () => {
             if (!element) return;
 
             const canvas = await html2canvas(element, {
-                scale: 3,
+                scale: 1.5, // Reduce scale
                 useCORS: true,
-                logging: true,
+                logging: false,
             });
 
-            const imgData = canvas.toDataURL("image/png");
-            const pdf = new jsPDF("p", "mm", "a4");
+            const imgData = canvas.toDataURL("image/jpeg", 0.6); // Use JPEG with compression
+            const pdf = new jsPDF({
+                orientation: "p",
+                unit: "mm",
+                format: "a4",
+                compress: true, // Enable compression
+            });
 
             const imgWidth = 190;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-            pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+            pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
             pdf.save("employee_salary_statement.pdf");
 
             setShowPdfContent(false);
@@ -250,10 +255,57 @@ const SalaryReport = () => {
         }, 700);
     };
 
+
+    const generateSalarySlipPDF = async () => {
+        setSalarySlipPdfContent(true);
+        setLoadingSalarySlipPdf(true);
+
+        setTimeout(async () => {
+            const pdf = new jsPDF("p", "mm", "a4");
+            const margin = 10;
+            const imgWidth = 210 - 2 * margin;
+            let yOffset = margin;
+
+            const salarySlipElements = document.querySelectorAll(".salary-slip");
+
+            for (let i = 0; i < salarySlipElements.length; i++) {
+                const element = salarySlipElements[i];
+
+                // Force display in case it's hidden
+                element.style.display = "block";
+
+                const canvas = await html2canvas(element, {
+                    scale: 1.5,
+                    useCORS: true,
+                    backgroundColor: "#fff",
+                    // width: 794,
+                    windowWidth: 794,
+                });
+
+                const imgData = canvas.toDataURL("image/jpeg", 0.8);
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                if (i > 0) {
+                    pdf.addPage();
+                    yOffset = margin;
+                }
+
+                pdf.addImage(imgData, "JPEG", margin, yOffset, imgWidth, imgHeight);
+            }
+
+            pdf.save("employee_salary_slip.pdf");
+
+            setSalarySlipPdfContent(false);
+            setLoadingSalarySlipPdf(false);
+        }, 700);
+    };
+
     const actionButtons = () => {
         return (
-            <div className='flex justify-start items-center gap-3 w-38'>
-                <Button type={`button`} useFor={'error'} text={'Download PDF'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
+            <div className='flex justify-start items-center gap-3 w-[28rem]'>
+                <Button type={`button`} text={'Download Salary Slip'} isLoading={loadingSalarySlipPdf} onClick={() => generateSalarySlipPDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
+
+                <Button type={`button`} useFor={'error'} text={'Download Statement'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
             </div>
         );
     };
@@ -279,19 +331,28 @@ const SalaryReport = () => {
                             name="selectedUserId"
                             control={control}
                             render={({ field }) => (
-                                <Select
+                                <SelectMultiple
                                     options={users}
-                                    label={"Employee List"}
+                                    label={"Select Employees"}
                                     placeholder="Select employees"
-                                    value={watch("selectedUserId")?.[0] || ''}
-                                    onChange={(_, newValue) => {
-                                        if (newValue?.id) {
-                                            field.onChange([newValue.id]);
-                                        } else {
-                                            setValue("selectedUserId", []);
-                                        }
+                                    value={field.value || []}
+                                    onChange={(newValue) => {
+                                        field.onChange(newValue);
                                     }}
                                 />
+                                // <Select
+                                //     options={users}
+                                //     label={"Employee List"}
+                                //     placeholder="Select employees"
+                                //     value={watch("selectedUserId")?.[0] || ''}
+                                //     onChange={(_, newValue) => {
+                                //         if (newValue?.id) {
+                                //             field.onChange([newValue.id]);
+                                //         } else {
+                                //             setValue("selectedUserId", []);
+                                //         }
+                                //     }}
+                                // />
                             )}
                         />
                     </div>
@@ -335,15 +396,13 @@ const SalaryReport = () => {
                                             getRowId={getRowIdForDataGrid}
                                             height={employees.length > 0 ? 'auto' : 150} // Adjust height dynamically
                                             showButtons={false} // No individual buttons for department tables
-                                            footerRowData={employees.length > 0 ? createDataGridTotalRow(departmentTotal, `${departmentName} Total`, departmentName) : null}
+                                            footerRowData={employees.length > 0 ? createDataGridTotalRow(departmentTotal, departmentName) : null}
                                         />
                                     </div>
                                 );
                             })}
-                            {/* The Overall Summary section has been removed from here */}
                         </div>
                     ) : (
-                        // This block will now only show if there's absolutely no data (row.length === 0)
                         <DataTable
                             columns={columns}
                             rows={row} // This will be empty
@@ -358,7 +417,7 @@ const SalaryReport = () => {
             </div>
             {
                 showPdfContent && (
-                    <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
+                    <div className='absolute top-0 left-0 z-[-1] w-[794px] opacity-0'>
                         <SalaryStatementPDFTable
                             // Pass the raw data and let the PDF table handle its own grouping/totals
                             data={groupedDataForDisplay || row}
@@ -373,328 +432,19 @@ const SalaryReport = () => {
                     </div>
                 )
             }
+            {
+                showSalarySlipPdfContent && (
+                    <div className='absolute top-0 left-0 z-[-1] w-[794px] opacity-0'>
+                        <SalarySlip
+                            data={row}
+                            companyInfo={companyInfo}
+                            filter={filter}
+                        />
+                    </div>
+                )
+            }
         </>
     );
 };
 
 export default SalaryReport;
-
-// import { useEffect, useState } from "react";
-// import { getAllEmployeeListByCompanyId } from "../../../../service/companyEmployee/companyEmployeeService";
-// import { Controller, get, useForm } from "react-hook-form";
-// import Select from "../../../common/select/select";
-// import { getAllDepartment } from "../../../../service/department/departmentService";
-// import { getEmployeeSalaryStatements } from "../../../../service/employeeSalaryStatement/employeeSalaryStatementService";
-// import SelectMultiple from "../../../common/select/selectMultiple";
-// import DataTable from "../../../common/table/table";
-// import Button from "../../../common/buttons/button";
-// import CustomIcons from "../../../common/icons/CustomIcons";
-// import jsPDF from "jspdf";
-// import html2canvas from "html2canvas";
-// import SalaryStatementPDFTable from "../PdfTable/salaryStatementPDFTable";
-// import { getCompanyDetails } from "../../../../service/companyDetails/companyDetailsService";
-// import * as pdfMake from "pdfmake/build/pdfmake";
-// import * as pdfFonts from "pdfmake/build/vfs_fonts";
-
-// pdfMake.vfs = pdfFonts?.vfs;
-
-
-// const filterOptions = [
-//     { id: 1, title: 'Last 1 Month', value: 1 },
-//     { id: 2, title: 'Last 3 Months', value: 3 },
-//     { id: 3, title: 'Last 6 Months', value: 6 },
-//     { id: 4, title: 'Last 1 Year', value: 12 }
-// ];
-
-// const SalaryReport = () => {
-//     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
-//     const [users, setUsers] = useState([])
-//     const [department, setDepartment] = useState([]);
-//     const [filter, setFilter] = useState(filterOptions[0]);
-//     const [row, setRow] = useState([]);
-//     const [loadingPdf, setLoadingPdf] = useState(false);
-//     const [showPdfContent, setShowPdfContent] = useState(false);
-//     const [companyInfo, setCompanyInfo] = useState()
-
-//     const {
-//         control,
-//         watch,
-//         setValue,
-//     } = useForm({
-//         defaultValues: {
-//             selectedUserId: [],
-//             selectedDepartmentId: [],
-//         }
-//     });
-
-//     const handleGetStatments = async () => {
-//         let data = {
-//             month: filter?.value,
-//             employeeIds: watch("selectedUserId") || [],
-//             departmentIds: watch("selectedDepartmentId") || [],
-//         }
-//         try {
-//             const res = await getEmployeeSalaryStatements(data)
-//             if (res?.data?.status === 200) {
-//                 const newData = res.data.result = res.data.result.map((item, index) => ({
-//                     ...item,
-//                     rowId: index + 1
-//                 }));
-//                 setRow(newData || [])
-//             }
-//         } catch (error) {
-//             console.error("Error fetching data:", error);
-//         }
-//     }
-
-//     const handleGetAllUsers = async () => {
-//         if (userInfo?.companyId) {
-//             const response = await getAllEmployeeListByCompanyId(userInfo?.companyId)
-//             const data = response.data.result?.map((row) => {
-//                 return {
-//                     id: row.employeeId,
-//                     title: row.userName
-//                 }
-//             })
-//             setUsers(data)
-//         }
-//     }
-
-//     const handleGetAllDepartment = async () => {
-//         if (userInfo?.companyId) {
-//             const response = await getAllDepartment(userInfo?.companyId)
-//             if (response.data.status === 200) {
-//                 const data = response.data?.result?.map((item) => {
-//                     return {
-//                         id: item?.id,
-//                         title: item?.departmentName,
-//                     }
-//                 })
-//                 setDepartment(data)
-//             }
-//         }
-//     }
-
-//     const handleGetCompanyInfo = async () => {
-//         if (userInfo?.companyId) {
-//             const response = await getCompanyDetails(userInfo?.companyId)
-//             setCompanyInfo(response?.data?.result)
-//         }
-//     }
-
-//     useEffect(() => {
-//         handleGetCompanyInfo();
-//         handleGetAllUsers()
-//         handleGetAllDepartment()
-//         // eslint-disable-next-line react-hooks/exhaustive-deps
-//     }, [])
-
-//     useEffect(() => {
-//         handleGetStatments();
-//     }, [watch("selectedUserId"), watch("selectedDepartmentId"), filter]);
-
-
-//     const columns = [
-//         {
-//             field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 50,
-//         },
-//         {
-//             field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
-//         },
-//         {
-//             field: 'departmentName',
-//             headerName: 'Department',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 180,
-//         },
-//         {
-//             field: 'basicSalary',
-//             headerName: 'Basic Salary',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 150,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         },
-//         {
-//             field: 'otAmount',
-//             headerName: 'OT (₹)',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 80,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         },
-//         {
-//             field: 'pfAmount',
-//             headerName: 'PF (₹)',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 100,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         },
-//         {
-//             field: 'ptAmount',
-//             headerName: 'PT (₹)',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 100,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         },
-//         {
-//             field: 'totalEarnings',
-//             headerName: 'Total Earnings (₹)',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 180,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         },
-//         {
-//             field: 'totalDeductions',
-//             headerName: 'Total Deductions (₹)',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 200,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         },
-//         {
-//             field: 'netSalary',
-//             headerName: 'Net Salary (₹)',
-//             headerClassName: 'uppercase',
-//             flex: 1,
-//             maxWidth: 150,
-//             align: "right",
-//             headerAlign: "right",
-//             renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
-//         }
-//     ];
-
-//     const getRowId = (row) => row.rowId;
-
-//     const generatePDF = async () => {
-//         setShowPdfContent(true);
-//         setLoadingPdf(true);
-
-//         setTimeout(async () => {
-//             const element = document.getElementById("salary-table-container");
-//             if (!element) return;
-
-//             const canvas = await html2canvas(element, {
-//                 scale: 3, // higher scale = better quality
-//                 useCORS: true,
-//                 logging: true, // for debugging
-//             });
-
-//             const imgData = canvas.toDataURL("image/png");
-//             const pdf = new jsPDF("p", "mm", "a4");
-
-//             const imgWidth = 190;
-//             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-//             pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-//             pdf.save("employee_salary_statement.pdf");
-
-//             setShowPdfContent(false);
-//             setLoadingPdf(false);
-//         }, 500); // allow time to render
-//     };
-
-//     const actionButtons = () => {
-//         return (
-//             <div className='flex justify-start items-center gap-3 w-38'>
-//                 <Button type={`button`} useFor={'error'} text={'Download PDF'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
-//             </div>
-//         )
-//     }
-
-//     return (
-//         <>
-//             <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
-//                 <div className='grid grid-col-12 md:grid-cols-4 gap-3 items-center'>
-//                     <div>
-//                         <Select
-//                             options={filterOptions}
-//                             label={"Filter by Duration"}
-//                             placeholder="Select Duration"
-//                             value={filter?.id}
-//                             onChange={(_, newValue) => {
-//                                 setFilter(newValue?.value ? newValue : filterOptions[0]);
-//                             }}
-//                         />
-//                     </div>
-
-//                     <div>
-//                         <Controller
-//                             name="selectedUserId"
-//                             control={control}
-//                             render={({ field }) => (
-//                                 <Select
-//                                     options={users}
-//                                     label={"Emmployee List"}
-//                                     placeholder="Select employees"
-//                                     value={watch("selectedUserId")?.[0] || []}
-//                                     onChange={(_, newValue) => {
-//                                         if (newValue?.id) {
-//                                             field.onChange([newValue.id]);
-//                                         } else {
-//                                             setValue("selectedUserId", null);
-//                                         }
-//                                     }}
-//                                 />
-//                             )}
-//                         />
-//                     </div>
-
-//                     <div>
-//                         <Controller
-//                             name="selectedDepartmentId"
-//                             control={control}
-//                             render={({ field }) => (
-//                                 <SelectMultiple
-//                                     options={department}
-//                                     label={"Select Department"}
-//                                     placeholder="Select department"
-//                                     value={field.value || []}
-//                                     onChange={(newValue) => {
-//                                         field.onChange(newValue);
-//                                     }}
-//                                 />
-//                             )}
-//                         />
-//                     </div>
-//                 </div>
-
-//                 <div className="mt-4">
-//                     <DataTable
-//                         columns={columns}
-//                         rows={row}
-//                         getRowId={getRowId}
-//                         height={550}
-//                         showButtons={true}
-//                         buttons={actionButtons}
-//                     />
-//                 </div>
-//             </div>
-//             {
-//                 showPdfContent && (
-//                     <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
-//                         <SalaryStatementPDFTable data={row} companyInfo={companyInfo} filter={filter} department={department} selectedDepartmentId={watch("selectedDepartmentId")} />
-//                     </div>
-//                 )
-//             }
-//         </>
-//     )
-// }
-
-// export default SalaryReport

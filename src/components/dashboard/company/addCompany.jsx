@@ -24,7 +24,7 @@ const getCurrentDate = () => {
     return now.toISOString().split("T")[0].replace(/-/g, ""); // e.g. "20250407"
 };
 
-const requiredContactKeys = ['firstName', 'lastName', 'email', 'phone', 'userName', 'password', 'roleName','gender'];
+const requiredContactKeys = ['firstName', 'lastName', 'email', 'phone', 'userName', 'password', 'roleName', 'gender'];
 
 const GenderOptions = [
     { id: 1, title: "Male" },
@@ -148,7 +148,6 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         setEditLocationId(null);
     }
 
-
     const togglePasswordVisibility = () => {
         setIsPasswordVisible((prev) => !prev);
     };
@@ -162,7 +161,6 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
             actionButtonText: 'Delete',
         })
     }
-
 
     const handleCloseLocationDialog = () => {
         setDialogLocation({
@@ -479,13 +477,13 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
 
     const getAllNewContact = () => {
         const isValid = (value) => value !== undefined && value !== null && value !== "";
-        let contact = []      
+        let contact = []
         setContactRow((prev) => {
             if (prev) {
                 const allValid = requiredContactKeys.every(field => isValid(prev[field]));
                 console.log(allValid)
                 if (allValid) {
-                    contact = [...prev];                    
+                    contact = [...prev];
                 }
             }
         })
@@ -559,7 +557,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                         4
                                     ]
                                 },
-                                 {
+                                {
                                     "moduleId": 5,
                                     "moduleName": "Manage Shifts",
                                     "moduleAssignedActions": [
@@ -619,7 +617,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                         4
                                     ]
                                 },
-                                 {
+                                {
                                     "moduleId": 2,
                                     "moduleName": "Department",
                                     "moduleAssignedActions": [
@@ -672,7 +670,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
 
     const handleFetchAllTimeZones = async () => {
         const response = await fetchAllTimeZones()
-        setTimeZones(response)        
+        setTimeZones(response)
     }
 
     const handleGetLastCompanyDetails = async () => {
@@ -827,20 +825,22 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                             name="ein"
                                             control={control}
                                             rules={{
-                                                required: "EIN number is required",
-                                                pattern: {
-                                                    value: /^\d{2}-\d{7}$/,
-                                                    message: "Invalid EIN format (XX-XXXXXXX)",
+                                                validate: (value) => {
+                                                    if (value === "") return true;
+                                                    const gstPattern = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+                                                    return gstPattern.test(value) || "Invalid GST format (e.g., 27ABCDE1234F1Z5)";
                                                 },
                                             }}
                                             render={({ field }) => (
                                                 <Input
                                                     {...field}
-                                                    label="EIN Or TAX Number"
-                                                    type='text'
-                                                    error={!!errors.ein}
-                                                    onInput={(e) => {
-                                                        e.target.value = e.target.value.replace(/[^0-9-]/g, '');
+                                                    label="GST Number"
+                                                    type="text"
+                                                    error={!!errors?.ein}
+                                                    helperText={errors?.ein?.message}
+                                                    onChange={(e) => {
+                                                        const cleaned = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                                                        field.onChange(cleaned);
                                                     }}
                                                 />
                                             )}

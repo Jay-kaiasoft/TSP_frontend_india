@@ -71,7 +71,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
               if (item.name === "Manage Shifts") {
                 data.push({
                   name: "Manage Shifts",
-                  icon: <CustomIcons iconName={'fa-solid fa-users'} css='cursor-pointer' />
+                  icon: <CustomIcons iconName={'fa-solid fa-clock'} css='cursor-pointer' />
                 })
               }
             })

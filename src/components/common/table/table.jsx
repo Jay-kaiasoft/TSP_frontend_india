@@ -60,7 +60,7 @@ export default function DataTable({
                 };
             }
             // Apply custom rendering for numeric columns in the total row
-            if (['basicSalary', 'otAmount', 'pfAmount', 'ptAmount', 'totalEarnings', 'totalDeductions', 'netSalary'].includes(col.field)) {
+            if (['basicSalary', 'otAmount', 'totalPfAmount', 'ptAmount', 'totalEarnings', 'totalDeductions', 'netSalary'].includes(col.field)) {
                 return {
                     ...col,
                     renderCell: (params) => {

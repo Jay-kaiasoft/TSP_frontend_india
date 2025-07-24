@@ -1,234 +1,234 @@
-// import React from 'react';
+import React from 'react';
 
-// // Utility function to convert numbers to Indian Rupee words
-// const numberToWords = (num) => {
-//   const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
-//   const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-//   const c = ['hundred', 'thousand', 'lakh', 'crore'];
+// Utility function to convert numbers to Indian Rupee words
+const numberToWords = (num) => {
+  const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
+  const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  const c = ['hundred', 'thousand', 'lakh', 'crore'];
 
-//   const convertLessThanOneThousand = (n) => {
-//     let s = '';
-//     if (n < 20) {
-//       s = a[n];
-//     } else {
-//       s = b[Math.floor(n / 10)] + ' ' + a[n % 10];
-//     }
-//     return s;
-//   };
+  const convertLessThanOneThousand = (n) => {
+    let s = '';
+    if (n < 20) {
+      s = a[n];
+    } else {
+      s = b[Math.floor(n / 10)] + ' ' + a[n % 10];
+    }
+    return s;
+  };
 
-//   if (num === 0) return 'Zero Rupees Only';
+  if (num === 0) return 'Zero Rupees Only';
 
-//   let n = Math.round(num * 100) / 100; // Handle decimals
-//   let integerPart = Math.floor(n);
-//   let decimalPart = Math.round((n - integerPart) * 100);
+  let n = Math.round(num * 100) / 100; // Handle decimals
+  let integerPart = Math.floor(n);
+  let decimalPart = Math.round((n - integerPart) * 100);
 
-//   let output = '';
+  let output = '';
 
-//   // Process crores
-//   if (integerPart >= 10000000) {
-//     output += convertLessThanOneThousand(Math.floor(integerPart / 10000000)) + 'crore ';
-//     integerPart %= 10000000;
-//   }
-//   // Process lakhs
-//   if (integerPart >= 100000) {
-//     output += convertLessThanOneThousand(Math.floor(integerPart / 100000)) + 'lakh ';
-//     integerPart %= 100000;
-//   }
-//   // Process thousands
-//   if (integerPart >= 1000) {
-//     output += convertLessThanOneThousand(Math.floor(integerPart / 1000)) + 'thousand ';
-//     integerPart %= 1000;
-//   }
-//   // Process hundreds
-//   if (integerPart >= 100) {
-//     output += convertLessThanOneThousand(Math.floor(integerPart / 100)) + 'hundred ';
-//     integerPart %= 100;
-//   }
-//   // Process remaining
-//   if (integerPart > 0) {
-//     output += convertLessThanOneThousand(integerPart);
-//   }
+  // Process crores
+  if (integerPart >= 10000000) {
+    output += convertLessThanOneThousand(Math.floor(integerPart / 10000000)) + 'crore ';
+    integerPart %= 10000000;
+  }
+  // Process lakhs
+  if (integerPart >= 100000) {
+    output += convertLessThanOneThousand(Math.floor(integerPart / 100000)) + 'lakh ';
+    integerPart %= 100000;
+  }
+  // Process thousands
+  if (integerPart >= 1000) {
+    output += convertLessThanOneThousand(Math.floor(integerPart / 1000)) + 'thousand ';
+    integerPart %= 1000;
+  }
+  // Process hundreds
+  if (integerPart >= 100) {
+    output += convertLessThanOneThousand(Math.floor(integerPart / 100)) + 'hundred ';
+    integerPart %= 100;
+  }
+  // Process remaining
+  if (integerPart > 0) {
+    output += convertLessThanOneThousand(integerPart);
+  }
 
-//   output = output.trim();
-//   output += ' Rupees';
+  output = output.trim();
+  output += ' Rupees';
 
-//   if (decimalPart > 0) {
-//     output += ' and ' + convertLessThanOneThousand(decimalPart) + ' Paisa';
-//   }
-//   return output + ' Only';
-// };
+  if (decimalPart > 0) {
+    output += ' and ' + convertLessThanOneThousand(decimalPart) + ' Paisa';
+  }
+  return output + ' Only';
+};
 
 
-// const SalarySlip = ({
-//   employee = {
-//     name: "Gaurav",
-//     id: "43521",
-//     designation: "Associate Editor",
-//     company: "Zylker Corp",
-//     address: "Gujarat India",
-//   },
-//   payslipDetails = {
-//     payPeriod: "January 2024",
-//     payDate: "29/02/2024",
-//     dateOfJoining: "30/06/2020",
-//     paidDays: 31,
-//     lopDays: 0,
-//   },
-//   salary = {
-//     earnings: {
-//       basic: { current: 43750.00, ytd: 87500.00 },
-//       hra: { current: 21875.00, ytd: 43750.00 },
-//       fixedAllowance: { current: 21875.00, ytd: 43750.00 },
-//     },
-//     deductions: {
-//       professionalTax: { current: 200.00, ytd: 400.00 },
-//     },
-//   },
-// }) => {
+const SalarySlip = ({
+  employee = {
+    name: "Gaurav",
+    id: "43521",
+    designation: "Associate Editor",
+    company: "Zylker Corp",
+    address: "Gujarat India",
+  },
+  payslipDetails = {
+    payPeriod: "January 2024",
+    payDate: "29/02/2024",
+    dateOfJoining: "30/06/2020",
+    paidDays: 31,
+    lopDays: 0,
+  },
+  salary = {
+    earnings: {
+      basic: { current: 43750.00, ytd: 87500.00 },
+      hra: { current: 21875.00, ytd: 43750.00 },
+      fixedAllowance: { current: 21875.00, ytd: 43750.00 },
+    },
+    deductions: {
+      professionalTax: { current: 200.00, ytd: 400.00 },
+    },
+  },
+}) => {
 
-//   // Calculate total earnings and YTD earnings
-//   const totalCurrentEarnings = Object.values(salary.earnings).reduce((acc, comp) => acc + comp.current, 0);
-//   const totalYTDEarnings = Object.values(salary.earnings).reduce((acc, comp) => acc + comp.ytd, 0);
+  // Calculate total earnings and YTD earnings
+  const totalCurrentEarnings = Object.values(salary.earnings).reduce((acc, comp) => acc + comp.current, 0);
+  const totalYTDEarnings = Object.values(salary.earnings).reduce((acc, comp) => acc + comp.ytd, 0);
 
-//   // Calculate total deductions and YTD deductions
-//   const totalCurrentDeductions = Object.values(salary.deductions).reduce((acc, comp) => acc + comp.current, 0);
-//   const totalYTDDeductions = Object.values(salary.deductions).reduce((acc, comp) => acc + comp.ytd, 0);
+  // Calculate total deductions and YTD deductions
+  const totalCurrentDeductions = Object.values(salary.deductions).reduce((acc, comp) => acc + comp.current, 0);
+  const totalYTDDeductions = Object.values(salary.deductions).reduce((acc, comp) => acc + comp.ytd, 0);
 
-//   const netSalary = totalCurrentEarnings - totalCurrentDeductions;
+  const netSalary = totalCurrentEarnings - totalCurrentDeductions;
 
-//   return (
-//     <div className="font-inter antialiased bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen flex items-center justify-center">
-//       <div className="max-w-4xl w-full bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
-//         {/* Top Blue Bar */}
-//         <div className="h-2 bg-gradient-to-r from-blue-700 to-blue-500"></div>
+  return (
+    <div className="font-inter antialiased bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen grid grid-cols-1 place-items-center gap-8">
+      <div className="max-w-4xl w-full bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
+        {/* Top Blue Bar */}
+        <div className="h-2 bg-gradient-to-r from-blue-700 to-blue-500"></div>
 
-//         {/* Header Section */}
-//         <div className="p-6 sm:p-8 flex justify-between items-start">
-//           <div>
-//             <h1 className="text-2xl font-bold text-gray-800">{employee.company}</h1>
-//             <p className="text-sm text-gray-600">{employee.address}</p>
-//           </div>
-//           {/* Zoho Logo Placeholder - Using a simple SVG for demonstration */}
-//           <div className="flex-shrink-0">
-//             <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-//               <rect width="100" height="100" rx="20" fill="#F0F0F0"/>
-//               <path d="M30 40 L50 20 L70 40 L50 60 L30 40 Z" fill="#FF8C00"/>
-//               <circle cx="50" cy="70" r="15" fill="#4CAF50"/>
-//               <path d="M30 70 L50 90 L70 70 L50 50 L30 70 Z" fill="#2196F3"/>
-//             </svg>
-//           </div>
-//         </div>
+        {/* Header Section */}
+        <div className="p-6 sm:p-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">{employee.company}</h1>
+            {/* <p className="text-sm text-gray-600">{employee.address}</p> */}
+          </div>
+          {/* Zoho Logo Placeholder - Using a simple SVG for demonstration
+          <div className="flex-shrink-0">
+            <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="20" fill="#F0F0F0" />
+              <path d="M30 40 L50 20 L70 40 L50 60 L30 40 Z" fill="#FF8C00" />
+              <circle cx="50" cy="70" r="15" fill="#4CAF50" />
+              <path d="M30 70 L50 90 L70 70 L50 50 L30 70 Z" fill="#2196F3" />
+            </svg>
+          </div> */}
+        </div>
 
-//         <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-200">
-//           <h2 className="text-xl font-bold text-gray-800 mb-4">Payslip for the month of {payslipDetails.payPeriod}</h2>
+        <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Payslip for the month of {payslipDetails.payPeriod}</h2>
 
-//           {/* Employee Pay Summary */}
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
-//             <div>
-//               <h3 className="text-lg font-semibold text-gray-800 mb-2">EMPLOYEE PAY SUMMARY</h3>
-//               <p className="mb-1"><strong className="w-32 inline-block">Employee Name:</strong> {employee.name}, {employee.id}</p>
-//               <p className="mb-1"><strong className="w-32 inline-block">Designation:</strong> {employee.designation}</p>
-//               <p className="mb-1"><strong className="w-32 inline-block">Date of Joining:</strong> {payslipDetails.dateOfJoining}</p>
-//               <p className="mb-1"><strong className="w-32 inline-block">Pay Period:</strong> {payslipDetails.payPeriod}</p>
-//               <p className="mb-1"><strong className="w-32 inline-block">Pay Date:</strong> {payslipDetails.payDate}</p>
-//             </div>
-//             <div className="text-right md:text-left md:pl-8">
-//               <p className="text-lg font-semibold text-gray-800 mb-2">Employee Net Pay</p>
-//               <p className="text-3xl font-extrabold text-blue-700 mb-2">₹{netSalary.toFixed(2)}</p>
-//               <p className="text-sm text-gray-600">Paid Days : {payslipDetails.paidDays} | LOP Days : {payslipDetails.lopDays}</p>
-//             </div>
-//           </div>
-//         </div>
+          {/* Employee Pay Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">EMPLOYEE PAY SUMMARY</h3>
+              <p className="mb-1"><strong className="w-32 inline-block">Employee Name:</strong> {employee.name}, {employee.id}</p>
+              <p className="mb-1"><strong className="w-32 inline-block">Designation:</strong> {employee.designation}</p>
+              <p className="mb-1"><strong className="w-32 inline-block">Date of Joining:</strong> {payslipDetails.dateOfJoining}</p>
+              <p className="mb-1"><strong className="w-32 inline-block">Pay Period:</strong> {payslipDetails.payPeriod}</p>
+              <p className="mb-1"><strong className="w-32 inline-block">Pay Date:</strong> {payslipDetails.payDate}</p>
+            </div>
+            <div className="text-right md:text-left md:pl-8">
+              <p className="text-lg font-semibold text-gray-800 mb-2">Employee Net Pay</p>
+              <p className="text-3xl font-extrabold text-blue-700 mb-2">₹{netSalary.toFixed(2)}</p>
+              <p className="text-sm text-gray-600">Paid Days : {payslipDetails.paidDays} | LOP Days : {payslipDetails.lopDays}</p>
+            </div>
+          </div>
+        </div>
 
-//         {/* Earnings Section */}
-//         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 sm:p-8">
-//           <div>
-//             <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">EARNINGS</h3>
-//             <div className="overflow-x-auto">
-//               <table className="w-full text-left table-auto border-collapse">
-//                 <thead className="bg-gray-100 text-gray-700">
-//                   <tr>
-//                     <th className="p-3 border-b border-gray-300">Component</th>
-//                     <th className="p-3 border-b border-gray-300 text-right">Amount</th>
-//                     <th className="p-3 border-b border-gray-300 text-right">YTD</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   <tr className="hover:bg-gray-50">
-//                     <td className="p-3 border-b border-gray-100">Basic</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.basic.current.toFixed(2)}</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.basic.ytd.toFixed(2)}</td>
-//                   </tr>
-//                   <tr className="hover:bg-gray-50">
-//                     <td className="p-3 border-b border-gray-100">House Rent Allowance</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.hra.current.toFixed(2)}</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.hra.ytd.toFixed(2)}</td>
-//                   </tr>
-//                   <tr className="hover:bg-gray-50">
-//                     <td className="p-3 border-b border-gray-100">Fixed Allowance</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.fixedAllowance.current.toFixed(2)}</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.fixedAllowance.ytd.toFixed(2)}</td>
-//                   </tr>
-//                   <tr className="font-bold bg-blue-50 text-blue-800">
-//                     <td className="p-3 border-t border-b-2 border-blue-300">Gross Earnings</td>
-//                     <td className="p-3 border-t border-b-2 border-blue-300 text-right">₹{totalCurrentEarnings.toFixed(2)}</td>
-//                     <td className="p-3 border-t border-b-2 border-blue-300 text-right">₹{totalYTDEarnings.toFixed(2)}</td>
-//                   </tr>
-//                 </tbody>
-//               </table>
-//             </div>
-//           </div>
+        {/* Earnings Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 sm:p-8">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">EARNINGS</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left table-auto border-collapse">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="p-3 border-b border-gray-300">Component</th>
+                    <th className="p-3 border-b border-gray-300 text-right">Amount</th>
+                    <th className="p-3 border-b border-gray-300 text-right">YTD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="hover:bg-gray-50">
+                    <td className="p-3 border-b border-gray-100">Basic</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.basic.current.toFixed(2)}</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.basic.ytd.toFixed(2)}</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="p-3 border-b border-gray-100">House Rent Allowance</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.hra.current.toFixed(2)}</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.hra.ytd.toFixed(2)}</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="p-3 border-b border-gray-100">Fixed Allowance</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.fixedAllowance.current.toFixed(2)}</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.earnings.fixedAllowance.ytd.toFixed(2)}</td>
+                  </tr>
+                  <tr className="font-bold bg-blue-50 text-blue-800">
+                    <td className="p-3 border-t border-b-2 border-blue-300">Gross Earnings</td>
+                    <td className="p-3 border-t border-b-2 border-blue-300 text-right">₹{totalCurrentEarnings.toFixed(2)}</td>
+                    <td className="p-3 border-t border-b-2 border-blue-300 text-right">₹{totalYTDEarnings.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-//           {/* Deductions Section */}
-//           <div>
-//             <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">DEDUCTIONS</h3>
-//             <div className="overflow-x-auto">
-//               <table className="w-full text-left table-auto border-collapse">
-//                 <thead className="bg-gray-100 text-gray-700">
-//                   <tr>
-//                     <th className="p-3 border-b border-gray-300">Component</th>
-//                     <th className="p-3 border-b border-gray-300 text-right">(-)Amount</th>
-//                     <th className="p-3 border-b border-gray-300 text-right">YTD</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   <tr className="hover:bg-gray-50">
-//                     <td className="p-3 border-b border-gray-100">Professional Tax</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.deductions.professionalTax.current.toFixed(2)}</td>
-//                     <td className="p-3 border-b border-gray-100 text-right">₹{salary.deductions.professionalTax.ytd.toFixed(2)}</td>
-//                   </tr>
-//                   <tr className="font-bold bg-red-50 text-red-800">
-//                     <td className="p-3 border-t border-b-2 border-red-300">Total Deductions</td>
-//                     <td className="p-3 border-t border-b-2 border-red-300 text-right">₹{totalCurrentDeductions.toFixed(2)}</td>
-//                     <td className="p-3 border-t border-b-2 border-red-300 text-right">₹{totalYTDDeductions.toFixed(2)}</td>
-//                   </tr>
-//                 </tbody>
-//               </table>
-//             </div>
-//           </div>
-//         </div>
+          {/* Deductions Section */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-300">DEDUCTIONS</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left table-auto border-collapse">
+                <thead className="bg-gray-100 text-gray-700">
+                  <tr>
+                    <th className="p-3 border-b border-gray-300">Component</th>
+                    <th className="p-3 border-b border-gray-300 text-right">(-)Amount</th>
+                    <th className="p-3 border-b border-gray-300 text-right">YTD</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="hover:bg-gray-50">
+                    <td className="p-3 border-b border-gray-100">Professional Tax</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.deductions.professionalTax.current.toFixed(2)}</td>
+                    <td className="p-3 border-b border-gray-100 text-right">₹{salary.deductions.professionalTax.ytd.toFixed(2)}</td>
+                  </tr>
+                  <tr className="font-bold bg-red-50 text-red-800">
+                    <td className="p-3 border-t border-b-2 border-red-300">Total Deductions</td>
+                    <td className="p-3 border-t border-b-2 border-red-300 text-right">₹{totalCurrentDeductions.toFixed(2)}</td>
+                    <td className="p-3 border-t border-b-2 border-red-300 text-right">₹{totalYTDDeductions.toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-//         {/* Net Pay & Footer */}
-//         <div className="p-6 sm:p-8 bg-gray-50 border-t border-gray-200">
-//           <div className="flex justify-between items-center mb-6">
-//             <p className="text-lg font-bold text-gray-800">NET PAY (Gross Earnings - Total Deductions)</p>
-//             <p className="text-xl font-bold text-blue-700">₹{netSalary.toFixed(2)}</p>
-//           </div>
+        {/* Net Pay & Footer */}
+        <div className="p-6 sm:p-8 bg-gray-50 border-t border-gray-200">
+          <div className="flex justify-between items-center mb-6">
+            <p className="text-lg font-bold text-gray-800">NET PAY (Gross Earnings - Total Deductions)</p>
+            <p className="text-xl font-bold text-blue-700">₹{netSalary.toFixed(2)}</p>
+          </div>
 
-//           <div className="text-center mb-6">
-//             <p className="text-xl font-bold text-gray-800">Total Net Payable ₹{netSalary.toFixed(2)} <span className="font-normal italic text-gray-600">(Indian Rupee {numberToWords(netSalary)})</span></p>
-//           </div>
+          <div className="text-center mb-6">
+            <p className="text-xl font-bold text-gray-800">Total Net Payable ₹{netSalary.toFixed(2)} <span className="font-normal italic text-gray-600">(Indian Rupee {numberToWords(netSalary)})</span></p>
+          </div>
 
-//           <div className="border-t border-gray-300 pt-4 text-center text-sm text-gray-500">
-//             <p>— This document has been automatically generated by Zoho Payroll; therefore, a signature is not required. —</p>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
+          <div className="border-t border-gray-300 pt-4 text-center text-sm text-gray-500">
+            <p>— This document has been automatically generated by Zoho Payroll; therefore, a signature is not required. —</p>
+          </div>
+        </div>
+      </div>    
+    </div>
+  );
+};
 
-// export default SalarySlip;
+export default SalarySlip;
 
 
 // import React from "react";
@@ -411,98 +411,3 @@
 // };
 
 // export default SalarySlip;
-
-
-
-import React from "react";
-
-const salaryData = [
-  {
-    id: "EMP1024",
-    name: "Ramesh Kumar",
-    designation: "Developer",
-    basic: 30000,
-    overtimeHours: 10,
-    overtimeRate: 200,
-    pf: 3600,
-    pt: 200,
-  },
-  {
-    id: "EMP1025",
-    name: "Sita Verma",
-    designation: "Designer",
-    basic: 28000,
-    overtimeHours: 5,
-    overtimeRate: 250,
-    pf: 3360,
-    pt: 200,
-  },
-  {
-    id: "EMP1026",
-    name: "Amit Shah",
-    designation: "QA Engineer",
-    basic: 26000,
-    overtimeHours: 8,
-    overtimeRate: 180,
-    pf: 3120,
-    pt: 200,
-  },
-]
-
-const SalaryStatement = () => {
-  return (
-    <div className="max-w-7xl mx-auto p-4 bg-white rounded-xl shadow">
-      <h2 className="text-2xl font-bold text-center mb-6 text-blue-700">
-        Salary Statement - July 2025
-      </h2>
-
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="border p-2">#</th>
-              <th className="border p-2">Employee ID</th>
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Designation</th>
-              <th className="border p-2">Basic (₹)</th>
-              <th className="border p-2">OT (₹)</th>
-              <th className="border p-2">PF (₹)</th>
-              <th className="border p-2">PT (₹)</th>
-              <th className="border p-2">Total Earnings (₹)</th>
-              <th className="border p-2">Total Deductions (₹)</th>
-              <th className="border p-2">Net Salary (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {salaryData.map((emp, index) => {
-              const overtime = emp.overtimeHours * emp.overtimeRate;
-              const totalEarnings = emp.basic + overtime;
-              const totalDeductions = emp.pf + emp.pt;
-              const netSalary = totalEarnings - totalDeductions;
-
-              return (
-                <tr key={emp.id} className="hover:bg-gray-50">
-                  <td className="border p-2 text-center">{index + 1}</td>
-                  <td className="border p-2">{emp.id}</td>
-                  <td className="border p-2">{emp.name}</td>
-                  <td className="border p-2">{emp.designation}</td>
-                  <td className="border p-2 text-right">{emp.basic.toFixed(2)}</td>
-                  <td className="border p-2 text-right">{overtime.toFixed(2)}</td>
-                  <td className="border p-2 text-right">{emp.pf.toFixed(2)}</td>
-                  <td className="border p-2 text-right">{emp.pt.toFixed(2)}</td>
-                  <td className="border p-2 text-right">{totalEarnings.toFixed(2)}</td>
-                  <td className="border p-2 text-right">{totalDeductions.toFixed(2)}</td>
-                  <td className="border p-2 text-right font-semibold text-green-600">
-                    {netSalary.toFixed(2)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-export default SalaryStatement;

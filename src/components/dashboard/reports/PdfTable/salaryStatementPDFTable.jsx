@@ -1,3 +1,23 @@
+import dayjs from "dayjs";
+
+const getPayslipPeriodText = (filterValue, currentDate = dayjs()) => {
+    const endMonth = currentDate.subtract(1, 'month'); // ✅ Exclude current month
+    const startMonth = endMonth.subtract(filterValue - 1, 'month');
+
+    const startFormat = startMonth.format("MMMM");
+    const endFormat = endMonth.format("MMMM");
+    const startYear = startMonth.format("YYYY");
+    const endYear = endMonth.format("YYYY");
+
+    if (filterValue === 1 || startFormat === endFormat) {
+        return `${endFormat} ${endYear}`;
+    } else if (startYear === endYear) {
+        return `${startFormat} to ${endFormat} ${endYear}`;
+    } else {
+        return `Payslip for the month of ${startFormat} ${startYear} to ${endFormat} ${endYear}`;
+    }
+};
+
 const SalaryStatementPDFTable = ({
     data,
     companyInfo,
@@ -14,63 +34,63 @@ const SalaryStatementPDFTable = ({
     }).filter(Boolean);
 
     // Helper to render a salary table for a list of employees
-  const renderSalaryTable = (employees, departmentTitle = null) => {
-    const totalEarnings = employees.reduce((sum, emp) => sum + (emp.totalEarnings || 0), 0);
-    const totalDeductions = employees.reduce((sum, emp) => sum + (emp.totalDeductions || 0), 0);
-    const netSalary = employees.reduce((sum, emp) => sum + (emp.netSalary || 0), 0);
+    const renderSalaryTable = (employees, departmentTitle = null) => {
+        const totalEarnings = employees.reduce((sum, emp) => sum + (emp.totalEarnings || 0), 0);
+        const totalDeductions = employees.reduce((sum, emp) => sum + (emp.totalDeductions || 0), 0);
+        const netSalary = employees.reduce((sum, emp) => sum + (emp.netSalary || 0), 0);
 
-    return (
-        <div key={departmentTitle}>
-            {departmentTitle && (
-                <h2 className="text-lg font-bold text-gray-800 my-5 text-center">
-                    {departmentTitle} Department
-                </h2>
-            )}
-            <table className="min-w-full border-collapse border-2 border-black h-full">
-                <thead>
-                    <tr>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">#</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Name</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Department</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Basic (₹)</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">OT (₹)</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">PF (₹)</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">PT (₹)</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Earnings (₹)</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Deductions (₹)</th>
-                        <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Net Salary (₹)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {employees.map((emp, index) => (
-                        <tr key={index} className="border border-black">
-                            <td className="border border-black text-center text-sm py-3 align-middle">{index + 1}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">{emp.employeeName}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">{emp.departmentName}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.basicSalary?.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otAmount?.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.pfAmount?.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.ptAmount?.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalEarnings?.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalDeductions?.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-3 font-semibold text-green-700 align-middle">
-                                ₹{emp.netSalary?.toLocaleString()}
-                            </td>
+        return (
+            <div key={departmentTitle}>
+                {departmentTitle && (
+                    <h2 className="text-lg font-bold text-gray-800 my-5 text-center">
+                        {departmentTitle} Department
+                    </h2>
+                )}
+                <table className="min-w-full border-collapse border-2 border-black h-full">
+                    <thead>
+                        <tr>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">#</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Name</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Department</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Basic (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">OT (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">PF (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">PT (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Earnings (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Deductions (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Net Salary (₹)</th>
                         </tr>
-                    ))}
+                    </thead>
+                    <tbody>
+                        {employees.map((emp, index) => (
+                            <tr key={index} className="border border-black">
+                                <td className="border border-black text-center text-sm py-3 align-middle">{index + 1}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">{emp.employeeName}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">{emp.departmentName}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.basicSalary?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otAmount?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalPfAmount?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.ptAmount?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalEarnings?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalDeductions?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 font-semibold text-green-700 align-middle">
+                                    ₹{emp.netSalary?.toLocaleString()}
+                                </td>
+                            </tr>
+                        ))}
 
-                    {/* ✅ TOTAL ROW */}
-                    <tr className="font-bold">
-                        <td colSpan={7} className="text-left border border-black py-2 px-2 text-sm">Total:</td>
-                        <td className="border border-black text-center text-sm py-2 px-2">₹{totalEarnings.toLocaleString()}</td>
-                        <td className="border border-black text-center text-sm py-2 px-2">₹{totalDeductions.toLocaleString()}</td>
-                        <td className="border border-black text-center text-sm py-2 px-2 text-green-700">₹{netSalary.toLocaleString()}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    );
-};
+                        {/* ✅ TOTAL ROW */}
+                        <tr className="font-bold">
+                            <td colSpan={7} className="text-left border border-black py-2 px-2 text-sm">Total:</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{totalEarnings.toLocaleString()}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{totalDeductions.toLocaleString()}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2 text-green-700">₹{netSalary.toLocaleString()}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        );
+    };
 
 
     return (
@@ -92,7 +112,7 @@ const SalaryStatementPDFTable = ({
                     </div>
                     <div className="text-right">
                         <h1 className="text-2xl font-bold uppercase">Salary Statement</h1>
-                        <p className="text-sm font-medium text-gray-700 my-1">Period: {filter?.title}</p>
+                        <p className="text-sm font-medium text-gray-700 my-1">Period: {getPayslipPeriodText(filter?.value)}</p>
                         {newDepartment.length > 0 && (
                             <p className="text-sm font-medium text-gray-700">
                                 Department: {newDepartment.join(', ')}

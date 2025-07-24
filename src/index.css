@@ -54,3 +54,14 @@ code {
       font-size: 10px; /* Reduce font size */
   }
 }
+
+/* @media print {
+  .salary-slip {
+    page-break-inside: avoid;
+  }
+
+  .no-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+} */

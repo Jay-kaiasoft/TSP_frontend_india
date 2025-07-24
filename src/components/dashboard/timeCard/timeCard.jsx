@@ -42,12 +42,6 @@ const tabData = [
     // },
 ]
 
-const payClassOptions = [
-    { id: 1, title: "Handyman" },
-    { id: 2, title: "HouseKeeping" },
-    { id: 3, title: "Managar" },
-]
-
 const TimeCard = ({ handleSetTitle, setAlert }) => {
     dayjs.extend(utc);
     dayjs.extend(timezone);
@@ -734,79 +728,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     return (
         <>
-            <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
-                <div className='mb-4 relative'>
-                    <div className='grid grid-col-12 md:grid-cols-4 gap-3 items-center'>
-                        <div className='flex justify-start items-center gap-6'>
-                            <div>
-                                <p className='font-bold'>{userInfo?.userName}</p>
-                            </div>
-                            <div onClick={toggleOpen}>
-                                <CustomIcons
-                                    iconName="fa-solid fa-angle-down"
-                                    css={`cursor-pointer h-4 w-4 transition-transform duration-300 ease-in-out transform ${isOpen ? "rotate-180" : "rotate-0"}`}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className={`mt-3 overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"}`}>
-                        <div className='flex justify-start items-center gap-12'>
-                            <div className='flex'>
-                                <span style={{ color: theme.palette.primary.text.main }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[100px] capitalize">
-                                    Position Id :
-                                </span>
-                                <span style={{ color: theme.palette.primary.text.main }}>-</span>
-                            </div>
-
-                            <div className='flex'>
-                                <span style={{ color: theme.palette.primary.text.main }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[100px] capitalize">
-                                    Pay class :
-                                </span>
-                                <span style={{ color: theme.palette.primary.text.main }}>
-                                    {userInfo?.payClass ? payClassOptions?.filter((row) => row.id === parseInt(userInfo?.payClass))?.[0]?.title : "-"}
-                                </span>
-                            </div>
-
-                            <div className='flex'>
-                                <span style={{ color: theme.palette.primary.text.main }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[100px] capitalize">
-                                    Status :
-                                </span>
-                                <span style={{ color: theme.palette.primary.text.main }}>
-                                    {userInfo?.isActive ? (userInfo?.isActive === 1 ? "Active" : "Deactive") : "-"}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className='mt-2 flex justify-start items-center gap-12'>
-                            <div className='flex'>
-                                <span style={{ color: theme.palette.primary.text.main }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[100px] capitalize">
-                                    Supervisor :
-                                </span>
-                                <span style={{ color: theme.palette.primary.text.main }}>-</span>
-                            </div>
-
-                            <div className='flex col-span-4'>
-                                <span style={{ color: theme.palette.primary.text.main }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[100px] capitalize">
-                                    Department :
-                                </span>
-                                <span style={{ color: theme.palette.primary.text.main }}>
-                                    {userInfo?.departmentName ? userInfo?.departmentName : "-"}
-                                </span>
-                            </div>
-
-                            <div className='flex'>
-                                <span style={{ color: theme.palette.primary.text.main }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[100px] capitalize">
-                                    Semimonthly :
-                                </span>
-                                <span style={{ color: theme.palette.primary.text.main }}>-</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className='bg-gray-200 h-0.5 my-4'></div>
-
+            <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>               
                 <div className='grid grid-col-12 md:grid-cols-4 gap-3 items-center'>
                     <div className='mb-4 w-full md:mb-0'>
                         <DatePickerComponent setValue={setValue} control={control} name='startDate' label={`Start Date`} minDate={null} maxDate={watch("endDate")} />
