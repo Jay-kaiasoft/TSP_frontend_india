@@ -42,7 +42,7 @@ export default function DataTable({
     const dataGridColumns = useMemo(() => {
         return columns.map(col => {
             if (col.field === 'employeeName' && col.headerName !== '#') { // Target 'Employee Name' column specifically for the label
-                 return {
+                return {
                     ...col,
                     renderCell: (params) => {
                         if (params.row.isTotalRow) {
@@ -60,13 +60,13 @@ export default function DataTable({
                 };
             }
             // Apply custom rendering for numeric columns in the total row
-            if (['basicSalary', 'otAmount', 'totalPfAmount', 'ptAmount', 'totalEarnings', 'totalDeductions', 'netSalary'].includes(col.field)) {
+            if (['basicSalary', 'otAmount', 'totalPfAmount', 'ptAmount', 'totalEarnings', 'otherDeductions', 'totalDeductions', 'netSalary'].includes(col.field)) {
                 return {
                     ...col,
                     renderCell: (params) => {
                         if (params.row.isTotalRow) {
                             // Only show value for totalEarnings, totalDeductions, netSalary
-                            if (['totalEarnings', 'totalDeductions', 'netSalary'].includes(col.field)) {
+                            if (['otherDeductions', 'totalEarnings', 'totalDeductions', 'netSalary'].includes(col.field)) {
                                 return <span>₹{params.value?.toLocaleString()}</span>;
                             } else {
                                 // For other financial columns in the total row, just show '₹' or leave empty
@@ -153,7 +153,7 @@ export default function DataTable({
                         '& .MuiDataGrid-cell[data-field="totalEarnings"], & .MuiDataGrid-cell[data-field="totalDeductions"], & .MuiDataGrid-cell[data-field="netSalary"]': {
                             textAlign: 'right',
                         },
-                         '& .MuiDataGrid-cell[data-field="employeeName"]': {
+                        '& .MuiDataGrid-cell[data-field="employeeName"]': {
                             // Align the "Overall Total" text to the left
                             textAlign: 'left',
                             paddingLeft: '16px' // Adjust as needed
@@ -197,7 +197,7 @@ export default function DataTable({
 //                             {
 //                                 showButtons && (
 //                                     <>
-//                                         {buttons()}                                      
+//                                         {buttons()}
 //                                     </>
 //                                 )
 //                             }
@@ -227,7 +227,7 @@ export default function DataTable({
 //                         top: 0,
 //                         zIndex: 2,
 //                         backgroundColor: theme.palette.primary.background,
-//                         // marginY:2,   
+//                         // marginY:2,
 //                     },
 //                     '& .MuiDataGrid-footerContainer': {
 //                         position: 'sticky',

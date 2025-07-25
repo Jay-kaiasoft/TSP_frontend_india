@@ -3,7 +3,6 @@ import dayjs from "dayjs";
 const numberToWords = (num) => {
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-    const c = ['hundred', 'thousand', 'lakh', 'crore'];
 
     const convertLessThanOneThousand = (n) => {
         let s = '';
@@ -191,6 +190,11 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                                                 {/* ({employee?.pfAmount ? `₹${employee?.pfAmount?.toLocaleString() }`: `${employee?.pfPercentage}%`})/Month */}
                                                 <td className="p-3 border-b border-gray-100">Provident Fund</td>
                                                 <td className="p-3 border-b border-gray-100 text-right">₹{employee?.totalPfAmount?.toLocaleString()}</td>
+                                            </tr>
+                                            <tr className="hover:bg-gray-50">
+                                                {/* ({employee?.pfAmount ? `₹${employee?.pfAmount?.toLocaleString() }`: `${employee?.pfPercentage}%`})/Month */}
+                                                <td className="p-3 border-b border-gray-100">Other Deductions</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otherDeductions?.toLocaleString()}</td>
                                             </tr>
                                             <tr className="font-bold bg-red-50 text-red-800">
                                                 <td className="p-3 border-t border-b-2 border-red-300">Total Deductions</td>

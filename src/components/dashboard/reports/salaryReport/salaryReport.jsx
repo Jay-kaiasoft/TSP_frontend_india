@@ -38,7 +38,6 @@ const SalaryReport = () => {
     const {
         control,
         watch,
-        setValue,
     } = useForm({
         defaultValues: {
             selectedUserId: [],
@@ -147,9 +146,10 @@ const SalaryReport = () => {
 
     const calculateTotals = (dataToSum) => {
         const totalEarnings = dataToSum.reduce((sum, item) => sum + (item.totalEarnings || 0), 0);
+        const otherDeductions = dataToSum.reduce((sum, item) => sum + (item.otherDeductions || 0), 0);
         const totalDeductions = dataToSum.reduce((sum, item) => sum + (item.totalDeductions || 0), 0);
         const netSalary = dataToSum.reduce((sum, item) => sum + (item.netSalary || 0), 0);
-        return { totalEarnings, totalDeductions, netSalary };
+        return { totalEarnings, otherDeductions, totalDeductions, netSalary };
     };
 
     // Calculate totals for each grouped department
@@ -180,6 +180,7 @@ const SalaryReport = () => {
             totalPfAmount: null,
             ptAmount: null,
             totalEarnings: totals.totalEarnings,
+            otherDeductions: totals.otherDeductions || 0, // Ensure this field exists
             totalDeductions: totals.totalDeductions,
             netSalary: totals.netSalary,
             isTotalRow: true, // Custom flag to identify this row for styling in DataGrid
@@ -207,15 +208,19 @@ const SalaryReport = () => {
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
         },
         {
-            field: 'totalEarnings', headerName: 'Total Earnings (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
         },
         {
-            field: 'totalDeductions', headerName: 'Total Deductions (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            field: 'otherDeductions', headerName: 'Other Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
         },
         {
-            field: 'netSalary', headerName: 'Net Salary (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
+            field: 'totalDeductions', headerName: 'Total Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+        },
+        {
+            field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
         }
     ];
@@ -254,7 +259,6 @@ const SalaryReport = () => {
             setLoadingPdf(false);
         }, 700);
     };
-
 
     const generateSalarySlipPDF = async () => {
         setSalarySlipPdfContent(true);
@@ -339,20 +343,7 @@ const SalaryReport = () => {
                                     onChange={(newValue) => {
                                         field.onChange(newValue);
                                     }}
-                                />
-                                // <Select
-                                //     options={users}
-                                //     label={"Employee List"}
-                                //     placeholder="Select employees"
-                                //     value={watch("selectedUserId")?.[0] || ''}
-                                //     onChange={(_, newValue) => {
-                                //         if (newValue?.id) {
-                                //             field.onChange([newValue.id]);
-                                //         } else {
-                                //             setValue("selectedUserId", []);
-                                //         }
-                                //     }}
-                                // />
+                                />                             
                             )}
                         />
                     </div>

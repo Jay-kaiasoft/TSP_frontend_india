@@ -36,6 +36,7 @@ const SalaryStatementPDFTable = ({
     // Helper to render a salary table for a list of employees
     const renderSalaryTable = (employees, departmentTitle = null) => {
         const totalEarnings = employees.reduce((sum, emp) => sum + (emp.totalEarnings || 0), 0);
+        const otherDeductions = employees.reduce((sum, emp) => sum + (emp.otherDeductions || 0), 0);
         const totalDeductions = employees.reduce((sum, emp) => sum + (emp.totalDeductions || 0), 0);
         const netSalary = employees.reduce((sum, emp) => sum + (emp.netSalary || 0), 0);
 
@@ -52,13 +53,14 @@ const SalaryStatementPDFTable = ({
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">#</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Name</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Department</th>
-                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Basic (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Basic Salary</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">OT (₹)</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">PF (₹)</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">PT (₹)</th>
-                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Earnings (₹)</th>
-                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Deductions (₹)</th>
-                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Net Salary (₹)</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Earnings</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Other Deductions</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Total Deductions</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 capitalize align-middle">Net Salary</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,6 +74,7 @@ const SalaryStatementPDFTable = ({
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalPfAmount?.toLocaleString()}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.ptAmount?.toLocaleString()}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalEarnings?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otherDeductions?.toLocaleString()}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalDeductions?.toLocaleString()}</td>
                                 <td className="border border-black text-center text-sm py-3 font-semibold text-green-700 align-middle">
                                     ₹{emp.netSalary?.toLocaleString()}
@@ -83,6 +86,7 @@ const SalaryStatementPDFTable = ({
                         <tr className="font-bold">
                             <td colSpan={7} className="text-left border border-black py-2 px-2 text-sm">Total:</td>
                             <td className="border border-black text-center text-sm py-2 px-2">₹{totalEarnings.toLocaleString()}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{otherDeductions.toLocaleString()}</td>
                             <td className="border border-black text-center text-sm py-2 px-2">₹{totalDeductions.toLocaleString()}</td>
                             <td className="border border-black text-center text-sm py-2 px-2 text-green-700">₹{netSalary.toLocaleString()}</td>
                         </tr>
