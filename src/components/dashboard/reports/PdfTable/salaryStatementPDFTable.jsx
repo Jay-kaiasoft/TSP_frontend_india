@@ -69,15 +69,15 @@ const SalaryStatementPDFTable = ({
                                 <td className="border border-black text-center text-sm py-3 align-middle">{index + 1}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">{emp.employeeName}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">{emp.departmentName}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.basicSalary?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otAmount?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalPfAmount?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.ptAmount?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalEarnings?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otherDeductions?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalDeductions?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalPfAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.ptAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otherDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm py-3 font-semibold text-green-700 align-middle">
-                                    ₹{emp.netSalary?.toLocaleString()}
+                                    ₹{emp.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}
                                 </td>
                             </tr>
                         ))}
@@ -85,10 +85,10 @@ const SalaryStatementPDFTable = ({
                         {/* ✅ TOTAL ROW */}
                         <tr className="font-bold">
                             <td colSpan={7} className="text-left border border-black py-2 px-2 text-sm">Total:</td>
-                            <td className="border border-black text-center text-sm py-2 px-2">₹{totalEarnings.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-2 px-2">₹{otherDeductions.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-2 px-2">₹{totalDeductions.toLocaleString()}</td>
-                            <td className="border border-black text-center text-sm py-2 px-2 text-green-700">₹{netSalary.toLocaleString()}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{totalEarnings.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{otherDeductions.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{totalDeductions.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2 text-green-700">₹{netSalary.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -197,14 +197,14 @@ export default SalaryStatementPDFTable;
 //                                     <td className="border border-black text-center text-sm py-3">{index + 1}</td>
 //                                     <td className="border border-black text-center text-sm py-3">{emp.employeeName}</td>
 //                                     <td className="border border-black text-center text-sm py-3">{emp.departmentName}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.basicSalary?.toLocaleString()}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.otAmount?.toLocaleString()}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.pfAmount?.toLocaleString()}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.ptAmount?.toLocaleString()}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.totalEarnings?.toLocaleString()}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.totalDeductions?.toLocaleString()}</td>
+//                                     <td className="border border-black text-center text-sm py-3">₹{emp.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+//                                     <td className="border border-black text-center text-sm py-3">₹{emp.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+//                                     <td className="border border-black text-center text-sm py-3">₹{emp.pfAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+//                                     <td className="border border-black text-center text-sm py-3">₹{emp.ptAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+//                                     <td className="border border-black text-center text-sm py-3">₹{emp.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+//                                     <td className="border border-black text-center text-sm py-3">₹{emp.totalDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
 //                                     <td className="border border-black text-center text-sm py-3">
-//                                         ₹{emp.netSalary?.toLocaleString()}
+//                                         ₹{emp.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}
 //                                     </td>
 //                                 </tr>
 //                             );

@@ -461,7 +461,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                 }
             </div>
             <div className='border rounded-lg bg-white w-full lg:w-full '>
-                <DataTable columns={columns} rows={shifts} getRowId={getRowId} height={380} showButtons={true} buttons={actionButtons} />
+                <DataTable columns={columns} rows={shifts} getRowId={getRowId} showButtons={true} buttons={actionButtons} />
             </div>
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteShift} handleClose={handleCloseDialog} loading={loading} />
         </div>

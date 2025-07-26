@@ -43,11 +43,11 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                             <tr key={index} className="border border-black">
                                 <td className="border border-black text-center text-sm h-10">{index + 1}</td>
                                 <td className="border border-black text-center text-sm h-10">{item?.userName}</td>
-                                <td className="border border-black text-center text-sm h-10">₹{item?.basic_salary?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm h-10">₹{item?.total_basic_salary?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm h-10">₹{item?.employee_pf_amount?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm h-10">₹{item?.employer_pf_amount?.toLocaleString()}</td>
-                                <td className="border border-black text-center text-sm h-10">₹{item?.total_amount?.toLocaleString()}</td>
+                                <td className="border border-black text-center text-sm h-10">₹{item?.basic_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm h-10">₹{item?.total_basic_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm h-10">₹{item?.employee_pf_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm h-10">₹{item?.employer_pf_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm h-10">₹{item?.total_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                             </tr>
                         ))}
                         <tr className="border border-black">
@@ -55,7 +55,7 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                                 <strong className='font-bold mr-5'>Total</strong>
                             </td>
                             <td className="border border-black text-center text-sm h-10">
-                                <strong className='font-bold'>₹{rows?.reduce((acc, item) => acc + (item?.total_amount || 0), 0)?.toLocaleString()}</strong>
+                                <strong className='font-bold'>₹{rows?.reduce((acc, item) => acc + (item?.total_amount || 0), 0)?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
                             </td>
                         </tr>
                     </tbody>

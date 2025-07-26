@@ -188,6 +188,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         if (response.status === 200) {
             setLoading(false);
             setAlert({ open: true, message: response.data.message, type: "success" });
+            handleGetEmployee()
             handleCloseFaceRegistrationDialog();
         } else {
             setLoading(false);
@@ -1904,7 +1905,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleCreateShift} handleClose={handleCloseDialog} />
             <AlertDialog open={dialogFaceRegistration.open} title={dialogFaceRegistration.title} message={dialogFaceRegistration.message} actionButtonText={dialogFaceRegistration.actionButtonText} handleAction={handleDeleteFaceRegistration} handleClose={handleCloseFaceRegistrationDialog} />
 
-            <FaceRegistration open={showFaceRegistration} handleClose={handleCloseFaceRegistration} employeeId={id} type="register" />
+            <FaceRegistration open={showFaceRegistration} handleClose={handleCloseFaceRegistration} employeeId={watch("employeeId") || id} type="register" />
         </div>
     )
 }

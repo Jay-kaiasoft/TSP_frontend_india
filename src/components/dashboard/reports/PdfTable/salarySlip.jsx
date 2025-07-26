@@ -103,27 +103,22 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                 data?.map((employee, index) => (
                     <div key={index} id={`salary-slip-${index}`} className="salary-slip w-full bg-white border border-gray-200 shadow-xl rounded-2xl overflow-hidden">
                         {/* Top Blue Bar */}
-                        <div className="h-2 bg-gradient-to-r from-[#666cff] to-[#9194fb]"></div>
+                        {/* <div className="h-2 bg-gradient-to-r from-[#666cff] to-[#9194fb]"></div> */}
 
                         {/* Header Section */}
                         <div className="p-6 sm:p-8 flex justify-between items-start">
+                            <div className="w-40 h-24">
+                                <img src={companyInfo?.companyLogo} alt="Logo" className="w-40 h-24 border" />
+                            </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-800">{companyInfo.companyName}</h1>
-                                {/* <p className="text-sm text-gray-600">{companyInfo.state}, {companyInfo.country}</p> */}
+                                <p className="text-sm text-gray-600">{companyInfo.email}</p>
+                                <p className="text-sm text-gray-600">{companyInfo.phone}</p>
                             </div>
-                            {/* Zoho Logo Placeholder - Using a simple SVG for demonstration */}
-                            {/* <div className="flex-shrink-0">
-                        <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="100" height="100" rx="20" fill="#F0F0F0" />
-                            <path d="M30 40 L50 20 L70 40 L50 60 L30 40 Z" fill="#FF8C00" />
-                            <circle cx="50" cy="70" r="15" fill="#4CAF50" />
-                            <path d="M30 70 L50 90 L70 70 L50 50 L30 70 Z" fill="#2196F3" />
-                        </svg>
-                    </div> */}
                         </div>
 
                         <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4"> {getPayslipPeriodText(filter?.value)}</h2>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center"> {getPayslipPeriodText(filter?.value)}</h2>
 
                             {/* Employee Pay Summary */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
@@ -135,7 +130,7 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                                 </div>
                                 <div className="text-right md:text-left md:pl-8">
                                     <p className="text-lg font-semibold text-gray-800 mb-2">Employee Net Pay</p>
-                                    <p className="text-3xl font-extrabold text-[#666cff] mb-2">₹{employee.netSalary?.toLocaleString()}</p>
+                                    <p className="text-3xl font-extrabold mb-2">₹{employee.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</p>
                                 </div>
                             </div>
                         </div>
@@ -155,15 +150,15 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                                         <tbody>
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Basic Salary</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.basicSalary?.toLocaleString()}</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Over Time</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otAmount?.toLocaleString()}</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
-                                            <tr className="font-bold bg-blue-50 text-[#666cff]">
-                                                <td className="p-3 border-t border-b-2 border-blue-300">Gross Earnings</td>
-                                                <td className="p-3 border-t border-b-2 border-blue-300 text-right">₹{employee?.totalEarnings?.toLocaleString()}</td>
+                                            <tr className="font-bold">
+                                                <td className="p-3 border-t border-b-2">Gross Earnings</td>
+                                                <td className="p-3 border-t border-b-2 text-right">₹{employee?.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -184,21 +179,19 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                                         <tbody>
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Professional Tax</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.ptAmount?.toLocaleString()}</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.ptAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
                                             <tr className="hover:bg-gray-50">
-                                                {/* ({employee?.pfAmount ? `₹${employee?.pfAmount?.toLocaleString() }`: `${employee?.pfPercentage}%`})/Month */}
                                                 <td className="p-3 border-b border-gray-100">Provident Fund</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.totalPfAmount?.toLocaleString()}</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.totalPfAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
                                             <tr className="hover:bg-gray-50">
-                                                {/* ({employee?.pfAmount ? `₹${employee?.pfAmount?.toLocaleString() }`: `${employee?.pfPercentage}%`})/Month */}
                                                 <td className="p-3 border-b border-gray-100">Other Deductions</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otherDeductions?.toLocaleString()}</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otherDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
-                                            <tr className="font-bold bg-red-50 text-red-800">
-                                                <td className="p-3 border-t border-b-2 border-red-300">Total Deductions</td>
-                                                <td className="p-3 border-t border-b-2 border-red-300 text-right">₹{employee?.totalDeductions?.toLocaleString()}</td>
+                                            <tr className="font-bold">
+                                                <td className="p-3 border-t border-b-2">Total Deductions</td>
+                                                <td className="p-3 border-t border-b-2 text-right">₹{employee?.totalDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -207,18 +200,21 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                         </div>
 
                         {/* Net Pay & Footer */}
-                        <div className="p-6 sm:p-8 bg-gray-50 border-t border-gray-200">
+                        <div className="p-6 sm:p-8 border-t border-gray-200">
                             <div className="flex justify-between items-center mb-6">
                                 <p className="text-lg font-bold text-gray-800">NET PAY (Gross Earnings - Total Deductions)</p>
-                                <p className="text-xl font-bold text-[#666cff]">₹{employee.netSalary?.toLocaleString()}</p>
+                                <p className="text-xl font-bold text-gray-800">₹{employee.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</p>
                             </div>
 
                             <div className="text-center mb-6">
-                                <p className="text-md font-bold text-gray-800">Total Net Payable ₹{employee.netSalary?.toLocaleString()} <span className="font-normal italic text-gray-600">({numberToWords(employee.netSalary)})</span></p>
+                                <p className="text-md font-bold text-gray-800">Total Net Payable ₹{employee.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })} <span className="font-normal italic text-gray-600 capitalize">({numberToWords(employee.netSalary)})</span></p>
                             </div>
 
-                            <div className="border-t border-gray-300 pt-4 text-center text-xs text-gray-500">
-                                <p>— This document has been automatically generated by {companyInfo?.companyName}; therefore, a signature is not required. —</p>
+                            <div className="border-t border-gray-300 pt-4 text-center text-xs text-gray-500 flex justify-end">
+                                <div className="h-24 flex flex-col justify-end">
+                                    <hr className="my-1 h-0.5" />
+                                    <p>Authorized Signatory</p>
+                                </div>
                             </div>
                         </div>
                     </div>

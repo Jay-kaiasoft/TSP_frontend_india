@@ -79,7 +79,7 @@ const PFReport = () => {
             maxWidth: 300,
             align: "right",
             headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString()}</span>
+            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'total_basic_salary',
@@ -89,7 +89,7 @@ const PFReport = () => {
             maxWidth: 200,
             align: "right",
             headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString()}</span>
+            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'employee_pf_amount',
@@ -99,7 +99,7 @@ const PFReport = () => {
             maxWidth: 300,
             align: "right",
             headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString()}</span>
+            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'employer_pf_amount',
@@ -109,7 +109,7 @@ const PFReport = () => {
             maxWidth: 300,
             align: "right",
             headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString()}</span>
+            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'total_amount',
@@ -121,8 +121,8 @@ const PFReport = () => {
             headerAlign: "right",
             renderCell: (params) =>
                 params.row.isTotalRow
-                    ? <strong className='font-semibold'>₹{params.value?.toLocaleString()}</strong>
-                    : <span>₹{params.value?.toLocaleString()}</span>
+                    ? <strong className='font-semibold'>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
+                    : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         }
     ];    
 

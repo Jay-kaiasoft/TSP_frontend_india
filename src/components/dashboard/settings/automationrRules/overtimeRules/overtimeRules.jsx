@@ -125,7 +125,7 @@ const OvertimeRules = () => {
             renderCell: (params) => {
                 return (
                     <>
-                        {params.row.otAmount ? `₹${params.row.otAmount?.toLocaleString()}` : '-'}
+                        {params.row.otAmount ? `₹${params.row.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}` : '-'}
                     </>
                 );
             }

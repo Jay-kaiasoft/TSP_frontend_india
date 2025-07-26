@@ -67,7 +67,7 @@ export default function DataTable({
                         if (params.row.isTotalRow) {
                             // Only show value for totalEarnings, totalDeductions, netSalary
                             if (['otherDeductions', 'totalEarnings', 'totalDeductions', 'netSalary'].includes(col.field)) {
-                                return <span>₹{params.value?.toLocaleString()}</span>;
+                                return <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>;
                             } else {
                                 // For other financial columns in the total row, just show '₹' or leave empty
                                 return <span></span>; // Or return null/'' for an empty cell
@@ -120,7 +120,7 @@ export default function DataTable({
                 checkboxSelection={checkboxSelection}
                 getRowClassName={getRowClassName}
                 sx={{
-                    maxHeight: height || "full",
+                    maxHeight: height || 550,
                     color: theme.palette.primary.text.main,
                     overflow: 'auto',
                     '& .MuiDataGrid-columnHeaders': {

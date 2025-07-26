@@ -95,19 +95,24 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
                 icon: <CustomIcons iconName={'fa-solid fa-circle'} css=' cursor-pointer' />,
               }));
 
+            if (userInfo?.companyId && userInfo?.employeeId) {
+              data.push({
+                name: "Reports",
+                icon: <CustomIcons iconName={'fa-solid fa-file'} css='cursor-pointer' />,
+                child: [
+                  { name: "PF Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
+                  { name: "PT Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
+                  { name: "Salary Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
+                ]
+              });
+            }
+
             data.push({
-              name: "Reports",
-              icon: <CustomIcons iconName={'fa-solid fa-file'} css='cursor-pointer' />,
-              child: [
-                { name: "PF Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
-                { name: "PT Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
-                { name: "Salary Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
-              ]
-            }, {
               name: "Permissions",
               icon: <CustomIcons iconName={'fa-solid fa-key'} css=' cursor-pointer' />,
               child: permissionsChildren,
             });
+
           }
         }
       }

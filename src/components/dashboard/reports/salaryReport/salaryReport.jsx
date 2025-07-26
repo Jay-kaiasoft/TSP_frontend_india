@@ -193,35 +193,35 @@ const SalaryReport = () => {
         { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', flex: 1, maxWidth: 180 },
         {
             field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'ptAmount', headerName: 'PT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'otherDeductions', headerName: 'Other Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalDeductions', headerName: 'Total Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
-            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString()}</span>
+            align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         }
     ];
 
@@ -380,12 +380,12 @@ const SalaryReport = () => {
 
                                 return (
                                     <div key={departmentName} className="mb-6 border p-4 rounded-lg shadow-sm">
-                                        <h3 className="text-lg font-semibold mb-3 text-gray-700">{departmentName} Department</h3>
+                                        <h3 className="text-lg font-semibold mb-3 text-gray-700 capitalize">{departmentName.toLocaleLowerCase().endsWith("department") ? departmentName : `${departmentName} department`}</h3>
                                         <DataTable
                                             columns={departmentTableColumns}
                                             rows={employees}
                                             getRowId={getRowIdForDataGrid}
-                                            height={employees.length > 0 ? 'auto' : 150} // Adjust height dynamically
+                                            height={employees.length > 0 ? 350 : 150} // Adjust height dynamically
                                             showButtons={false} // No individual buttons for department tables
                                             footerRowData={employees.length > 0 ? createDataGridTotalRow(departmentTotal, departmentName) : null}
                                         />

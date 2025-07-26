@@ -71,7 +71,6 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const [orgType, setOrgType] = useState([])
-    const [selectedOrgType, setSelectedOrgType] = useState(null)
     const [formDataFile, setFormDataFile] = useState(null)
     const [selectedTab, setSelectedTab] = useState(0);
     const [contactRow, setContactRow] = useState([]);
@@ -645,6 +644,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
             roles: filterRoles,
             employees: filteredContact,
             deletedEmployeeId: (deletedContact?.length > 0 && deletedContact !== null) ? deletedContact : [],
+            organizationType: oganizationType?.find(item => item.id === data.organizationType)?.title || "",
         }
 
         if (companyId) {
@@ -826,9 +826,8 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                             control={control}
                                             rules={{
                                                 validate: (value) => {
-                                                    if (value === "") return true;
                                                     const gstPattern = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-                                                    return gstPattern.test(value) || "Invalid GST format (e.g., 27ABCDE1234F1Z5)";
+                                                    return gstPattern.test(value) || "(e.g., 27ABCDE1234F1Z5)";
                                                 },
                                             }}
                                             render={({ field }) => (
@@ -836,15 +835,20 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                                     {...field}
                                                     label="GST Number"
                                                     type="text"
-                                                    error={!!errors?.ein}
-                                                    helperText={errors?.ein?.message}
                                                     onChange={(e) => {
-                                                        const cleaned = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                                                        field.onChange(cleaned);
+                                                        // Clean the input to match IFSC code format
+                                                        if (e.target.value) {
+                                                            const cleaned = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                                                            field.onChange(cleaned);
+                                                        } else {
+                                                            field.onChange("");
+                                                        }
                                                     }}
+                                                    error={errors?.ein}
+                                                    helperText={errors?.ein ? errors.ein.message : ""}
                                                 />
                                             )}
-                                        />
+                                        />                                       
                                     </div>
 
                                     <div>
@@ -878,16 +882,9 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                                     placeholder="Select organization type"
                                                     multiple={false}
                                                     error={errors?.organizationType}
-                                                    value={selectedOrgType || null}
+                                                    value={watch("organizationType") || null}
                                                     onChange={(_, newValue) => {
-                                                        if (newValue && newValue.id) {
-                                                            setSelectedOrgType(newValue.id)
-                                                            setValue(`organizationType`, newValue.title);
-                                                        } else {
-                                                            field.onChange(null);
-                                                            setSelectedOrgType(null)
-                                                            setValue(`organizationType`, null);
-                                                        }
+                                                        field.onChange(newValue.id || null);
                                                     }}
                                                 />
                                             )}

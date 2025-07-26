@@ -210,7 +210,7 @@ const ManageEmployees = ({ handleSetTitle, setAlert }) => {
     return (
         <div className='px-3 lg:px-0'>
             <div className='border rounded-lg bg-white lg:w-full'>
-                <DataTable columns={columns} rows={employees} getRowId={getRowId} height={420} showSearch={false} showButtons={true} buttons={employeeActionButtons} />
+                <DataTable columns={columns} rows={employees} getRowId={getRowId} showSearch={false} showButtons={true} buttons={employeeActionButtons} />
             </div>
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteEmployee} handleClose={handleCloseDialog} loading={loading} />
         </div>

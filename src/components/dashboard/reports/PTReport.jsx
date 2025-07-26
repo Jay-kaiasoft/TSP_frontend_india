@@ -86,7 +86,7 @@ const PTReport = () => {
             maxWidth: 250,
             align: "right",
             headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString()}</span>
+            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'total_gross_salary',
@@ -96,7 +96,7 @@ const PTReport = () => {
             maxWidth: 300,
             align: "right",
             headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString()}</span>
+            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'pt_amount',
@@ -108,8 +108,8 @@ const PTReport = () => {
             headerAlign: "right",
             renderCell: (params) =>
                 params.row.isTotalRow
-                    ? <strong className='font-semibold'>₹{params.value?.toLocaleString()}</strong>
-                    : <span>₹{params.value?.toLocaleString()}</span>
+                    ? <strong className='font-semibold'>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
+                    : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         }
     ];
 
