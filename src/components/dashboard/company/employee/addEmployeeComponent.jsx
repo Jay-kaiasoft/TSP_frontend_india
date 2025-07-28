@@ -61,6 +61,11 @@ const payScheduleOptions = [
     { id: 4, title: "Yearly" },
 ]
 
+const PFTypeOptions = [
+    { id: 1, title: "Percentage" },
+    { id: 2, title: "Fixed Amount" }
+]
+
 const CanteenTypeOptions = [
     { id: 1, title: "Office Type" },
     { id: 2, title: "Labour Type" }
@@ -119,6 +124,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             dob: new Date(),
             email: "",
             phone: "",
+            emergencyPhone: "",
+            altPhone: "",
             password: "",
             roleId: '',
             shiftId: '',
@@ -143,6 +150,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             isActive: 1,
             checkGeofence: true,
             isPf: false,
+            pfType: "",
             pfPercentage: 0,
             pfAmount: 0,
             isPt: false,
@@ -280,6 +288,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 setValue("gender", res?.data?.result?.gender === "Male" ? 1 : (res?.data?.result?.gender !== "" && res?.data?.result?.gender !== null) ? 2 : "")
                 setValue("companyLocation", res?.data?.result?.companyLocation ? JSON.parse(res?.data?.result?.companyLocation) : [])
                 setValue("canteenType", res?.data?.result?.canteenType ? CanteenTypeOptions?.filter((row) => row?.title === res?.data?.result?.canteenType)?.[0]?.id : null)
+                setValue("pfType", PFTypeOptions?.filter((row) => row?.title === res?.data?.result?.pfType)?.[0]?.id || null)
             }
             if (res?.data?.result?.bankAccountId) {
                 const response = await getEmployeeBankInfo(res?.data?.result?.bankAccountId)
@@ -575,6 +584,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         const newData = {
             ...data,
             canteenType: data?.canteenType ? CanteenTypeOptions?.filter((row) => row?.id === data?.canteenType)?.[0]?.title : null,
+            pfType: PFTypeOptions?.filter((row) => row?.id === watch("pfType"))?.[0]?.title || null,
             companyId: companyId,
             employeeId: id || watch("employeeId"),
             gender: parseInt(watch("gender")) === 1 ? "Male" : watch("gender") !== null ? "Female" : "",
@@ -1159,6 +1169,64 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                         )}
                                                     />
                                                 </div>
+
+                                                <div>
+                                                    <Controller
+                                                        name="emergencyPhone"
+                                                        control={control}
+                                                        rules={{
+                                                            maxLength: {
+                                                                value: 10,
+                                                                message: 'Enter valid phone number',
+                                                            },
+                                                            minLength: {
+                                                                value: 10,
+                                                                message: 'Enter valid phone number',
+                                                            },
+                                                        }}
+                                                        render={({ field }) => (
+                                                            <Input
+                                                                {...field}
+                                                                label="Emergency Phone Number"
+                                                                type={`text`}
+                                                                error={errors?.emergencyPhone}
+                                                                onChange={(e) => {
+                                                                    const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                    field.onChange(numericValue);
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <Controller
+                                                        name="alternatePhone"
+                                                        control={control}
+                                                        rules={{
+                                                            maxLength: {
+                                                                value: 10,
+                                                                message: 'Enter valid phone number',
+                                                            },
+                                                            minLength: {
+                                                                value: 10,
+                                                                message: 'Enter valid phone number',
+                                                            },
+                                                        }}
+                                                        render={({ field }) => (
+                                                            <Input
+                                                                {...field}
+                                                                label="Alternate Phone Number"
+                                                                type={`text`}
+                                                                error={errors?.alternatePhone}
+                                                                onChange={(e) => {
+                                                                    const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                    field.onChange(numericValue);
+                                                                }}
+                                                            />
+                                                        )}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1458,7 +1526,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                             {
                                                 watch("employeeTypeId") === 3 && (
                                                     <>
-                                                        <div className='col-span-2'>
+                                                        <div className='col-span-2 w-52'>
                                                             <Controller
                                                                 name="isPf"
                                                                 control={control}
@@ -1479,7 +1547,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             />
                                                         </div>
 
-                                                        <div className={`col-span-2 transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
+                                                        <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
                                                             <Controller
                                                                 name="basicSalary"
                                                                 control={control}
@@ -1501,69 +1569,103 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             />
                                                         </div>
 
-                                                        <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
+                                                        <div>
                                                             <Controller
-                                                                name="pfPercentage"
+                                                                name="pfType"
                                                                 control={control}
                                                                 rules={{
-                                                                    required: (watch("isPf") && !watch("pfAmount")) ? "PF Percentage is required" : false,
-                                                                    min: {
-                                                                        value: 1,
-                                                                        message: "PF Percentage must be at least 1"
-                                                                    }
+                                                                    required: "PF Type is required"
                                                                 }}
                                                                 render={({ field }) => (
-                                                                    <Input
-                                                                        {...field}
-                                                                        label="PF Percentage"
-                                                                        type={`text`}
-                                                                        error={errors?.pfPercentage}
-                                                                        disabled={watch("pfAmount")}
-                                                                        onChange={(e) => {
-                                                                            let value = e.target.value;
-                                                                            if (/^\d*\.?\d*$/.test(value)) {
-                                                                                setValue("pfAmount", "");
-                                                                                field.onChange(value);
+                                                                    <Select
+                                                                        options={PFTypeOptions}
+                                                                        label={"PF Type"}
+                                                                        placeholder="Select PF type"
+                                                                        value={parseInt(watch("pfType")) || null}
+                                                                        onChange={(_, newValue) => {
+                                                                            if (newValue?.id) {
+                                                                                field.onChange(newValue.id);
+                                                                            } else {
+                                                                                setValue("pfType", null);
                                                                             }
                                                                         }}
-                                                                        endIcon={<CustomIcons iconName={`fa-solid fa-percent`} css={'text-gray-500'} />}
+                                                                        error={errors?.pfType}
                                                                     />
                                                                 )}
                                                             />
                                                         </div>
 
-                                                        <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
-                                                            <Controller
-                                                                name="pfAmount"
-                                                                control={control}
-                                                                rules={{
-                                                                    required: (watch("isPf") && !watch("pfPercentage")) ? "PF Amount is required" : false,
-                                                                    min: {
-                                                                        value: 1,
-                                                                        message: "PF Amount must be at least 1"
-                                                                    }
-                                                                }}
-                                                                render={({ field }) => (
-                                                                    <Input
-                                                                        {...field}
-                                                                        label="PF Amount"
-                                                                        type={`text`}
-                                                                        error={errors?.pfAmount}
-                                                                        disabled={watch("pfPercentage")}
-                                                                        onChange={(e) => {
-                                                                            let value = e.target.value;
-                                                                            if (/^\d*\.?\d*$/.test(value)) {
-                                                                                setValue("pfPercentage", "");
-                                                                                field.onChange(value);
+                                                        {
+                                                            watch("pfType") === 1 && (
+                                                                <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
+                                                                    <Controller
+                                                                        name="pfPercentage"
+                                                                        control={control}
+                                                                        rules={{
+                                                                            required: (watch("isPf") && !watch("pfAmount")) ? "PF Percentage is required" : false,
+                                                                            min: {
+                                                                                value: 1,
+                                                                                message: "PF Percentage must be at least 1"
                                                                             }
                                                                         }}
-                                                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                        render={({ field }) => (
+                                                                            <Input
+                                                                                {...field}
+                                                                                label="PF Percentage"
+                                                                                type={`text`}
+                                                                                error={errors?.pfPercentage}
+                                                                                disabled={watch("pfType") === 2}
+                                                                                onChange={(e) => {
+                                                                                    let value = e.target.value;
+                                                                                    if (/^\d*\.?\d*$/.test(value)) {
+                                                                                        setValue("pfAmount", "");
+                                                                                        field.onChange(value);
+                                                                                    }
+                                                                                }}
+                                                                                endIcon={<CustomIcons iconName={`fa-solid fa-percent`} css={'text-gray-500'} />}
+                                                                            />
+                                                                        )}
                                                                     />
-                                                                )}
-                                                            />
-                                                        </div>
+                                                                </div>
+                                                            )
+                                                        }
+                                                        {
+                                                            watch("pfType") === 2 && (
+                                                                <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
+                                                                    <Controller
+                                                                        name="pfAmount"
+                                                                        control={control}
+                                                                        rules={{
+                                                                            required: (watch("isPf") && !watch("pfPercentage")) ? "PF Amount is required" : false,
+                                                                            min: {
+                                                                                value: 1,
+                                                                                message: "PF Amount must be at least 1"
+                                                                            }
+                                                                        }}
+                                                                        render={({ field }) => (
+                                                                            <Input
+                                                                                {...field}
+                                                                                label="PF Amount"
+                                                                                type={`text`}
+                                                                                error={errors?.pfAmount}
+                                                                                disabled={watch("pfType") === 1}
+                                                                                onChange={(e) => {
+                                                                                    let value = e.target.value;
+                                                                                    if (/^\d*\.?\d*$/.test(value)) {
+                                                                                        setValue("pfPercentage", "");
+                                                                                        field.onChange(value);
+                                                                                    }
+                                                                                }}
+                                                                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                            />
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                            )
+                                                        }
 
-                                                        <div className='col-span-2'>
+
+                                                        <div className='col-span-2 w-52'>
                                                             <Controller
                                                                 name="isPt"
                                                                 control={control}
@@ -1580,30 +1682,31 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                                     />
                                                                 )}
                                                             />
-                                                            <div className={`transition-all duration-500 ${watch("isPt") ? "mt-3 opacity-100 text-opacity-100 bg-opacity-100" : "opacity-0 mt-0"}`}>
-                                                                <Controller
-                                                                    name="ptAmount"
-                                                                    control={control}
-                                                                    rules={{
-                                                                        required: watch("isPt") ? "PT Amount is required" : false,
-                                                                    }}
-                                                                    render={({ field }) => (
-                                                                        <Input
-                                                                            {...field}
-                                                                            label="PT Amount"
-                                                                            type={`text`}
-                                                                            error={errors?.ptAmount}
-                                                                            onChange={(e) => {
-                                                                                let value = e.target.value;
-                                                                                if (/^\d*\.?\d*$/.test(value)) {
-                                                                                    field.onChange(value);
-                                                                                }
-                                                                            }}
-                                                                            endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                                                        />
-                                                                    )}
-                                                                />
-                                                            </div>
+
+                                                        </div>
+                                                        <div className={`col-span-2 transition-all duration-500 ${watch("isPt") ? "opacity-100 text-opacity-100 bg-opacity-100" : "opacity-0 mt-0"}`}>
+                                                            <Controller
+                                                                name="ptAmount"
+                                                                control={control}
+                                                                rules={{
+                                                                    required: watch("isPt") ? "PT Amount is required" : false,
+                                                                }}
+                                                                render={({ field }) => (
+                                                                    <Input
+                                                                        {...field}
+                                                                        label="PT Amount"
+                                                                        type={`text`}
+                                                                        error={errors?.ptAmount}
+                                                                        onChange={(e) => {
+                                                                            let value = e.target.value;
+                                                                            if (/^\d*\.?\d*$/.test(value)) {
+                                                                                field.onChange(value);
+                                                                            }
+                                                                        }}
+                                                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                    />
+                                                                )}
+                                                            />
                                                         </div>
                                                     </>
                                                 )

@@ -28,7 +28,7 @@ const PFReport = () => {
         setEmployees([]);
 
         const res = await getEmployeePFReport(userInfo?.companyId, "PF", filter?.value);
-        let data = res.data.result?.map((item, index) => ({
+        let data = res?.data?.result?.map((item, index) => ({
             ...item,
             rowId: index + 1
         })) || [];
@@ -42,7 +42,7 @@ const PFReport = () => {
             total_amount: totalPF,
             isTotalRow: true
         });
-    
+
         setEmployees(data);
     };
 
@@ -92,6 +92,24 @@ const PFReport = () => {
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
+            field: 'totalDays',
+            headerName: 'Total Days',
+            headerClassName: 'uppercase',
+            flex: 1,
+            maxWidth: 300,
+            align: "right",
+            headerAlign: "right",
+        },
+        {
+            field: 'daysWorked',
+            headerName: 'Working Days',
+            headerClassName: 'uppercase',
+            flex: 1,
+            maxWidth: 300,
+            align: "right",
+            headerAlign: "right",
+        },
+        {
             field: 'employee_pf_amount',
             headerName: 'Employee PF',
             headerClassName: 'uppercase',
@@ -124,34 +142,50 @@ const PFReport = () => {
                     ? <strong className='font-semibold'>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
                     : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         }
-    ];    
+    ];
 
     const generatePDF = async () => {
         setShowPdfContent(true);
         setLoadingPdf(true);
 
         setTimeout(async () => {
-            const element = document.getElementById("PF-table-container");
-            if (!element) return;
-
-            const canvas = await html2canvas(element, {
-                scale: 3, // higher scale = better quality
-                useCORS: true,
-                logging: true, // for debugging
-            });
-
-            const imgData = canvas.toDataURL("image/png");
             const pdf = new jsPDF("p", "mm", "a4");
+            const margin = 10;
+            const imgWidth = 210 - 2 * margin;
+            let yOffset = margin;
 
-            const imgWidth = 190;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            const salarySlipElements = document.querySelectorAll("#PF-table-container");
 
-            pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+            for (let i = 0; i < salarySlipElements.length; i++) {
+                const element = salarySlipElements[i];
+
+                // Force display in case it's hidden
+                element.style.display = "block";
+
+                const canvas = await html2canvas(element, {
+                    scale: 1.5,
+                    useCORS: true,
+                    backgroundColor: "#fff",
+                    // width: 794,
+                    windowWidth: 794,
+                });
+
+                const imgData = canvas.toDataURL("image/jpeg", 0.8);
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                if (i > 0) {
+                    pdf.addPage();
+                    yOffset = margin;
+                }
+
+                pdf.addImage(imgData, "JPEG", margin, yOffset, imgWidth, imgHeight);
+            }
+
             pdf.save("employee_pf_report.pdf");
 
             setShowPdfContent(false);
             setLoadingPdf(false);
-        }, 500); // allow time to render
+        }, 700);
     };
 
     const getRowId = (row) => row.rowId ?? row.id;
@@ -165,7 +199,7 @@ const PFReport = () => {
     }
 
     return (
-        <div className='px-3 lg:px-0'>           
+        <div className='px-3 lg:px-0'>
             <div className="my-3 w-60">
                 <Select
                     options={filterOptions}
@@ -193,7 +227,7 @@ const PFReport = () => {
                 <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
                     <PFPDFTable data={employees} companyInfo={companyInfo} filter={filter} />
                 </div>
-            )}           
+            )}
         </div>
     );
 };

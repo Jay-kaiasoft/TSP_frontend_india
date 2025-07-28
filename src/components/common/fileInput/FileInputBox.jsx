@@ -50,7 +50,7 @@ export default function FileInputBox({ onFileSelect, value, onRemove, text }) {
                         type="file"
                         ref={fileInputRef}
                         className="hidden"
-                        accept="image/*"
+                        accept="image/JPG, image/PNG, image/JPEG"
                         onChange={handleFileChange}
                     />
                 </div>

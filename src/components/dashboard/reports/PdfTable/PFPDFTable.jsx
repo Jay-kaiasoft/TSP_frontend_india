@@ -1,3 +1,26 @@
+import dayjs from "dayjs";
+
+const getPayPeriodText = (monthsBack, currentDate = dayjs()) => {
+    if (!monthsBack || monthsBack <= 0) return "";
+
+    const end = currentDate.subtract(1, 'month'); // ✅ Exclude current month
+    const start = end.subtract(monthsBack - 1, 'month');
+
+    const endMonth = end.format("MMMM");
+    const endYear = end.format("YYYY");
+    const startMonth = start.format("MMMM");
+    const startYear = start.format("YYYY");
+
+    if (monthsBack === 1) {
+        return `${endMonth} ${endYear}`;
+    }
+
+    if (startYear === endYear) {
+        return `${startMonth} to ${endMonth} ${endYear}`;
+    } else {
+        return `${startMonth} ${startYear} to ${endMonth} ${endYear}`;
+    }
+};
 
 const PFPDFTable = ({ data, companyInfo, filter }) => {
     const rows = data?.filter(item => !item?.isTotalRow);
@@ -22,7 +45,7 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                         </div>
                     </div>
                     <div>
-                        <h1 className='font-semibold text-lg text-center'>From: &nbsp;&nbsp;&nbsp; {filter?.title}</h1>
+                        <h1 className='font-semibold text-lg text-center'>From: &nbsp; {getPayPeriodText(filter?.value)}</h1>
                     </div>
                 </div>
 
@@ -33,6 +56,8 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Employee Name</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Basic Salary(Monthly)</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total Basic Salary</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total Days</th>
+                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Working Days</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Employee PF</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Employer PF</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total PF</th>
@@ -45,13 +70,15 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                                 <td className="border border-black text-center text-sm h-10">{item?.userName}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.basic_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.total_basic_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm h-10">{item?.totalDays}</td>
+                                <td className="border border-black text-center text-sm h-10">{item?.daysWorked}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.employee_pf_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.employer_pf_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.total_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                             </tr>
                         ))}
                         <tr className="border border-black">
-                            <td colSpan={6} className="border border-black text-right text-sm h-10">
+                            <td colSpan={8} className="border border-black text-right text-sm h-10">
                                 <strong className='font-bold mr-5'>Total</strong>
                             </td>
                             <td className="border border-black text-center text-sm h-10">

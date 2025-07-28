@@ -34,12 +34,12 @@ const PTReport = () => {
             rowId: index + 1
         })) || [];
 
-        const totalPT = data.reduce((sum, emp) => sum + (Number(emp.pt_amount) || 0), 0);
+        const totalPT = data.reduce((sum, emp) => sum + (Number(emp.total_amount) || 0), 0);
 
         data.push({
             rowId: 'total',
             userName: 'Total',
-            pt_amount: totalPT,
+            total_amount: totalPT,
             isTotalRow: true
         });
 
@@ -99,8 +99,26 @@ const PTReport = () => {
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'pt_amount',
-            headerName: 'Professional Tax Amount',
+            field: 'totalDays',
+            headerName: 'Total Days',
+            headerClassName: 'uppercase',
+            flex: 1,
+            maxWidth: 300,
+            align: "right",
+            headerAlign: "right",
+        },
+        {
+            field: 'daysWorked',
+            headerName: 'Working Days',
+            headerClassName: 'uppercase',
+            flex: 1,
+            maxWidth: 300,
+            align: "right",
+            headerAlign: "right",
+        },
+        {
+            field: 'total_amount',
+            headerName: 'Total pt Amount',
             headerClassName: 'uppercase',
             flex: 1,
             maxWidth: 300,
@@ -117,29 +135,45 @@ const PTReport = () => {
     const generatePDF = async () => {
         setShowPdfContent(true);
         setLoadingPdf(true);
-
+ 
         setTimeout(async () => {
-            const element = document.getElementById("PT-table-container");
-            if (!element) return;
-
-            const canvas = await html2canvas(element, {
-                scale: 3, // higher scale = better quality
-                useCORS: true,
-                logging: true, // for debugging
-            });
-
-            const imgData = canvas.toDataURL("image/png");
             const pdf = new jsPDF("p", "mm", "a4");
+            const margin = 10;
+            const imgWidth = 210 - 2 * margin;
+            let yOffset = margin;
 
-            const imgWidth = 190;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            const salarySlipElements = document.querySelectorAll("#PT-table-container");
 
-            pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+            for (let i = 0; i < salarySlipElements.length; i++) {
+                const element = salarySlipElements[i];
+
+                // Force display in case it's hidden
+                element.style.display = "block";
+
+                const canvas = await html2canvas(element, {
+                    scale: 1.5,
+                    useCORS: true,
+                    backgroundColor: "#fff",
+                    // width: 794,
+                    windowWidth: 794,
+                });
+
+                const imgData = canvas.toDataURL("image/jpeg", 0.8);
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                if (i > 0) {
+                    pdf.addPage();
+                    yOffset = margin;
+                }
+
+                pdf.addImage(imgData, "JPEG", margin, yOffset, imgWidth, imgHeight);
+            }
+
             pdf.save("employee_pt_report.pdf");
 
             setShowPdfContent(false);
             setLoadingPdf(false);
-        }, 500); // allow time to render
+        }, 700);
     };
 
     const getRowId = (row) => row.rowId ?? row.id;
@@ -175,7 +209,7 @@ const PTReport = () => {
                     showButtons={true}
                     buttons={actionButtons}
                 />
-            </div>          
+            </div>
             {
                 showPdfContent && (
                     <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
