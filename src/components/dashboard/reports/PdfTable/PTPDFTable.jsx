@@ -56,8 +56,6 @@ const PTPDFTable = ({ data, companyInfo, filter }) => {
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Employee Name</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Gross Salary(Monthly)</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total Gross Salary</th>
-                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total Days</th>
-                            <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Working Days</th>
                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">PT Amount</th>
                         </tr>
                     </thead>
@@ -69,17 +67,15 @@ const PTPDFTable = ({ data, companyInfo, filter }) => {
                                 <td className="border border-black text-center text-sm h-10">{item?.userName}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.gross_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm h-10">₹{item?.total_gross_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-                                <td className="border border-black text-center text-sm h-10">{item?.totalDays}</td>
-                                <td className="border border-black text-center text-sm h-10">{item?.daysWorked}</td>
-                                <td className="border border-black text-center text-sm h-10">₹{item?.total_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                <td className="border border-black text-center text-sm h-10">₹{item?.pt_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                             </tr>
                         ))}
                         <tr className="border border-black">
-                            <td colSpan={6} className="border border-black text-left text-sm h-10">
+                            <td colSpan={4} className="border border-black text-right text-sm h-10">
                                 <strong className='font-bold mr-5'>Total</strong>
                             </td>
                             <td className="border border-black text-center text-sm h-10">
-                                <strong className='font-bold'>₹{rows?.reduce((acc, item) => acc + (item?.total_amount || 0), 0)?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
+                                <strong className='font-bold'>₹{rows?.reduce((acc, item) => acc + (item?.pt_amount || 0), 0)?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
                             </td>
                         </tr>
                     </tbody>

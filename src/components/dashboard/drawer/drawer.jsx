@@ -102,6 +102,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
                 child: [
                   { name: "PF Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
                   { name: "PT Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
+                  { name: "Generate Salary", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
                   { name: "Salary Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
                 ]
               });

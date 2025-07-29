@@ -150,7 +150,7 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                         localStorage.setItem("theme", JSON.stringify(theme.data.result))
                         handleSetTheme(theme.data.result)
                     }
-                    if (response?.data?.result?.data?.roleName !== 'Admin' && response?.data?.result?.data?.roleName !== 'Owner') {
+                    if (response?.data?.result?.data?.roleName !== 'Admin' && response?.data?.result?.data?.roleName !== 'Owner' && response?.data?.result?.data?.checkGeofence === 1) {
                         if (response.data.result?.data?.companyLocation) {
                             const locations = await getLocations(JSON.parse(response.data.result?.data?.companyLocation));
                             if (locations.data.status === 200) {
@@ -348,7 +348,7 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                                 <Button type={`submit`} text={`Sign in`} />
                             </div>
                             <div>
-                                <Button useFor='error' type={`button`} text={`Login With Face`} onClick={handleOpenFaceRegistration}/>
+                                <Button useFor='error' type={`button`} text={`Login With Face`} onClick={handleOpenFaceRegistration} />
                             </div>
                         </div>
 

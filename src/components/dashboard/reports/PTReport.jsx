@@ -34,12 +34,12 @@ const PTReport = () => {
             rowId: index + 1
         })) || [];
 
-        const totalPT = data.reduce((sum, emp) => sum + (Number(emp.total_amount) || 0), 0);
+        const totalPT = data.reduce((sum, emp) => sum + (Number(emp.pt_amount) || 0), 0);
 
         data.push({
             rowId: 'total',
             userName: 'Total',
-            total_amount: totalPT,
+            pt_amount: totalPT,
             isTotalRow: true
         });
 
@@ -97,28 +97,10 @@ const PTReport = () => {
             align: "right",
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },
+        },       
         {
-            field: 'totalDays',
-            headerName: 'Total Days',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 300,
-            align: "right",
-            headerAlign: "right",
-        },
-        {
-            field: 'daysWorked',
-            headerName: 'Working Days',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 300,
-            align: "right",
-            headerAlign: "right",
-        },
-        {
-            field: 'total_amount',
-            headerName: 'Total pt Amount',
+            field: 'pt_amount',
+            headerName: 'Total PT Amount',
             headerClassName: 'uppercase',
             flex: 1,
             maxWidth: 300,
@@ -180,7 +162,8 @@ const PTReport = () => {
 
     const actionButtons = () => {
         return (
-            <div className='flex justify-start items-center gap-3 w-38'>
+            <div className='flex justify-start items-center gap-3'>
+                {/* <Button type={`button`} text={'Generate report'} isLoading={loadingPdf} onClick={() => handleGetAllEmployees()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} /> */}
                 <Button type={`button`} useFor={'error'} text={'Download PDF'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
             </div>
         )

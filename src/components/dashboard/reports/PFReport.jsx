@@ -63,7 +63,7 @@ const PFReport = () => {
 
     const columns = [
         {
-            field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 100,
+            field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 50,
             renderCell: (params) =>
                 params.row.isTotalRow ? null : <span>{params.value}</span>
         },
@@ -192,7 +192,8 @@ const PFReport = () => {
 
     const actionButtons = () => {
         return (
-            <div className='flex justify-start items-center gap-3 w-38'>
+            <div className='flex justify-start items-center gap-3'>
+                {/* <Button type={`button`} text={'Generate report'} isLoading={loadingPdf} onClick={() => handleGetAllEmployees()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} /> */}
                 <Button type={`button`} useFor={'error'} text={'Download PDF'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
             </div>
         )

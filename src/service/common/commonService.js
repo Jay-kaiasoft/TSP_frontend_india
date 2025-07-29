@@ -155,3 +155,19 @@ export const getAllCountryList = async () => {
         console.log(error)
     }
 }
+
+export const getListOfYears = () => {
+    try {
+        const currentYear = new Date().getFullYear();
+        const startYear = 2000;
+
+        const years = Array.from(
+            { length: currentYear - startYear + 1 },
+            (_, index) => startYear + index
+        );
+        return years.map(year => ({ id: year, title: year.toString() }))?.reverse();
+    } catch (error) {
+        console.error("Error fetching years:", error);
+        return [];
+    }
+}

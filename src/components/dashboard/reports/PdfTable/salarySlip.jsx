@@ -56,47 +56,7 @@ const numberToWords = (num) => {
     return output + ' Only';
 };
 
-const getPayslipPeriodText = (filterValue, currentDate = dayjs()) => {
-    const endMonth = currentDate.subtract(1, 'month'); // ✅ Exclude current month
-    const startMonth = endMonth.subtract(filterValue - 1, 'month');
-
-    const startFormat = startMonth.format("MMMM");
-    const endFormat = endMonth.format("MMMM");
-    const startYear = startMonth.format("YYYY");
-    const endYear = endMonth.format("YYYY");
-
-    if (filterValue === 1 || startFormat === endFormat) {
-        return `Salary Slip for the month of ${endFormat} ${endYear}`;
-    } else if (startYear === endYear) {
-        return `Salary Slip for the month of ${startFormat} to ${endFormat} ${endYear}`;
-    } else {
-        return `Salary Slip for the month of ${startFormat} ${startYear} to ${endFormat} ${endYear}`;
-    }
-};
-
-const getPayPeriodText = (monthsBack, currentDate = dayjs()) => {
-    if (!monthsBack || monthsBack <= 0) return "";
-
-    const end = currentDate.subtract(1, 'month'); // ✅ Exclude current month
-    const start = end.subtract(monthsBack - 1, 'month');
-
-    const endMonth = end.format("MMMM");
-    const endYear = end.format("YYYY");
-    const startMonth = start.format("MMMM");
-    const startYear = start.format("YYYY");
-
-    if (monthsBack === 1) {
-        return `${endMonth} ${endYear}`;
-    }
-
-    if (startYear === endYear) {
-        return `${startMonth} to ${endMonth} ${endYear}`;
-    } else {
-        return `${startMonth} ${startYear} to ${endMonth} ${endYear}`;
-    }
-};
-
-const SalarySlip = ({ data, companyInfo, filter }) => {
+const SalarySlip = ({ data, companyInfo, filter, selectedYear }) => {
     return (
         <div className="font-inter antialiased bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen grid grid-cols-1 place-items-center gap-8">
             {
@@ -118,7 +78,7 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                         </div>
 
                         <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center"> {getPayslipPeriodText(filter?.value)}</h2>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{filter?.title}-{selectedYear}</h2>
 
                             {/* Employee Pay Summary */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
@@ -126,7 +86,7 @@ const SalarySlip = ({ data, companyInfo, filter }) => {
                                     <h3 className="text-lg font-semibold text-gray-800 mb-2">EMPLOYEE PAY SUMMARY</h3>
                                     <p className="mb-1"><strong className="w-32 inline-block">Employee Name:</strong> {employee.employeeName}</p>
                                     <p className="mb-1"><strong className="w-32 inline-block">Department:</strong> {employee.departmentName}</p>
-                                    <p className="mb-1"><strong className="w-32 inline-block">Pay Period:</strong> {getPayPeriodText(filter?.value)}</p>
+                                    <p className="mb-1"><strong className="w-32 inline-block">Pay Period:</strong> {filter?.title}-{selectedYear}</p>
                                 </div>
                                 <div className="text-right md:text-left md:pl-8">
                                     <p className="text-lg font-semibold text-gray-800 mb-2">Employee Net Pay</p>

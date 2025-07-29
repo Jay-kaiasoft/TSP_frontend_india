@@ -3,21 +3,16 @@ import { getAllEmployeeListByCompanyId } from "../../../../service/companyEmploy
 import { Controller, useForm } from "react-hook-form";
 import Select from "../../../common/select/select";
 import { getAllDepartment } from "../../../../service/department/departmentService";
+import { getEmployeeSalaryStatements } from "../../../../service/employeeSalaryStatement/employeeSalaryStatementService";
 import SelectMultiple from "../../../common/select/selectMultiple";
 import DataTable from "../../../common/table/table"; // Your custom DataTable
 import Button from "../../../common/buttons/button";
 import CustomIcons from "../../../common/icons/CustomIcons";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
-import SalaryStatementPDFTable from "../PdfTable/salaryStatementPDFTable";
-import { getCompanyDetails } from "../../../../service/companyDetails/companyDetailsService";
-import SalarySlip from "../PdfTable/salarySlip";
 import { getListOfYears } from "../../../../service/common/commonService";
-import { handleSetTitle } from "../../../../redux/commonReducers/commonReducers";
+import AlertDialog from "../../../common/alertDialog/alertDialog";
+import { addSalaryStatement } from "../../../../service/salaryStatementHistory/salaryStatementHistoryService";
+import { handleSetTitle, setAlert } from "../../../../redux/commonReducers/commonReducers";
 import { connect } from "react-redux";
-import { getAllHistory } from "../../../../service/salaryStatementHistory/salaryStatementHistoryService";
-import SalaryStatementModel from "../../../models/salaryStatement/SalaryStatementModel";
-import Components from "../../../muiComponents/components";
 import PermissionWrapper from "../../../common/permissionWrapper/PermissionWrapper";
 
 const filterOptions = [
@@ -35,25 +30,17 @@ const filterOptions = [
     { id: 12, title: 'December', value: 12 }
 ];
 
-const SalaryReport = ({ handleSetTitle }) => {
+const GenerateSalary = ({ setAlert, handleSetTitle }) => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const [years, setYears] = useState([]);
 
     const [users, setUsers] = useState([]);
     const [department, setDepartment] = useState([]);
-    const [row, setRow] = useState([]); // This will hold the raw data from the API
-    const [loadingPdf, setLoadingPdf] = useState(false);
-    const [loadingSalarySlipPdf, setLoadingSalarySlipPdf] = useState(false);
-
-    const [showPdfContent, setShowPdfContent] = useState(false);
-    const [showSalarySlipPdfContent, setSalarySlipPdfContent] = useState(false);
-
-    const [companyInfo, setCompanyInfo] = useState();
-    const [filter, setFilter] = useState(null);
+    const [row, setRow] = useState([]);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-
-    const [open, setOpen] = useState(false);
-    const [salaryStatementId, setSalaryStatementId] = useState(null);
+    const [filter, setFilter] = useState(null);
+    const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [loading, setLoading] = useState(false);
 
     const {
         control,
@@ -65,29 +52,62 @@ const SalaryReport = ({ handleSetTitle }) => {
         }
     });
 
-    const handleOpenSalaryStatementModel = (id) => {
-        setSalaryStatementId(id);
-        setOpen(true);
-    };
+    const handleOpenSalaryDialog = () => {
+        setDialog({
+            open: true,
+            title: 'Generate & Save Salary',
+            message: `Are you sure! Do you want to generate and save the salary statements for ${filter?.title}-${selectedYear}?`,
+            actionButtonText: 'Save Salary',
+        });
+    }
 
-    const handleCloseSalaryStatementModel = () => {
-        setSalaryStatementId(null);
-        setOpen(false);
-    };
+    const handleCloseSalaryDialog = () => {
+        setDialog({ open: false, title: '', message: '', actionButtonText: '' });
+    }
+
+    const handleSaveSalary = async () => {
+        setLoading(true);
+        const newData = row?.map(({ id, ...rest }) => {
+            return {
+                ...rest,
+                month: `${filter?.title}-${selectedYear}`,
+            };
+        });
+
+        const res = await addSalaryStatement(newData);
+        if (res?.data?.status === 201) {
+            setLoading(false);
+            handleCloseSalaryDialog();
+            setAlert({
+                open: true,
+                type: 'success',
+                message: 'Salary statements saved successfully!'
+            })
+        } else {
+            setAlert({
+                open: true,
+                type: 'error',
+                message: res?.data?.message || 'Failed to save salary statements!'
+            })
+        }
+        setLoading(false);
+    }
 
     const handleGetStatements = async () => {
         let data = {
-            month: `${filter?.title}-${selectedYear}`,
+            month: filter?.value,
+            year: selectedYear,
             employeeIds: watch("selectedUserId") || [],
             departmentIds: watch("selectedDepartmentId") || [],
         };
         try {
-            if (filter && selectedYear) {
-                const res = await getAllHistory(data);
+            if (data?.month && data?.year) {
+                const res = await getEmployeeSalaryStatements(data);
                 if (res?.data?.status === 200) {
                     const newData = res.data.result?.map((item, index) => ({
                         ...item,
-                        id: item.id,
+                        // Ensure 'id' for DataGrid, and 'rowId' for your internal logic/PDF
+                        id: item.employeeSalaryStatementId || `employee-${item.employeeId}-${index}`, // Ensure unique 'id' for DataGrid
                         rowId: index + 1
                     }));
                     setRow(newData || []);
@@ -126,36 +146,30 @@ const SalaryReport = ({ handleSetTitle }) => {
         }
     };
 
-    const handleGetCompanyInfo = async () => {
-        if (userInfo?.companyId) {
-            const response = await getCompanyDetails(userInfo?.companyId);
-            setCompanyInfo(response?.data?.result);
-        }
-    };
-
     const handleGetAllYears = async () => {
         const years = await getListOfYears();
         setYears(years);
     }
 
     useEffect(() => {
-        handleSetTitle("Salary Report");
+        handleSetTitle("Generate Salary");
         const today = new Date();
         const lastMonth = today.getMonth();
         const defaultFilter = filterOptions.find(option => option.value === (lastMonth === 0 ? 12 : lastMonth));
         setFilter(defaultFilter);
-        handleGetAllYears();
-        handleGetCompanyInfo();
+        handleGetAllYears()
         handleGetAllUsers();
         handleGetAllDepartment();
     }, []);
 
     useEffect(() => {
         handleGetStatements();
-    }, [watch("selectedUserId"), watch("selectedDepartmentId"), filter, selectedYear]);
+    }, [watch("selectedUserId"), watch("selectedDepartmentId"), selectedYear, filter]);
 
+    // This memo will now always group if there's data in 'row'.
+    // If specific departments are selected, it filters to those, otherwise groups all.
     const groupedDataForDisplay = useMemo(() => {
-        if (row.length === 0) return null;
+        if (row.length === 0) return null; // No data, no groups
 
         const allDepartments = {};
         row.forEach(item => {
@@ -166,6 +180,7 @@ const SalaryReport = ({ handleSetTitle }) => {
             allDepartments[deptName].push(item);
         });
 
+        // If departments are selected, filter the grouped data
         if (watch("selectedDepartmentId") && watch("selectedDepartmentId").length > 0) {
             const filteredGroups = {};
             watch("selectedDepartmentId").forEach(id => {
@@ -177,6 +192,7 @@ const SalaryReport = ({ handleSetTitle }) => {
             return filteredGroups;
         }
 
+        // Otherwise, return all grouped departments
         return allDepartments;
     }, [row, watch("selectedDepartmentId"), department]);
 
@@ -200,8 +216,6 @@ const SalaryReport = ({ handleSetTitle }) => {
         return null;
     }, [groupedDataForDisplay]);
 
-    // Calculate overall totals (this is still used for the PDF, but not for display in this component)
-    const overallTotals = useMemo(() => calculateTotals(row), [row]);
 
     // Function to create a special total row object for DataGrid
     const createDataGridTotalRow = (totals, idPrefix) => {
@@ -224,153 +238,64 @@ const SalaryReport = ({ handleSetTitle }) => {
     };
 
     const columns = [
-        // { field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 100 },
-        { field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 180 },
-        { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', flex: 1, maxWidth: 180 },
+        // { field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 100, sortable: false, disableColumnMenu: true },
+        { field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 180, sortable: false, disableColumnMenu: true },
+        { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', flex: 1, maxWidth: 180, sortable: false, disableColumnMenu: true },
         {
             field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'ptAmount', headerName: 'PT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'otherDeductions', headerName: 'Other Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalDeductions', headerName: 'Total Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
+            sortable: false, disableColumnMenu: true,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },
-        {
-            field: 'action',
-            headerName: 'action',
-            headerClassName: 'uppercase',
-            renderCell: (params) => {
-                if (!params.row.isTotalRow) {
-                    return (
-                        <div className='flex items-center gap-2 justify-center h-full'>
-                            <PermissionWrapper
-                                functionalityName="Company"
-                                moduleName="Salary Statement"
-                                actionId={2}
-                                component={
-                                    <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                        <Components.IconButton onClick={() => handleOpenSalaryStatementModel(params.row.id)}>
-                                            <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                                        </Components.IconButton>
-                                    </div>
-                                }
-                            />
-                        </div>
-                    );
-                }
-            },
-        },
+        }
     ];
 
     const getRowIdForDataGrid = (rowItem) => rowItem.id;
 
-    const generatePDF = async () => {
-        setShowPdfContent(true);
-        setLoadingPdf(true);
-
-        setTimeout(async () => {
-            const element = document.getElementById("salary-table-container");
-            if (!element) return;
-
-            const canvas = await html2canvas(element, {
-                scale: 1.5, // Reduce scale
-                useCORS: true,
-                logging: false,
-            });
-
-            const imgData = canvas.toDataURL("image/jpeg", 0.6); // Use JPEG with compression
-            const pdf = new jsPDF({
-                orientation: "p",
-                unit: "mm",
-                format: "a4",
-                compress: true, // Enable compression
-            });
-
-            const imgWidth = 190;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-            pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight);
-            pdf.save("employee_salary_statement.pdf");
-
-            setShowPdfContent(false);
-            setLoadingPdf(false);
-        }, 700);
-    };
-
-    const generateSalarySlipPDF = async () => {
-        setSalarySlipPdfContent(true);
-        setLoadingSalarySlipPdf(true);
-
-        setTimeout(async () => {
-            const pdf = new jsPDF("p", "mm", "a4");
-            const margin = 10;
-            const imgWidth = 210 - 2 * margin;
-            let yOffset = margin;
-
-            const salarySlipElements = document.querySelectorAll(".salary-slip");
-
-            for (let i = 0; i < salarySlipElements.length; i++) {
-                const element = salarySlipElements[i];
-
-                // Force display in case it's hidden
-                element.style.display = "block";
-
-                const canvas = await html2canvas(element, {
-                    scale: 1.5,
-                    useCORS: true,
-                    backgroundColor: "#fff",
-                    // width: 794,
-                    windowWidth: 794,
-                });
-
-                const imgData = canvas.toDataURL("image/jpeg", 0.8);
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                if (i > 0) {
-                    pdf.addPage();
-                    yOffset = margin;
-                }
-
-                pdf.addImage(imgData, "JPEG", margin, yOffset, imgWidth, imgHeight);
-            }
-
-            pdf.save("employee_salary_slip.pdf");
-
-            setSalarySlipPdfContent(false);
-            setLoadingSalarySlipPdf(false);
-        }, 700);
-    };
-
     const actionButtons = () => {
         return (
-            <div className='flex justify-start items-center gap-3 w-[28rem]'>
-                <Button type={`button`} text={'Download Salary Slip'} isLoading={loadingSalarySlipPdf} onClick={() => generateSalarySlipPDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
-
-                <Button type={`button`} useFor={'error'} text={'Download Statement'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
+            <div className='flex justify-start items-center gap-3'>
+                <PermissionWrapper
+                    functionalityName="Company"
+                    moduleName="Salary Statement"
+                    actionId={1}
+                    component={
+                        <Button type={`button`} text={'Generate & Save Salary'} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} />
+                    }
+                />
             </div>
         );
     };
@@ -479,43 +404,15 @@ const SalaryReport = ({ handleSetTitle }) => {
                     )}
                 </div>
             </div>
-            <SalaryStatementModel open={open} handleClose={handleCloseSalaryStatementModel} id={salaryStatementId} handleGetStatements={handleGetStatements} />
-            {
-                showPdfContent && (
-                    <div className='absolute top-0 left-0 z-[-1] w-[794px] opacity-0'>
-                        <SalaryStatementPDFTable
-                            // Pass the raw data and let the PDF table handle its own grouping/totals
-                            data={groupedDataForDisplay || row}
-                            companyInfo={companyInfo}
-                            filter={filter}
-                            selectedYear={selectedYear}
-                            department={department}
-                            selectedDepartmentId={watch("selectedDepartmentId")}
-                            isGrouped={!!groupedDataForDisplay} // Indicate if grouping is active for PDF
-                            overallTotals={overallTotals}
-                            groupedDepartmentTotals={groupedDepartmentTotals}
-                        />
-                    </div>
-                )
-            }
-            {
-                showSalarySlipPdfContent && (
-                    <div className='absolute top-0 left-0 z-[-1] w-[794px] opacity-0'>
-                        <SalarySlip
-                            data={row}
-                            selectedYear={selectedYear}
-                            companyInfo={companyInfo}
-                            filter={filter}
-                        />
-                    </div>
-                )
-            }
+            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleSaveSalary} handleClose={handleCloseSalaryDialog} loading={loading} />
+
         </>
     );
 };
 
 const mapDispatchToProps = {
+    setAlert,
     handleSetTitle
 };
 
-export default connect(null, mapDispatchToProps)(SalaryReport);
+export default connect(null, mapDispatchToProps)(GenerateSalary)

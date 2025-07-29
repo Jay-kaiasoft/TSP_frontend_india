@@ -119,10 +119,9 @@ function AddFunctionalityModel({ setAlert, open, handleClose, functionalityId, h
                             render={({ field }) => (
                                 <Input
                                     {...field}
-                                    label="Functionality Name *"
+                                    label="Functionality Name"
                                     type={`text`}
                                     error={errors.functionalityName}
-                                    helperText={errors.functionalityName && errors.functionalityName.message}
                                     onChange={(e) => {
                                         field.onChange(e);
                                     }}

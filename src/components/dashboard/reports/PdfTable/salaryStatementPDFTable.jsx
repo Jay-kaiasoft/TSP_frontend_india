@@ -1,27 +1,10 @@
 import dayjs from "dayjs";
 
-const getPayslipPeriodText = (filterValue, currentDate = dayjs()) => {
-    const endMonth = currentDate.subtract(1, 'month'); // ✅ Exclude current month
-    const startMonth = endMonth.subtract(filterValue - 1, 'month');
-
-    const startFormat = startMonth.format("MMMM");
-    const endFormat = endMonth.format("MMMM");
-    const startYear = startMonth.format("YYYY");
-    const endYear = endMonth.format("YYYY");
-
-    if (filterValue === 1 || startFormat === endFormat) {
-        return `${endFormat} ${endYear}`;
-    } else if (startYear === endYear) {
-        return `${startFormat} to ${endFormat} ${endYear}`;
-    } else {
-        return `Payslip for the month of ${startFormat} ${startYear} to ${endFormat} ${endYear}`;
-    }
-};
-
 const SalaryStatementPDFTable = ({
     data,
     companyInfo,
     filter,
+    selectedYear,
     department,
     selectedDepartmentId,
     isGrouped = false,
@@ -76,7 +59,7 @@ const SalaryStatementPDFTable = ({
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.otherDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-black text-center text-sm py-3 align-middle">₹{emp.totalDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-                                <td className="border border-black text-center text-sm py-3 font-semibold text-green-700 align-middle">
+                                <td className="border border-black text-center text-sm py-3 font-semibold align-middle">
                                     ₹{emp.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}
                                 </td>
                             </tr>
@@ -88,7 +71,7 @@ const SalaryStatementPDFTable = ({
                             <td className="border border-black text-center text-sm py-2 px-2">₹{totalEarnings.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                             <td className="border border-black text-center text-sm py-2 px-2">₹{otherDeductions.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                             <td className="border border-black text-center text-sm py-2 px-2">₹{totalDeductions.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-                            <td className="border border-black text-center text-sm py-2 px-2 text-green-700">₹{netSalary.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                            <td className="border border-black text-center text-sm py-2 px-2">₹{netSalary.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -116,7 +99,7 @@ const SalaryStatementPDFTable = ({
                     </div>
                     <div className="text-right">
                         <h1 className="text-2xl font-bold uppercase">Salary Statement</h1>
-                        <p className="text-sm font-medium text-gray-700 my-1">Period: {getPayslipPeriodText(filter?.value)}</p>
+                        <p className="text-sm font-medium text-gray-700 my-1">Period: {filter?.title}-{selectedYear}</p>
                         {newDepartment.length > 0 && (
                             <p className="text-sm font-medium text-gray-700">
                                 Department: {newDepartment.join(', ')}
@@ -137,83 +120,3 @@ const SalaryStatementPDFTable = ({
 };
 
 export default SalaryStatementPDFTable;
-
-
-// const SalaryStatementPDFTable = ({ data, companyInfo, filter, department, selectedDepartmentId }) => {
-//     const newDepartment = department?.map((dept) => {
-//         if (selectedDepartmentId?.includes(dept?.id)) {
-//             return dept?.title;
-//         }
-//         return null;
-//     }).filter(Boolean);
-
-//     return (
-//         <div className="overflow-x-auto h-full">
-//             <div id="salary-table-container" style={{ width: '1000px', border: '2px solid black', padding: '16px' }}>
-//                 <div className="flex items-center justify-between border-b border-gray-500 pb-4 mb-4">
-//                     <div className="flex items-center space-x-4">
-//                         <img
-//                             src={companyInfo?.companyLogo}
-//                             alt="Company Logo"
-//                             className="w-24 h-24 object-contain border p-1 bg-white"
-//                         />
-//                         <div>
-//                             <h2 className="text-xl font-bold">{companyInfo?.companyName}</h2>
-//                             {companyInfo?.email && <p className="text-sm my-1">{companyInfo?.email}</p>}
-//                             {companyInfo?.phone && <p className="text-sm">{companyInfo?.phone}</p>}
-//                         </div>
-//                     </div>
-//                     <div className="text-right">
-//                         <h1 className="text-2xl font-bold uppercase">Salary Statement</h1>
-//                         <p className="text-sm font-medium text-gray-700 my-1">Period: {filter?.title}</p>
-//                         {Array.isArray(newDepartment) && newDepartment.length > 0 && (
-//                             <p className="text-sm font-medium text-gray-700">
-//                                 Department: {newDepartment.join(', ')}
-//                             </p>
-//                         )}
-//                     </div>
-
-//                 </div>
-
-//                 <table className="min-w-full border-collapse border-2 border-black h-full">
-//                     <thead>
-//                         <tr>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">#</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Name</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Department</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Basic (₹)</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">OT (₹)</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">PF (₹)</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">PT (₹)</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total Earnings (₹)</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Total Deductions (₹)</th>
-//                             <th className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5 capitalize">Net Salary (₹)</th>
-//                         </tr>
-//                     </thead>
-//                     <tbody>
-//                         {data.map((emp, index) => {
-//                             return (
-//                                 <tr key={index} className="border border-black">
-//                                     <td className="border border-black text-center text-sm py-3">{index + 1}</td>
-//                                     <td className="border border-black text-center text-sm py-3">{emp.employeeName}</td>
-//                                     <td className="border border-black text-center text-sm py-3">{emp.departmentName}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.pfAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.ptAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-//                                     <td className="border border-black text-center text-sm py-3">₹{emp.totalDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-//                                     <td className="border border-black text-center text-sm py-3">
-//                                         ₹{emp.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}
-//                                     </td>
-//                                 </tr>
-//                             );
-//                         })}
-//                     </tbody>
-//                 </table>
-//             </div>
-//         </div>
-//     )
-// }
-
-// export default SalaryStatementPDFTable
