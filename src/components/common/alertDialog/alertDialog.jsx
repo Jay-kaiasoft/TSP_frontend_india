@@ -50,8 +50,8 @@ export default function AlertDialog({ open, handleClose, title, message, handleA
                     </Components.Typography>
                 </Components.DialogContent>
                 <Components.DialogActions>
-                    <div className='flex justify-end'>
-                        <p className='text-sm text-red-400'>
+                    <div className='flex justify-between items-center gap-4 w-full'>
+                        <p className='text-sm text-red-400 w-3/4'>
                             {note ? `Note: ${note}` : ''}
                         </p>
                         <div>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { getAllEmployeeListByCompanyId } from "../../../../service/companyEmployee/companyEmployeeService";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, set, useForm } from "react-hook-form";
 import Select from "../../../common/select/select";
 import { getAllDepartment } from "../../../../service/department/departmentService";
 import SelectMultiple from "../../../common/select/selectMultiple";
@@ -49,7 +49,6 @@ const SalaryReport = ({ handleSetTitle }) => {
     const [showSalarySlipPdfContent, setSalarySlipPdfContent] = useState(false);
 
     const [companyInfo, setCompanyInfo] = useState();
-    const [filter, setFilter] = useState(null);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     const [open, setOpen] = useState(false);
@@ -58,10 +57,13 @@ const SalaryReport = ({ handleSetTitle }) => {
     const {
         control,
         watch,
+        setValue,
     } = useForm({
         defaultValues: {
             selectedUserId: [],
             selectedDepartmentId: [],
+            selectedMonth: [],
+            month: []
         }
     });
 
@@ -76,13 +78,17 @@ const SalaryReport = ({ handleSetTitle }) => {
     };
 
     const handleGetStatements = async () => {
+        const selectedMonths = filterOptions.filter(option => watch("selectedMonth")?.includes(option.id)).map(option => {
+            return "" + option.title + "-" + selectedYear;
+        });
+
         let data = {
-            month: `${filter?.title}-${selectedYear}`,
+            month: selectedMonths || [],
             employeeIds: watch("selectedUserId") || [],
             departmentIds: watch("selectedDepartmentId") || [],
         };
         try {
-            if (filter && selectedYear) {
+            if (selectedMonths && selectedYear) {
                 const res = await getAllHistory(data);
                 if (res?.data?.status === 200) {
                     const newData = res.data.result?.map((item, index) => ({
@@ -143,7 +149,7 @@ const SalaryReport = ({ handleSetTitle }) => {
         const today = new Date();
         const lastMonth = today.getMonth();
         const defaultFilter = filterOptions.find(option => option.value === (lastMonth === 0 ? 12 : lastMonth));
-        setFilter(defaultFilter);
+        setValue("selectedMonth", [defaultFilter?.id]);
         handleGetAllYears();
         handleGetCompanyInfo();
         handleGetAllUsers();
@@ -152,7 +158,7 @@ const SalaryReport = ({ handleSetTitle }) => {
 
     useEffect(() => {
         handleGetStatements();
-    }, [watch("selectedUserId"), watch("selectedDepartmentId"), filter, selectedYear]);
+    }, [watch("selectedUserId"), watch("selectedDepartmentId"), watch("selectedMonth"), selectedYear]);
 
     const groupedDataForDisplay = useMemo(() => {
         if (row.length === 0) return null;
@@ -392,14 +398,21 @@ const SalaryReport = ({ handleSetTitle }) => {
                     </div>
 
                     <div>
-                        <Select
-                            options={filterOptions}
-                            label={"Filter by Duration"}
-                            placeholder="Select Duration"
-                            value={filter?.id}
-                            onChange={(_, newValue) => {
-                                setFilter(newValue?.value ? newValue : filterOptions[0]);
-                            }}
+                        <Controller
+                            name="selectedMonth"
+                            control={control}
+                            render={({ field }) => (
+                                <SelectMultiple
+                                    options={filterOptions}
+                                    label={"Select Months"}
+                                    placeholder="Select months"
+                                    value={field.value || []}
+                                    onChange={(newValue) => {
+                                        // setValue("selectedMonth", newValue);
+                                        field.onChange(newValue);
+                                    }}
+                                />
+                            )}
                         />
                     </div>
 
@@ -487,7 +500,7 @@ const SalaryReport = ({ handleSetTitle }) => {
                             // Pass the raw data and let the PDF table handle its own grouping/totals
                             data={groupedDataForDisplay || row}
                             companyInfo={companyInfo}
-                            filter={filter}
+                            // filter={filter}
                             selectedYear={selectedYear}
                             department={department}
                             selectedDepartmentId={watch("selectedDepartmentId")}
@@ -505,7 +518,7 @@ const SalaryReport = ({ handleSetTitle }) => {
                             data={row}
                             selectedYear={selectedYear}
                             companyInfo={companyInfo}
-                            filter={filter}
+                        // filter={filter}
                         />
                     </div>
                 )

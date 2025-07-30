@@ -107,15 +107,23 @@ const SalarySlip = ({ data, companyInfo, filter, selectedYear }) => {
                                                 <th className="p-3 border-b border-gray-300 text-right">Amount</th>
                                             </tr>
                                         </thead>
+
                                         <tbody>
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Basic Salary</td>
                                                 <td className="p-3 border-b border-gray-100 text-right">₹{employee?.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
+
+                                            <tr className="hover:bg-gray-50">
+                                                <td className="p-3 border-b border-gray-100">Earn Salary</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.totalEarnSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                            </tr>
+
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Over Time</td>
                                                 <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
+
                                             <tr className="font-bold">
                                                 <td className="p-3 border-t border-b-2">Gross Earnings</td>
                                                 <td className="p-3 border-t border-b-2 text-right">₹{employee?.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>

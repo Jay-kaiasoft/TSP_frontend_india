@@ -67,29 +67,51 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
 
     const handleSaveSalary = async () => {
         setLoading(true);
-        const newData = row?.map(({ id, ...rest }) => {
-            return {
-                ...rest,
-                month: `${filter?.title}-${selectedYear}`,
-            };
-        });
+        let data = {
+            month: filter?.value,
+            year: selectedYear,
+            employeeIds: [],
+            departmentIds: [],
+        };
+        try {
+            if (data?.month && data?.year) {
+                const response = await getEmployeeSalaryStatements(data);
+                if (response?.data?.status === 200) {
+                    const newData = response?.data?.result?.map(({ id, ...rest }) => {
+                        return {
+                            ...rest,
+                            month: `${filter?.title}-${selectedYear}`,
+                        };
+                    });
 
-        const res = await addSalaryStatement(newData);
-        if (res?.data?.status === 201) {
-            setLoading(false);
-            handleCloseSalaryDialog();
-            setAlert({
-                open: true,
-                type: 'success',
-                message: 'Salary statements saved successfully!'
-            })
-        } else {
-            setAlert({
-                open: true,
-                type: 'error',
-                message: res?.data?.message || 'Failed to save salary statements!'
-            })
+                    const res = await addSalaryStatement(newData);
+                    if (res?.data?.status === 201) {
+                        setLoading(false);
+                        handleCloseSalaryDialog();
+                        setAlert({
+                            open: true,
+                            type: 'success',
+                            message: 'Salary statements saved successfully!'
+                        })
+                    } else {
+                        setAlert({
+                            open: true,
+                            type: 'error',
+                            message: res?.data?.message || 'Failed to save salary statements!'
+                        })
+                    }
+                } else {
+                    setAlert({
+                        open: true,
+                        type: 'error',
+                        message: response?.data?.message || 'Failed to fetch salary statements!'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching data:", error);
         }
+
         setLoading(false);
     }
 
@@ -404,7 +426,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                     )}
                 </div>
             </div>
-            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleSaveSalary} handleClose={handleCloseSalaryDialog} loading={loading} />
+            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleSaveSalary} handleClose={handleCloseSalaryDialog} loading={loading} note={`This action will save salary statements for all employees and departments for the month of ${filter?.title}-${selectedYear}.`} />
 
         </>
     );
