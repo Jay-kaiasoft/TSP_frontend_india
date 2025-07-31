@@ -604,6 +604,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             checkGeofence: data.checkGeofence ? 1 : 0,
         }
         if (activeStep === 2) {
+            if (watch("employeeTypeId") === 3 && !watch("isPf")) {
+                setAlert({ open: true, message: "PF is required", type: "error" })
+                return
+            }
+            if (watch("employeeTypeId") === 3 && !watch("isPt")) {
+                setAlert({ open: true, message: "PT is required", type: "error" })
+                return
+            }
             if (id) {
                 const res = await updateEmployee(id, newData)
                 if (res.data?.status === 200) {
@@ -1569,7 +1577,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             />
                                                         </div>
 
-                                                        <div>
+                                                        <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
                                                             <Controller
                                                                 name="pfType"
                                                                 control={control}
@@ -1684,6 +1692,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             />
 
                                                         </div>
+
                                                         <div className={`col-span-2 transition-all duration-500 ${watch("isPt") ? "opacity-100 text-opacity-100 bg-opacity-100" : "opacity-0 mt-0"}`}>
                                                             <Controller
                                                                 name="ptAmount"

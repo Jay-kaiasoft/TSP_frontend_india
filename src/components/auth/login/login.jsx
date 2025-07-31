@@ -124,7 +124,6 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
         const response = await login(data)
         if (response.data.status === 200) {
             localStorage.setItem("companyId", watch("companyId"))
-            Cookies.set('authToken', response.data.result?.token, { expires: 1 });
             localStorage.setItem('userInfo', JSON.stringify(response.data.result?.data))
             handleSetUserDetails(response.data.result?.data)
             if (remember) {
@@ -150,7 +149,8 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                         localStorage.setItem("theme", JSON.stringify(theme.data.result))
                         handleSetTheme(theme.data.result)
                     }
-                    if (response?.data?.result?.data?.roleName !== 'Admin' && response?.data?.result?.data?.roleName !== 'Owner' && response?.data?.result?.data?.checkGeofence === 1) {
+                    
+                    if (response?.data?.result?.data?.checkGeofence === 1 && response?.data?.result?.data?.roleName !== 'Admin' && response?.data?.result?.data?.roleName !== 'Owner') {
                         if (response.data.result?.data?.companyLocation) {
                             const locations = await getLocations(JSON.parse(response.data.result?.data?.companyLocation));
                             if (locations.data.status === 200) {
@@ -178,6 +178,8 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
 
                                 const isInsideGeofence = await checkGeofenceStatus(allowedExternalIds, response.data.result?.data?.employeeId);
                                 localStorage.setItem("timeInAllow", isInsideGeofence?.isInside ? 1 : 0)
+                                Cookies.set('authToken', response.data.result?.token, { expires: 1 });
+
                                 if (!isInsideGeofence?.isInside) {
                                     setLoading(false)
                                     setAlert({
@@ -190,14 +192,17 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                             }
                         }
                     } else {
+                        Cookies.set('authToken', response.data.result?.token, { expires: 1 });
                         localStorage.setItem("timeInAllow", 1)
                     }
                     const res = await getEmployeeRole(response.data.result?.data?.roleId)
                     localStorage.setItem('permissions', JSON.stringify(res.data?.result?.rolesActions?.functionalities))
                 }
                 if (!response.data.result?.data?.companyId) {
+                    Cookies.set('authToken', response.data.result?.token, { expires: 1 });
                     navigate('/dashboard')
                 } else {
+                    Cookies.set('authToken', response.data.result?.token, { expires: 1 });
                     navigate('/dashboard/main')
                 }
                 // setAlert({ open: true, message: response.data.message, type: "success" })

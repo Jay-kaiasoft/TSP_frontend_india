@@ -228,7 +228,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
 
     const checkGeofenceStatus = async () => {
         try {
-            if ((userInfo?.companyId && userInfo?.employeeId) && (userInfo?.roleName !== "Admin" && userInfo?.roleName !== "Owner")){
+            if (userInfo?.companyId && userInfo?.checkGeofence === 1 && userInfo?.roleName !== "Admin" && userInfo?.roleName !== "Owner") {
                 setLoading(true);
                 const locations = await getLocations(JSON.parse(userInfo?.companyLocation));
                 if (locations.data.status === 200) {

@@ -1,5 +1,3 @@
-import dayjs from "dayjs";
-
 const numberToWords = (num) => {
     const a = ['', 'one ', 'two ', 'three ', 'four ', 'five ', 'six ', 'seven ', 'eight ', 'nine ', 'ten ', 'eleven ', 'twelve ', 'thirteen ', 'fourteen ', 'fifteen ', 'sixteen ', 'seventeen ', 'eighteen ', 'nineteen '];
     const b = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
@@ -56,7 +54,7 @@ const numberToWords = (num) => {
     return output + ' Only';
 };
 
-const SalarySlip = ({ data, companyInfo, filter, selectedYear }) => {
+const SalarySlip = ({ data, companyInfo }) => {  
     return (
         <div className="font-inter antialiased bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen grid grid-cols-1 place-items-center gap-8">
             {
@@ -78,18 +76,17 @@ const SalarySlip = ({ data, companyInfo, filter, selectedYear }) => {
                         </div>
 
                         <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{filter?.title}-{selectedYear}</h2>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{employee?.month}</h2>
 
                             {/* Employee Pay Summary */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-700">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-2">EMPLOYEE PAY SUMMARY</h3>
-                                    <p className="mb-1"><strong className="w-32 inline-block">Employee Name:</strong> {employee.employeeName}</p>
-                                    <p className="mb-1"><strong className="w-32 inline-block">Department:</strong> {employee.departmentName}</p>
-                                    <p className="mb-1"><strong className="w-32 inline-block">Pay Period:</strong> {filter?.title}-{selectedYear}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-5 gap-x-8 gap-y-4 text-gray-700">
+                                <div className="col-span-3">
+                                    <p className="mb-1"><strong className="w-40 inline-block">Employee Name:</strong> {employee.employeeName}</p>
+                                    <p className="mb-1"><strong className="w-40 inline-block">Department:</strong> {employee.departmentName}</p>
+                                    <p className="mb-1"><strong className="w-40 inline-block">Pay Period:</strong> {employee?.month}</p>
                                 </div>
-                                <div className="text-right md:text-left md:pl-8">
-                                    <p className="text-lg font-semibold text-gray-800 mb-2">Employee Net Pay</p>
+                                <div className="text-right md:text-left md:pl-8 col-span-2">
+                                    <p className="text-lg font-semibold text-gray-800 mb-1">Employee Net Pay</p>
                                     <p className="text-3xl font-extrabold mb-2">₹{employee.netSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</p>
                                 </div>
                             </div>

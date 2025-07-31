@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
-import { fetchAllTimeZones, indianOrganizationType, oganizationType, uploadFiles } from '../../../service/common/commonService';
+import { fetchAllTimeZones, getStaticRoles, getStaticRolesWithPermissions, indianOrganizationType, oganizationType, uploadFiles } from '../../../service/common/commonService';
 import { deleteGeofence, getCurrentLocation } from '../../../service/common/radarService';
 import { createCompanyDetails, getCompanyDetails, updateCompanyDetails, uploadCompanyLogo, deleteCompanyLogo, getLastCompanyDetails } from '../../../service/companyDetails/companyDetailsService';
 import { handleSetTitle, setAlert } from '../../../redux/commonReducers/commonReducers';
@@ -35,24 +35,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
     const theme = useTheme();
 
-    const [roleData, setRoleData] = useState([
-        {
-            id: 1,
-            title: 'Owner',
-        },
-        {
-            id: 2,
-            title: 'Admin',
-        },
-        {
-            id: 3,
-            title: 'Manager',
-        },
-        {
-            id: 4,
-            title: 'Bookkeeper',
-        },
-    ])
+    const [roleData, setRoleData] = useState(getStaticRoles());        
 
     const [selectedRole, setSelectedRole] = useState(1)
 
@@ -193,6 +176,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
             }
         }
     }
+
     const handleCloseGeofencesDialog = () => {
         setDialogGeofence({
             open: false,
@@ -503,7 +487,6 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         return contact;
     }
 
-
     const submit = async (data) => {
 
         if (selectedTab === 1 && locationData?.length === 0) {
@@ -515,129 +498,12 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
             requiredContactKeys.every(key => connect[key]?.trim() !== "" && connect[key]?.trim() !== undefined)
         );
 
-        const filterRoles = roleData?.map((item, index) => {
-            return {
-                roleName: item.title,
-                rolesActions: {
-                    "functionalities": [
-                        {
-                            "functionalityId": 1,
-                            "functionalityName": "Company",
-                            "modules": [
-                                {
-                                    "moduleId": 3,
-                                    "moduleName": "Manage Company",
-                                    "moduleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ],
-                                    "roleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                },
-                                {
-                                    "moduleId": 5,
-                                    "moduleName": "Manage Employees",
-                                    "moduleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ],
-                                    "roleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                },
-                                {
-                                    "moduleId": 5,
-                                    "moduleName": "Manage Shifts",
-                                    "moduleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ],
-                                    "roleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "functionalityId": 2,
-                            "functionalityName": "Users",
-                            "modules": [
-                                {
-                                    "moduleId": 1,
-                                    "moduleName": "User",
-                                    "moduleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ],
-                                    "roleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                }
-                            ]
-                        },
-                        {
-                            "functionalityId": 3,
-                            "functionalityName": "Permission",
-                            "modules": [
-                                {
-                                    "moduleId": 2,
-                                    "moduleName": "Role",
-                                    "moduleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ],
-                                    "roleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                },
-                                {
-                                    "moduleId": 2,
-                                    "moduleName": "Department",
-                                    "moduleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ],
-                                    "roleAssignedActions": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        })
+        const filterRoles = getStaticRolesWithPermissions()
+
+        if (filteredContact.length === 0 && selectedTab === 2) {
+            setAlert({ open: true, message: "Please add at least one contact", type: 'warning' });
+            return;
+        }
 
         const filteredData = {
             ...data,
@@ -848,7 +714,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                                     helperText={errors?.ein ? errors.ein.message : ""}
                                                 />
                                             )}
-                                        />                                       
+                                        />
                                     </div>
 
                                     <div>

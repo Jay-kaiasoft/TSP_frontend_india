@@ -7,12 +7,14 @@ import { setAlert } from '../../../../redux/commonReducers/commonReducers';
 import Input from '../../../common/input/input';
 import Components from '../../../muiComponents/components';
 import Button from '../../../common/buttons/button';
-import { uploadFiles } from '../../../../service/common/commonService';
+import { getStaticRoles, getStaticRolesWithPermissions, uploadFiles } from '../../../../service/common/commonService';
 import { getAllCompanyRole } from '../../../../service/companyEmployeeRole/companyEmployeeRoleService';
 import Select from '../../../common/select/select';
 import CustomIcons from '../../../common/icons/CustomIcons';
 import { getAllLocationsByCompanyId } from '../../../../service/location/locationService';
 import SelectMultiple from '../../../common/select/selectMultiple';
+import { getAllCountry } from '../../../../service/country/countryService';
+import { getAllStateByCountry } from '../../../../service/state/stateService';
 
 const GenderOptions = [
     { id: 1, title: "Male" },
@@ -28,35 +30,8 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
     const [formDataFile, setFormDataFile] = useState(null)
     const [roles, setRoles] = useState([])
     const [locations, setLocations] = useState([])
-
-    // const [passwordError, setPasswordError] = useState([
-    //     {
-    //         condition: (value) => value.length >= 8,
-    //         message: 'Minimum 8 characters long',
-    //         showError: true,
-    //     },
-    //     {
-    //         condition: (value) => /[a-z]/.test(value),
-    //         message: 'At least one lowercase character',
-    //         showError: true,
-    //     },
-    //     {
-    //         condition: (value) => /[\d@$!%*?&\s]/.test(value),
-    //         message: 'At least one number, symbol, or whitespace character',
-    //         showError: true,
-    //     },
-    // ]);
-
-    // const [showPasswordRequirement, setShowPasswordRequirement] = useState(false)
-
-    // const validatePassword = (value) => {
-    //     const updatedErrors = passwordError.map((error) => ({
-    //         ...error,
-    //         showError: !error.condition(value),
-    //     }));
-    //     setPasswordError(updatedErrors);
-    //     return updatedErrors.every((error) => !error.showError) || 'Password does not meet all requirements.';
-    // };
+    const [countryData, setCountryData] = useState([])
+    const [stateData, setStateData] = useState([])
 
     const {
         handleSubmit,
@@ -75,6 +50,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
             phone: "",
             password: "",
             roleId: '',
+            roleName: "",
             companyId: "",
             hourlyRate: "",
             gender: "",
@@ -98,6 +74,34 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
         setIsPasswordVisible((prev) => !prev);
     };
 
+    const handleGetAllCountrys = async () => {
+        const res = await getAllCountry()
+        const data = res?.data?.result?.map((item) => {
+            return {
+                id: item.id,
+                title: item.cntName
+            }
+        })
+        setCountryData(data)
+    }
+
+    const handleGetAllStatesByCountryId = async (id) => {
+        const res = await getAllStateByCountry(id)
+        const data = res?.data?.result?.map((item) => {
+            return {
+                ...item,
+                id: item.id,
+                title: item.stateLong
+            }
+        })
+        setStateData(data)
+
+        if (watch("state")) {
+            const selectedState = data?.filter((row) => row?.title === watch("state"))?.[0] || null
+            setValue("state", selectedState?.title)
+        }
+    }
+
     const handleGetEmployee = async () => {
         if (employeeId) {
             const res = await getCompanyEmployee(employeeId);
@@ -111,16 +115,15 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
         }
     }
 
-    const submit = async (data) => {
+
+    const submit = async (data) => {        
         const newData = {
             ...data,
+            roles: getStaticRolesWithPermissions(),
             companyId: companyId,
             gender: parseInt(watch("gender")) === 1 ? "Male" : watch("gender") !== null ? "Female" : "",
             companyLocation: watch("companyLocation")?.length > 0 ? JSON.stringify(watch("companyLocation")) : null,
         }
-        // if (passwordError.some((row) => row.showError === true) || (newData.password === "" || newData.password === null)) {
-        //     return;
-        // }
         if (employeeId) {
             const res = await updateEmployeeFromTSP(employeeId, newData);
             if (res?.data?.status === 200) {
@@ -217,7 +220,11 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
                     id: item?.roleId
                 }
             })
-            setRoles(data)
+            if (data?.length > 0) {
+                setRoles(data)
+            } else {
+                setRoles(getStaticRoles())
+            }
         }
     }
 
@@ -237,6 +244,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
     }
 
     useEffect(() => {
+        handleGetAllCountrys()
         handleGetEmployeeRoles()
     }, [])
 
@@ -244,6 +252,12 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
         handleGetEmployee();
         handleGetCompanyLocations();
     }, [employeeId])
+
+    useEffect(() => {
+        if (countryData?.length > 0 && watch("country")) {
+            handleGetAllStatesByCountryId(countryData?.filter((item) => item.title === watch("country"))?.[0]?.id)
+        }
+    }, [countryData])
 
     return (
         <div className='relative h-full'>
@@ -500,8 +514,10 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
                                     onChange={(_, newValue) => {
                                         if (newValue?.id) {
                                             field.onChange(newValue.id);
+                                            setValue("roleName", newValue.title);
                                         } else {
                                             setValue("roleId", null);
+                                            setValue("roleName", "");
                                         }
                                     }}
                                 />
@@ -548,19 +564,28 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
                         />
                     </div>
 
-
                     <div>
                         <Controller
-                            name="city"
+                            name="country"
                             control={control}
+                            rules={{
+                                required: "Country is required"
+                            }}
                             render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    label="City"
-                                    type={`text`}
-                                    onChange={(e) => {
-                                        field.onChange(e);
+                                <Select
+                                    options={countryData}
+                                    label={"Country"}
+                                    placeholder="Select country"
+                                    value={countryData?.filter((row) => row.title === watch("country"))?.[0]?.id || null}
+                                    onChange={(_, newValue) => {
+                                        if (newValue?.id) {
+                                            field.onChange(newValue.title);
+                                            handleGetAllStatesByCountryId(newValue.id);
+                                        } else {
+                                            setValue("country", null);
+                                        }
                                     }}
+                                    error={errors?.country}
                                 />
                             )}
                         />
@@ -570,14 +595,24 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
                         <Controller
                             name="state"
                             control={control}
+                            rules={{
+                                required: "State is required"
+                            }}
                             render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    label="State"
-                                    type={`text`}
-                                    onChange={(e) => {
-                                        field.onChange(e);
+                                <Select
+                                    disabled={stateData?.length === 0}
+                                    options={stateData}
+                                    label={"State"}
+                                    placeholder="Select state"
+                                    value={stateData?.filter((row) => row.title === watch("state"))?.[0]?.id || null}
+                                    onChange={(_, newValue) => {
+                                        if (newValue?.id) {
+                                            field.onChange(newValue.title);
+                                        } else {
+                                            setValue("state", null);
+                                        }
                                     }}
+                                    error={errors?.state}
                                 />
                             )}
                         />
@@ -585,12 +620,12 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
 
                     <div>
                         <Controller
-                            name="country"
+                            name="city"
                             control={control}
                             render={({ field }) => (
                                 <Input
                                     {...field}
-                                    label="Country"
+                                    label="City"
                                     type={`text`}
                                     onChange={(e) => {
                                         field.onChange(e);

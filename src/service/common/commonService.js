@@ -171,3 +171,124 @@ export const getListOfYears = () => {
         return [];
     }
 }
+
+export const getStaticRoles = () => {
+    return [
+        {
+            id: 1,
+            title: 'Owner',
+        },
+        {
+            id: 2,
+            title: 'Admin',
+        },
+        {
+            id: 3,
+            title: 'Manager',
+        },
+    ];
+}
+
+export const getStaticRolesWithPermissions = () => {
+    return getStaticRoles()?.map((item, index) => {
+        return {
+            roleName: item.title,
+            rolesActions: {
+                "functionalities": [
+                    {
+                        "functionalityId": 1,
+                        "functionalityName": "Company",
+                        "modules": [
+                            {
+                                "moduleId": 3,
+                                "moduleName": "Manage Company",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 5,
+                                "moduleName": "Manage Employees",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 9,
+                                "moduleName": "Manage Shifts",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "functionalityId": 3,
+                        "functionalityName": "Permission",
+                        "modules": [
+                            {
+                                "moduleId": 2,
+                                "moduleName": "Role",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 6,
+                                "moduleName": "Department",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    })
+}

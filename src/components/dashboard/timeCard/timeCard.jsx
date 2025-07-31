@@ -34,12 +34,6 @@ const tabData = [
     {
         label: 'Timecard',
     },
-    // {
-    //     label: 'Totals'
-    // },
-    // {
-    //     label: 'Schedule',
-    // },
 ]
 
 const TimeCard = ({ handleSetTitle, setAlert }) => {
@@ -53,7 +47,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const [selectedTab, setSelectedTab] = useState(0);
     const [loadingPdf, setLoadingPdf] = useState(false);
 
-    const [isOpen, setIsOpen] = useState(false);
     const [users, setUsers] = useState([])
 
     const [rows, setRow] = useState([])
@@ -95,10 +88,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         setSelectedTab(value);
     }
 
-    const toggleOpen = () => {
-        setIsOpen((prev) => !prev);
-    };
-
     function convertToDesiredFormat(date) {
         // This function now expects a Date object, not an ISO string
         const day = String(date.getDate()).padStart(2, '0');
@@ -111,7 +100,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     }
 
     const handleGetAllUsers = async () => {
-        if ((userInfo?.roleName === "Admin" && userInfo?.companyId)) {
+        if (((userInfo?.roleName === "Admin" || userInfo?.roleName === "Owner") && userInfo?.companyId)) {
             const response = await getAllEmployeeListByCompanyId(userInfo?.companyId)
             const data = response.data.result?.map((row) => {
                 return {
@@ -764,7 +753,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             />
                         </div>
                     ) : null}
-                    {
+                    {/* {
                         userInfo?.companyId ? (
                             <div className='mb-4 w-full md:mb-0'>
                                 <Controller
@@ -784,7 +773,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                                 />
                             </div>
                         ) : null
-                    }
+                    } */}
                     <div className='mb-4 w-full md:mb-0'>
                         <Controller
                             name="selectedDepartmentId"
@@ -893,44 +882,6 @@ const mapDispatchToProps = {
 
 export default connect(null, mapDispatchToProps)(TimeCard);
 
-
-// const generatePDF = async () => {
-//     setLoadingPdf(true)
-//     const element = document.getElementById("table-container");
-//     if (!element) return;
-
-//     const tables = element.getElementsByTagName("table");
-//     const pdf = new jsPDF("p", "mm", "a4");
-
-//     let yPos = 20; // Initial Y position
-//     pdf.text("In-Out Report", 105, 15, { align: "center" });
-
-//     for (let index = 0; index < tables.length; index++) {
-//         const table = tables[index];
-
-//         // Convert each table to an image
-//         const canvas = await html2canvas(table, {
-//             scale: 2,
-//             useCORS: true,
-//         });
-
-//         const imgData = canvas.toDataURL("image/png");
-//         const imgWidth = 190; // Fit within A4 width (210mm - 10mm margins)
-//         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-//         // Check if a new page is needed
-//         if (yPos + imgHeight > 280) {
-//             pdf.addPage();
-//             yPos = 10; // Reset Y position on new page
-//         }
-
-//         pdf.addImage(imgData, "PNG", 10, yPos, imgWidth, imgHeight);
-//         yPos += imgHeight + 10; // Move position down
-//     }
-
-//     pdf.save("report.pdf");
-//     setLoadingPdf(false)
-// };
 
 // const generateExcel = async () => {
 //     setLoadingExcel(true)

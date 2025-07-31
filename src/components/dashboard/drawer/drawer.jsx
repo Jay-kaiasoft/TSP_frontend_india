@@ -89,7 +89,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
         else if (functionalityName === "Permission") {
           if (filteredModules.length > 0) {
             const permissionsChildren = filteredModules
-              .filter((module) => (module?.moduleName !== "Contractor" && module?.moduleName !== "Functionality" && module?.moduleName !== "Module"))
+              .filter((module) => (module?.moduleName !== "Contractor" && module?.moduleName !== "Functionality" && module?.moduleName !== "Module" && module?.moduleName !== "Salary Statement"))
               .map((module) => ({
                 name: module.moduleName,
                 icon: <CustomIcons iconName={'fa-solid fa-circle'} css=' cursor-pointer' />,
