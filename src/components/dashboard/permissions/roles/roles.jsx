@@ -20,7 +20,7 @@ const Roles = ({ handleSetTitle }) => {
   const userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
   const handleGetAllUserRoles = async () => {
-    handleSetTitle('Role')
+    handleSetTitle('Manage Roles')
     if (!userInfo?.companyId && !userInfo?.employeeId) {
       const response = await getAllRoleList()
       const data = response?.data?.result?.rolesList?.map((item, index) => {
@@ -114,11 +114,11 @@ const Roles = ({ handleSetTitle }) => {
           <div className='flex items-center gap-2 justify-center h-full'>
             <PermissionWrapper
               functionalityName="Permission"
-              moduleName="Role"
+              moduleName="Manage Roles"
               actionId={2}
               component={
                 <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                  <Components.IconButton onClick={() => navigate(`/dashboard/role/updaterole/${params.row.roleId}`)}>
+                  <Components.IconButton onClick={() => navigate(`/dashboard/manageroles/updaterole/${params.row.roleId}`)}>
                     <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
                   </Components.IconButton>
                 </div>
@@ -126,7 +126,7 @@ const Roles = ({ handleSetTitle }) => {
             />
             <PermissionWrapper
               functionalityName="Permission"
-              moduleName="Role"
+              moduleName="Manage Roles"
               actionId={3}
               component={
                 <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
@@ -148,7 +148,7 @@ const Roles = ({ handleSetTitle }) => {
   }
 
   const habdleAddRole = () => {
-    navigate('/dashboard/role/addrole')
+    navigate('/dashboard/manageroles/addrole')
   }
 
   useState(() => {
@@ -160,7 +160,7 @@ const Roles = ({ handleSetTitle }) => {
     return (
       <PermissionWrapper
         functionalityName="Permission"
-        moduleName="Role"
+        moduleName="Manage Roles"
         actionId={1}
         component={
           <div>

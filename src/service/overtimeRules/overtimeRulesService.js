@@ -51,13 +51,3 @@ export const deleteOvertimeRule = async (id) => {
         console.log(error)
     }
 }
-
-export const assignOvertimeRuleToEmployee = async (id, data) => {
-    try {
-        const response = axiosInterceptor().post(`${overtimeRulesURL}/assignOvertimeRuleToEmployee/${id}`, data)
-        return response
-
-    } catch (error) {
-        console.log(error)
-    }
-}

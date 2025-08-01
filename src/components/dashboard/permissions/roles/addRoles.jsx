@@ -168,7 +168,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                 if (res.data.status === 200) {
                     setLoading(false);
                 
-                    navigate('/dashboard/role');
+                    navigate('/dashboard/manageroles');
                 } else {
                     setLoading(false);
                     setAlert({ open: true, message: res.data.message, type: 'error' });
@@ -177,7 +177,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                 const res = await updateRole(id, newData);
                 if (res.data.status === 200) {
                     setLoading(false);
-                    navigate('/dashboard/role');
+                    navigate('/dashboard/manageroles');
                 } else {
                     setLoading(false);
                     setAlert({ open: true, message: res.data.message, type: 'error' });
@@ -196,7 +196,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                 if (res.data.status === 201) {
                     // setAlert({ open: true, message: res.data.message, type: 'success' });
                     setLoading(false);
-                    navigate('/dashboard/role');
+                    navigate('/dashboard/manageroles');
                 } else {
                     setLoading(false);
                     setAlert({ open: true, message: res.data.message, type: 'error' });
@@ -205,7 +205,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                 const res = await createRole(newData);
                 if (res.data.status === 201) {
                     setLoading(false);
-                    navigate('/dashboard/role');
+                    navigate('/dashboard/manageroles');
                 } else {
                     setLoading(false);
                     setAlert({ open: true, message: res.data.message, type: 'error' });
@@ -215,7 +215,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
     }
 
     useEffect(() => {
-        handleSetTitle("Role")
+        handleSetTitle("Manage Roles");
         handleGetAllActions();
         handleGetAllActionsByRole();
     }, []);
@@ -349,7 +349,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
 
                 <div className='flex justify-end mt-5 gap-3'>
                     <div>
-                        <Button type="button" text={"Back"} variant="contained" color="primary" onClick={() => navigate("/dashboard/role")} />
+                        <Button type="button" text={"Back"} variant="contained" color="primary" onClick={() => navigate("/dashboard/manageroles")} />
                     </div>
                     <div>
                         <Button type="submit" text={id ? "Update role" : "Add role"} variant="contained" color="primary" isLoading={loading} />

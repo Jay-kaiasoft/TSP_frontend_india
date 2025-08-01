@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import Components from '../../../../muiComponents/components';
 import DataTable from '../../../../common/table/table';
 import OvertimeRulesModel from '../../../../models/overtimeRules/overtimeRulesModel';
-import AsignRulesToUsers from '../../../../models/overtimeRules/assignRulesToUsers';
 import AlertDialog from '../../../../common/alertDialog/alertDialog';
 
 const OvertimeRules = () => {
@@ -16,7 +15,6 @@ const OvertimeRules = () => {
     const [row, setRow] = useState([]);
     const [open, setOpen] = useState(false);
     const [overTimeId, setOverTimeId] = useState(null);
-    const [openUserModel, setOpenUserModel] = useState(false);
 
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [loading, setLoading] = useState(false);
@@ -39,28 +37,27 @@ const OvertimeRules = () => {
             message: '',
             actionButtonText: ''
         })
-        setOpenUserModel(false)
     }
 
     const handleDeleteOvertime = async () => {
         const response = await deleteOvertimeRule(overTimeId);
         if (response?.data?.status === 200) {
-            handleCloseDialog()
+            // handleCloseDialog()
             setOverTimeId(null);
             handleGetAllOvertimeRules();
         }
     }
 
-    const handleUserModelOpen = (id) => {
-        setOverTimeId(id);
-        setOpenUserModel(true);
-    }
+    // const handleUserModelOpen = (id) => {
+    //     setOverTimeId(id);
+    //     setOpenUserModel(true);
+    // }
 
-    const handleUserModelClose = () => {
-        setOverTimeId(null);
-        handleGetAllOvertimeRules();
-        setOpenUserModel(false);
-    }
+    // const handleUserModelClose = () => {
+    //     setOverTimeId(null);
+    //     handleGetAllOvertimeRules();
+    //     setOpenUserModel(false);
+    // }
 
     const handleOpen = (id) => {
         setOverTimeId(id);
@@ -154,11 +151,11 @@ const OvertimeRules = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-center h-full'>
-                        <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                        {/* <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                             <Components.IconButton onClick={() => handleUserModelOpen(params.row.id)}>
                                 <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
                             </Components.IconButton>
-                        </div>
+                        </div> */}
                         <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                             <Components.IconButton onClick={() => handleOpen(params.row.id)}>
                                 <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
@@ -225,7 +222,7 @@ const OvertimeRules = () => {
             </div>
 
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteOvertime} handleClose={handleCloseDialog} loading={loading} />
-            <AsignRulesToUsers open={openUserModel} handleClose={handleUserModelClose} overTimeId={overTimeId} handleGetAllOvertimeRules={handleGetAllOvertimeRules} />
+            {/* <AsignRulesToUsers open={openUserModel} handleClose={handleUserModelClose} overTimeId={overTimeId} handleGetAllOvertimeRules={handleGetAllOvertimeRules} /> */}
             <OvertimeRulesModel open={open} handleClose={handleClose} companyId={userInfo?.companyId} overTimeId={overTimeId} handleGetAllOvertimeRules={handleGetAllOvertimeRules} />
         </div>
     )

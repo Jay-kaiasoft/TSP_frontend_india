@@ -141,8 +141,8 @@ const SalaryStatementPDFTable = ({
                         )}
                         <div>
                             <h2 className="text-2xl font-extrabold text-gray-900 mb-1">{companyInfo?.companyName || 'Your Company Name'}</h2>
-                            {companyInfo?.email && <p className="text-sm text-gray-600 mb-0.5"><span className="font-semibold">Email:</span> {companyInfo.email}</p>}
-                            {companyInfo?.phone && <p className="text-sm text-gray-600"><span className="font-semibold">Phone:</span> {companyInfo.phone}</p>}
+                            {companyInfo?.email && <p className="text-sm text-gray-600 mb-0.5"><span className="font-semibold">Email:</span> {companyInfo.email ? companyInfo.email : '-'}</p>}
+                            {companyInfo?.phone && <p className="text-sm text-gray-600"><span className="font-semibold">Phone:</span> {companyInfo.phone ? companyInfo.phone : '-'}</p>}
                         </div>
                     </div>
                     <div className="text-right">
@@ -152,7 +152,7 @@ const SalaryStatementPDFTable = ({
                 </div>
 
                 {/* Main Content: Month and Department Tables */}
-                {renderContent()}              
+                {renderContent()}
 
             </div>
         </div>

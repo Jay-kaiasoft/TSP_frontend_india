@@ -30,6 +30,7 @@ import axios from 'axios';
 import { faceRecognitionAPIBaseURL } from '../../../../config/apiConfig/apiConfig';
 import FileInputBox from '../../../common/fileInput/FileInputBox';
 import Checkbox from '../../../common/checkBox/checkbox';
+import { getAllOvertimeRules } from '../../../../service/overtimeRules/overtimeRulesService';
 
 const GenderOptions = [
     { id: 1, title: "Male" },
@@ -87,6 +88,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
     const [countryData, setCountryData] = useState([])
     const [stateData, setStateData] = useState([])
+    const [otRules, setOtRules] = useState([]);
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef(null);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -159,7 +161,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             grossSalary: "",
             canteenType: "",
             canteenAmount: "",
-
+            otId: null,
             accountId: "",
             accountType: "",
             ifscCode: "",
@@ -579,6 +581,21 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         }
     }
 
+    const handleGetAllOvertimeRules = async () => {
+        if (userInfo?.companyId) {
+            const response = await getAllOvertimeRules(userInfo?.companyId);
+            if (response?.data?.status === 200) {
+                const data = response?.data?.result?.map((item) => {
+                    return {
+                        id: item.id,
+                        title: item.ruleName
+                    }
+                })
+                setOtRules(data)
+            }
+        }
+    }
+
     const submit = async (data, submitType) => {
         const saveAndExit = submitType === "saveAndExit";
         const newData = {
@@ -677,6 +694,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     }, [])
 
     useEffect(() => {
+        handleGetAllOvertimeRules()
         handleGetAllCountrys()
         handleGetEmployee();
         handleGetAllUserType()
@@ -1769,6 +1787,28 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                                 }
                                                             }}
                                                             endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div className='col-span-2'>
+                                                <Controller
+                                                    name="otId"
+                                                    control={control}                                                
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            options={otRules}
+                                                            label={"Overtime Rule"}
+                                                            placeholder="Select overtime rule"
+                                                            value={parseInt(watch("otId")) || null}
+                                                            onChange={(_, newValue) => {
+                                                                if (newValue?.id) {
+                                                                    field.onChange(newValue.id);
+                                                                } else {
+                                                                    setValue("otId", null);
+                                                                }
+                                                            }}
                                                         />
                                                     )}
                                                 />

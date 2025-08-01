@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Components from '../../../muiComponents/components';
 import DataTable from '../../../common/table/table';
-import { setAlert } from '../../../../redux/commonReducers/commonReducers';
+import { setAlert, handleSetTitle } from '../../../../redux/commonReducers/commonReducers';
 import { connect } from 'react-redux';
 import AlertDialog from '../../../common/alertDialog/alertDialog';
 import PermissionWrapper from '../../../common/permissionWrapper/PermissionWrapper';
@@ -10,7 +10,7 @@ import AddDepartmentModel from '../../../models/department/addDepartmentModel';
 import CustomIcons from '../../../common/icons/CustomIcons';
 import Button from '../../../common/buttons/button';
 
-const Department = ({ setAlert }) => {
+const Department = ({ setAlert, handleSetTitle }) => {
 
     const [department, setDepartment] = useState([]);
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
@@ -99,7 +99,7 @@ const Department = ({ setAlert }) => {
                     <div className='flex items-center gap-2 justify-center h-full'>
                         <PermissionWrapper
                             functionalityName="Permission"
-                            moduleName="Department"
+                            moduleName="Manage Departments"
                             actionId={2}
                             component={
                                 <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
@@ -111,7 +111,7 @@ const Department = ({ setAlert }) => {
                         />
                         <PermissionWrapper
                             functionalityName="Permission"
-                            moduleName="Department"
+                            moduleName="Manage Departments"
                             actionId={3}
                             component={
                                 <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
@@ -132,6 +132,7 @@ const Department = ({ setAlert }) => {
     }
 
     useEffect(() => {
+        handleSetTitle('Manage Departments')
         handleGetAllDepartment()
     }, [])
 
@@ -139,7 +140,7 @@ const Department = ({ setAlert }) => {
         return (
             <PermissionWrapper
                 functionalityName="Permission"
-                moduleName="Department"
+                moduleName="Manage Departments"
                 actionId={1}
                 component={
                     <div>
@@ -165,6 +166,7 @@ const Department = ({ setAlert }) => {
 
 const mapDispatchToProps = {
     setAlert,
+    handleSetTitle
 };
 
 export default connect(null, mapDispatchToProps)(Department)

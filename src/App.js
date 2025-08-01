@@ -120,19 +120,19 @@ function App() {
           element: <Modules />,
         },
         {
-          path: "role",
+          path: "manageroles",
           element: <Roles />,
         },
         {
-          path: "role/addrole",
+          path: "manageroles/addrole",
           element: <AddRoles />,
         },
         {
-          path: "role/updaterole/:id",
+          path: "manageroles/updaterole/:id",
           element: <AddRoles />,
         },
         {
-          path: "department",
+          path: "managedepartments",
           element: <Department />,
         },
         {

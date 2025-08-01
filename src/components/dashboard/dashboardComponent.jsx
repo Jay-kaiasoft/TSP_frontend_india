@@ -162,7 +162,7 @@ const DashboardComponent = ({ handleSetTitle, handleSetTimeIn, timeIn }) => {
               <>
                 <div style={{ color: theme.palette.primary.text.main }} className="text-xl font-bold text-end">{formatTime(timer)}</div>
                 <div className="flex justify-end gap-4 mr-3">
-                  <Button text={isRunning ? "Clock Out" : "Time In"} useFor={isRunning ? "error" : "success"} onClick={!isRunning ? handleStart : handleOpenDialog} />
+                  <Button text={isRunning ? "Clock Out" : "Clock In"} useFor={isRunning ? "error" : "success"} onClick={!isRunning ? handleStart : handleOpenDialog} />
                 </div>
               </>
             )
