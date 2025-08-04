@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, set, useForm } from 'react-hook-form';
 import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
 import { fetchAllTimeZones, getStaticRoles, getStaticRolesWithPermissions, indianOrganizationType, oganizationType, uploadFiles } from '../../../service/common/commonService';
 import { deleteGeofence, getCurrentLocation } from '../../../service/common/radarService';
@@ -35,7 +35,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
     const theme = useTheme();
 
-    const [roleData, setRoleData] = useState(getStaticRoles());        
+    const [roleData, setRoleData] = useState(getStaticRoles());
 
     const [selectedRole, setSelectedRole] = useState(1)
 
@@ -744,13 +744,16 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                             render={({ field }) => (
                                                 <Select
                                                     options={orgType}
-                                                    label="Oganization Type"
+                                                    label="Organization Type"
                                                     placeholder="Select organization type"
-                                                    multiple={false}
                                                     error={errors?.organizationType}
-                                                    value={watch("organizationType") || null}
+                                                    value={parseInt(watch("organizationType")) || null}
                                                     onChange={(_, newValue) => {
-                                                        field.onChange(newValue.id || null);
+                                                        if (newValue) {
+                                                            field.onChange(newValue.id);
+                                                        } else {
+                                                            setValue("organizationType", null);
+                                                        }
                                                     }}
                                                 />
                                             )}
@@ -1276,11 +1279,13 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                 </div>
 
             </form>
+
             <div className={`absolute border rounded-full ${(id || selectedTab === 1) ? "top-16" : "top-24"} md:top-5`}>
                 <Components.IconButton onClick={handleBack}>
                     <CustomIcons iconName={'fa-solid fa-arrow-left'} css=' cursor-pointer h-5 w-5' />
                 </Components.IconButton>
             </div>
+
             <AlertDialog open={dialogLocation.open} title={dialogLocation.title} message={dialogLocation.message} actionButtonText={dialogLocation.actionButtonText} handleAction={handleDeleteLocation} handleClose={handleCloseLocationDialog} loading={loading} />
             <AddLocationModel open={locationModal} handleClose={handleCloseLocationModal} locationId={editLocationId} companyId={companyId} handleGetLocations={handleGetAllLocationsByCompanyId} />
 

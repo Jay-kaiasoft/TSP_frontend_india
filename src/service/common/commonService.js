@@ -246,6 +246,22 @@ export const getStaticRolesWithPermissions = () => {
                                     3,
                                     4
                                 ]
+                            },
+                            {
+                                "moduleId": 16,
+                                "moduleName": "Overtime Rules",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
                             }
                         ]
                     },
@@ -284,9 +300,47 @@ export const getStaticRolesWithPermissions = () => {
                                     3,
                                     4
                                 ]
+                            },
+                            {
+                                "moduleId": 15,
+                                "moduleName": "Salary Statement",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
                             }
                         ]
-                    }
+                    },
+                    {
+                        "functionalityId": 4,
+                        "functionalityName": "Time Card",
+                        "modules": [
+                            {
+                                "moduleId": 8,
+                                "moduleName": "Clock-In-Out",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                        ]
+                    },
                 ]
             }
         }

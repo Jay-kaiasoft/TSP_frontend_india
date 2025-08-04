@@ -135,17 +135,18 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                 replace(res.data?.result?.role?.rolesActions?.functionalities);
             } else {
                 const res = await getEmployeeRole(id);
+                const data = res.data?.result?.rolesActions?.functionalities?.filter((func) => func.functionalityName !== "Users");
                 setValue('roleName', res.data?.result?.roleName);
-                replace(res.data?.result?.rolesActions?.functionalities);
+                replace(data);
             }
         } else {
             // handleSetTitle('Add Roles');
+            
             if (!userInfo?.companyId && !userInfo?.employeeId) {
                 const res = await getAllActionsByRole(0);
                 replace(res.data?.result?.functionalities);
             } else {
                 const res = await getAllEmployeeActionsByRole(0)
-                console.log("data?.result?.functionalities", res?.data?.result?.functionalities)
                 replace(res.data?.result?.functionalities);
             }
         }

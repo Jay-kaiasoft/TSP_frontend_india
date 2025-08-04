@@ -8,6 +8,7 @@ import Components from '../../../../muiComponents/components';
 import DataTable from '../../../../common/table/table';
 import OvertimeRulesModel from '../../../../models/overtimeRules/overtimeRulesModel';
 import AlertDialog from '../../../../common/alertDialog/alertDialog';
+import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWrapper';
 
 const OvertimeRules = () => {
     const theme = useTheme();
@@ -156,23 +157,31 @@ const OvertimeRules = () => {
                                 <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
                             </Components.IconButton>
                         </div> */}
-                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        {/* <PermissionWrapper
-                            functionalityName="Permission"
-                            moduleName="Department"
+                        <PermissionWrapper
+                            functionalityName="Company"
+                            moduleName="Overtime Rules"
+                            actionId={2}
+                            Component={
+                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        />
+
+                        <PermissionWrapper
+                            functionalityName="Company"
+                            moduleName="Overtime Rules"
                             actionId={3}
-                            component={ */}
-                        <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpenDeleteOvertimeDialog(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        {/* }
-                        /> */}
+                            component={
+                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenDeleteOvertimeDialog(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        />
                     </div>
                 );
             },
@@ -185,16 +194,16 @@ const OvertimeRules = () => {
 
     const actionButtons = () => {
         return (
-            // <PermissionWrapper
-            //     functionalityName="Permission"
-            //     moduleName="Department"
-            //     actionId={1}
-            //     component={
-            <div>
-                <Button type={`button`} text={'Create Overtime Rule'} onClick={() => handleOpen(null)} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
-            </div>
-            //     }
-            // />
+            <PermissionWrapper
+                functionalityName="Company"
+                moduleName="Overtime Rules"
+                actionId={1}
+                component={
+                    <div>
+                        <Button type={`button`} text={'Create Overtime Rule'} onClick={() => handleOpen(null)} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
+                    </div>
+                }
+            />
         )
     }
 

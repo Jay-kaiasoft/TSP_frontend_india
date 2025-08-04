@@ -1765,37 +1765,41 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                     )}
                                                 />
                                             </div>
-
-                                            <div>
-                                                <Controller
-                                                    name="canteenAmount"
-                                                    control={control}
-                                                    rules={{
-                                                        required: watch("canteenType") ? "Canteen amount is required" : false,
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <Input
-                                                            {...field}
-                                                            label={watch("canteenType") === 1 ? "Amount Cut From Salary" : watch("canteenType") === 2 ? "Amount Cut(Per Plate) From Daly Wages" : ""}
-                                                            type={`text`}
-                                                            error={errors?.canteenAmount}
-                                                            disabled={!watch("canteenType")}
-                                                            onChange={(e) => {
-                                                                let value = e.target.value;
-                                                                if (/^\d*\.?\d*$/.test(value)) {
-                                                                    field.onChange(value);
-                                                                }
+                                            {
+                                                watch("canteenType") && (
+                                                    <div>
+                                                        <Controller
+                                                            name="canteenAmount"
+                                                            control={control}
+                                                            rules={{
+                                                                required: watch("canteenType") ? "Canteen amount is required" : false,
                                                             }}
-                                                            endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                            render={({ field }) => (
+                                                                <Input
+                                                                    {...field}
+                                                                    label={watch("canteenType") === 1 ? "Amount Cut From Salary" : watch("canteenType") === 2 ? "Amount Cut(Per Plate) From Daly Wages" : ""}
+                                                                    type={`text`}
+                                                                    error={errors?.canteenAmount}
+                                                                    disabled={!watch("canteenType")}
+                                                                    onChange={(e) => {
+                                                                        let value = e.target.value;
+                                                                        if (/^\d*\.?\d*$/.test(value)) {
+                                                                            field.onChange(value);
+                                                                        }
+                                                                    }}
+                                                                    endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                />
+                                                            )}
                                                         />
-                                                    )}
-                                                />
-                                            </div>
+                                                    </div>
+                                                )
+                                            }
+
 
                                             <div className='col-span-2'>
                                                 <Controller
                                                     name="otId"
-                                                    control={control}                                                
+                                                    control={control}
                                                     render={({ field }) => (
                                                         <Select
                                                             options={otRules}
@@ -2006,7 +2010,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 Do you want to set up Face Recognition for this employee now?
                                             </p>
 
-                                            <div className="flex justify-center items-center gap-4">
+                                            <div className="grid grid-cols-2 gap-4">
                                                 <Button
                                                     type="button"
                                                     text="Set Face Recognition"

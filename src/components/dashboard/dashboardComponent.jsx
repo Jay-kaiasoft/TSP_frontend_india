@@ -20,7 +20,7 @@ const DashboardComponent = ({ handleSetTitle, handleSetTimeIn, timeIn }) => {
   const [isRunning, setIsRunning] = useState(false);
 
   const [data, setData] = useState(null)
-  
+
   const {
     setValue,
   } = useForm({
@@ -52,7 +52,7 @@ const DashboardComponent = ({ handleSetTitle, handleSetTimeIn, timeIn }) => {
   const handleStart = async () => {
     if (!isRunning) {
       // const date1 = new Date();
-        const response = await addUserTimeIn(sessionStorage.getItem("locationId") !== undefined && sessionStorage.getItem("locationId") !== null ? sessionStorage.getItem("locationId") : "");
+      const response = await addUserTimeIn(sessionStorage.getItem("locationId") !== undefined && sessionStorage.getItem("locationId") !== null ? sessionStorage.getItem("locationId") : "", userInfo?.companyId);
       if (response.data?.status === 201) {
         setIsRunning(true);
         setValue("id", response.data?.result?.id);

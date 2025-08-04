@@ -43,7 +43,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
     const theme = useTheme();
 
-
     const [selectedTab, setSelectedTab] = useState(0);
     const [loadingPdf, setLoadingPdf] = useState(false);
 
@@ -146,7 +145,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 params.append("endDate", convertToDesiredFormat(endDate));
             }
         }
-
+        params.append("companyId", userInfo?.companyId);
         let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (userTimeZone === "Asia/Kolkata") {
             userTimeZone = "Asia/Calcutta";

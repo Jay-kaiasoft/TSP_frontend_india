@@ -56,7 +56,11 @@ const Department = ({ setAlert, handleSetTitle }) => {
         if (userInfo?.companyId) {
             const response = await getAllDepartment(userInfo?.companyId)
             if (response.data.status === 200) {
-                setDepartment(response.data.result)
+                const departments = response.data.result.map((item, index) => ({
+                    ...item,
+                    rowId: index +1,
+                }))
+                setDepartment(departments)
             }
         }
     }
@@ -77,7 +81,7 @@ const Department = ({ setAlert, handleSetTitle }) => {
 
     const columns = [
         {
-            field: 'id',
+            field: 'rowId',
             headerName: 'id',
             headerClassName: 'uppercase',
             flex: 1,
@@ -128,7 +132,7 @@ const Department = ({ setAlert, handleSetTitle }) => {
     ];
 
     const getRowId = (row) => {
-        return row.id;
+        return row.rowId;
     }
 
     useEffect(() => {

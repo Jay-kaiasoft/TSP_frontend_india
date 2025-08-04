@@ -69,9 +69,9 @@ export const getUserLastInOut = async (id) => {
     }
 }
 
-export const addUserTimeIn = async (id) => {
+export const addUserTimeIn = async (id,companyId) => {
     try {
-        const response = axiosInterceptor().post(`${userInOutURL}/create?locationId=${id}`)
+        const response = axiosInterceptor().post(`${userInOutURL}/create?locationId=${id}&companyId=${companyId}`)
         return response
 
     } catch (error) {

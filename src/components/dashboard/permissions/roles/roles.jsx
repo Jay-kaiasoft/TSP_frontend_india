@@ -31,6 +31,7 @@ const Roles = ({ handleSetTitle }) => {
       })
       setUserRoles(data)
     } else {
+      
       const response = await getAllCompanyRole(userInfo?.companyId)
       const data = response?.data?.result?.map((item, index) => {
         return {

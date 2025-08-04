@@ -1013,7 +1013,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                             <th style={{ color: theme.palette.primary.text.main }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">
                                                                 <p>
                                                                     Status
-                                                                    <Tooltip title="Double-click To Edit" placement="bottom" arrow>
+                                                                    <Tooltip title="Geofence is required for active location" placement="bottom" arrow>
                                                                         <span>
                                                                             <CustomIcons iconName="fa-solid fa-circle-info" css="cursor-pointer" />
                                                                         </span>
@@ -1094,8 +1094,8 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
 
                                                                     <td style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 p-2 text-center font-semibold text-sm break-words">
                                                                         <div className="flex justify-center items-center gap-2">
-                                                                            {
-                                                                                !userInfo?.userId && (
+                                                                            {/* {
+                                                                                !userInfo?.userId && ( */}
                                                                                     <PermissionWrapper
                                                                                         functionalityName={"Company"}
                                                                                         moduleName={"Manage Company"}
@@ -1107,8 +1107,8 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                                                             </div>
                                                                                         }
                                                                                     />
-                                                                                )
-                                                                            }
+                                                                                {/* )
+                                                                            } */}
                                                                             <PermissionWrapper
                                                                                 functionalityName={"Company"}
                                                                                 moduleName={"Manage Company"}

@@ -104,7 +104,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
 
     const handleStart = async () => {
         if (!isRunning) {
-            const response = await addUserTimeIn(sessionStorage.getItem("locationId") !== undefined && sessionStorage.getItem("locationId") !== null ? sessionStorage.getItem("locationId") : "");
+            const response = await addUserTimeIn(sessionStorage.getItem("locationId") !== undefined && sessionStorage.getItem("locationId") !== null ? sessionStorage.getItem("locationId") : "",userInfo?.companyId);
             if (response.data?.status === 201) {
                 setIsRunning(true);
                 setValue("id", response.data?.result?.id);
