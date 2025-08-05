@@ -73,6 +73,9 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             employeeIds: [],
             departmentIds: [],
         };
+        if (watch("selectedDepartmentId") && watch("selectedDepartmentId").length > 0) {
+            data.departmentIds = watch("selectedDepartmentId");
+        }
         try {
             if (data?.month && data?.year) {
                 const response = await getEmployeeSalaryStatements(data);

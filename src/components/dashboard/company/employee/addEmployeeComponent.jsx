@@ -19,7 +19,6 @@ import { getAllEmployeeType } from '../../../../service/employeeType/employeeTyp
 import dayjs from 'dayjs';
 import { useTheme } from '@mui/material';
 import { getAllShifts } from '../../../../service/companyShift/companyShiftService';
-import { getAllCountry } from '../../../../service/country/countryService';
 import { getAllStateByCountry } from '../../../../service/state/stateService';
 import { getAllActiveLocationsByCompanyId } from '../../../../service/location/locationService';
 import SelectMultiple from '../../../common/select/selectMultiple';
@@ -86,7 +85,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         "Face Registration"
     ])
 
-    const [countryData, setCountryData] = useState([])
     const [stateData, setStateData] = useState([])
     const [otRules, setOtRules] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -108,6 +106,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [showFaceRegistration, setShowFaceRegistration] = useState(false);
     const [dialogFaceRegistration, setDialogFaceRegistration] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+
     const {
         handleSubmit,
         control,
@@ -150,7 +149,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             payPeriod: "",
             hiredDate: new Date(),
             isActive: 1,
-            checkGeofence: true,
+            checkGeofence: false,
             isPf: false,
             pfType: "",
             pfPercentage: 0,
@@ -161,6 +160,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             grossSalary: "",
             canteenType: "",
             canteenAmount: "",
+            lunchBreak: "",
+
             otId: null,
             accountId: "",
             accountType: "",
@@ -249,10 +250,12 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         if (shifts?.length === 0) {
             handleSetTitle("Manage Shifts")
             navigate("/dashboard/manageshifts")
+            return
         }
         if (departments?.length === 0) {
-            handleSetTitle("Departments")
-            navigate("/dashboard/department")
+            handleSetTitle("Manage Departments")
+            navigate("/dashboard/managedepartments")
+            return
         }
     }
 
@@ -553,17 +556,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         setShifts(data);
     };
 
-    const handleGetAllCountrys = async () => {
-        const res = await getAllCountry()
-        const data = res?.data?.result?.map((item) => {
-            return {
-                id: item.id,
-                title: item.cntName
-            }
-        })
-        setCountryData(data)
-    }
-
     const handleGetAllStatesByCountryId = async (id) => {
         const res = await getAllStateByCountry(id)
         const data = res?.data?.result?.map((item) => {
@@ -695,7 +687,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
     useEffect(() => {
         handleGetAllOvertimeRules()
-        handleGetAllCountrys()
         handleGetEmployee();
         handleGetAllUserType()
         handleGetAllDepartment()
@@ -708,10 +699,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     }, [companyId])
 
     useEffect(() => {
-        if (countryData?.length > 0 && watch("country")) {
-            handleGetAllStatesByCountryId(countryData?.filter((item) => item.title === watch("country"))?.[0]?.id)
+        if (watch("country")) {
+            handleGetAllStatesByCountryId(102)
         }
-    }, [countryData])
+    }, [watch("country")])
+
+    // useEffect(() => {
+    //     setValue("userName", watch("firstName") + watch("lastName"))
+    // }, [watch("firstName"), watch("lastName")])
 
     return (
         <div className='px-3 lg:px-0'>
@@ -885,6 +880,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             error={errors?.userName}
                                                             onChange={(e) => {
                                                                 field.onChange(e);
+                                                                // if (e.target.value !== "" && e.target.value !== null && e.target.value !== undefined) {
+                                                                // } else {
+                                                                //     field.onChange(watch("firstName") + watch("lastName"));
+                                                                // }
                                                             }}
                                                         />
                                                     )}
@@ -1054,29 +1053,11 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                             </div>
 
                                             <div>
-                                                <Controller
-                                                    name="country"
-                                                    control={control}
-                                                    rules={{
-                                                        required: "Country is required"
-                                                    }}
-                                                    render={({ field }) => (
-                                                        <Select
-                                                            options={countryData}
-                                                            label={"Country"}
-                                                            placeholder="Select country"
-                                                            value={countryData?.filter((row) => row.title === watch("country"))?.[0]?.id || null}
-                                                            onChange={(_, newValue) => {
-                                                                if (newValue?.id) {
-                                                                    field.onChange(newValue.title);
-                                                                    handleGetAllStatesByCountryId(newValue.id);
-                                                                } else {
-                                                                    setValue("country", null);
-                                                                }
-                                                            }}
-                                                            error={errors?.country}
-                                                        />
-                                                    )}
+                                                <Input
+                                                    label="Country"
+                                                    type={`text`}
+                                                    disabled={true}
+                                                    value={watch("country") || "India"}
                                                 />
                                             </div>
 
@@ -1201,6 +1182,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                         name="emergencyPhone"
                                                         control={control}
                                                         rules={{
+                                                            required: "Emergency Phone is required",
                                                             maxLength: {
                                                                 value: 10,
                                                                 message: 'Enter valid phone number',
@@ -1208,6 +1190,13 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             minLength: {
                                                                 value: 10,
                                                                 message: 'Enter valid phone number',
+                                                            },
+                                                            validate: {
+                                                                isValid: (value) => {
+                                                                    if (value === watch("phone")) {
+                                                                        return "Emergency phone number cannot be the same as phone number";
+                                                                    }
+                                                                },
                                                             },
                                                         }}
                                                         render={({ field }) => (
@@ -1795,8 +1784,30 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 )
                                             }
 
+                                            <div>
+                                                <Controller
+                                                    name="lunchBreak"
+                                                    control={control}
+                                                    rules={{
+                                                        required: "Lunch break time is required"
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <Input
+                                                            {...field}
+                                                            label={'Lunch Break Time(Minutes)'}
+                                                            type={`text`}
+                                                            error={errors?.lunchBreak}
+                                                            onChange={(e) => {
+                                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                field.onChange(numericValue);
+                                                            }}
+                                                            endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
 
-                                            <div className='col-span-2'>
+                                            <div>
                                                 <Controller
                                                     name="otId"
                                                     control={control}
@@ -1817,6 +1828,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                     )}
                                                 />
                                             </div>
+
                                         </div>
                                     </>
                                 )

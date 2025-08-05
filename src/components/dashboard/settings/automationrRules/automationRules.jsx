@@ -17,7 +17,7 @@ const AutomationRules = () => {
                         <div className='grow'>
                             <h2 className='text-lg font-semibold'>Overtime Rules</h2>
                             <p className='text-gray-600'>
-                                Automate Oovertime for employees who work beyond their scheduled hours.
+                                Automate Overtime for employees who work beyond their scheduled hours.
                             </p>
                         </div>
                         <div>

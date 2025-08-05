@@ -512,7 +512,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                                         )
                                     }
                                 </>
-                            ):<span>-</span>
+                            ) : <span>-</span>
                         }
                     </>
                 );
@@ -587,54 +587,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
                 return <div>{formattedOT}</div>;
             }
-        },
-        {
-            field: 'lbt',
-            headerName: 'lbt',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 80,
-            align: "left",
-            headerAlign: "left",
-            renderCell: (params) => {
-                return (
-                    <div>
-                        {"00:00"}
-                    </div>
-                );
-            },
-        },
-        {
-            field: 'lbp',
-            headerName: 'lbp',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 80,
-            align: "left",
-            headerAlign: "left",
-            renderCell: (params) => {
-                return (
-                    <div>
-                        {"00:00"}
-                    </div>
-                );
-            },
-        },
-        {
-            field: 'ok',
-            headerName: 'out of shift',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 80,
-            align: "left",
-            headerAlign: "left",
-            renderCell: (params) => {
-                return (
-                    <div>
-                        {"-"}
-                    </div>
-                );
-            },
         },
         {
             field: 'total',
@@ -716,7 +668,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     return (
         <>
-            <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>               
+            <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
                 <div className='grid grid-col-12 md:grid-cols-4 gap-3 items-center'>
                     <div className='mb-4 w-full md:mb-0'>
                         <DatePickerComponent setValue={setValue} control={control} name='startDate' label={`Start Date`} minDate={null} maxDate={watch("endDate")} />
@@ -808,19 +760,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Total Hours :</div>
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{formatTotalDuration(getTotalDurationInMs(rows))}</div>
                         </div>
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">vacation :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
                     </div>
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Regular :</div>
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{getTotalRegular(rows)}</div>
-                        </div>
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Holiday :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
                         </div>
                     </div>
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
@@ -828,41 +772,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">OT : </div>
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{formatHoursToHrMin(getTotalOT(rows))}</div>
                         </div>
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">sick :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
                     </div>
-                    <div className="md:inline-flex flex-col justify-center items-start gap-3">
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Lunch/Break Taken :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">others :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
-                    </div>
-                    <div className="md:inline-flex flex-col justify-center items-start gap-3">
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Lunch/Break Paid :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Total amount :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
-                    </div>
-                    <div className="md:inline-flex flex-col justify-center items-start gap-3">
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">OOS :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">OOS :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">00:00</div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
             {showPdfContent && (
