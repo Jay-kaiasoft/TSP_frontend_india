@@ -14,6 +14,8 @@ import { addSalaryStatement } from "../../../../service/salaryStatementHistory/s
 import { handleSetTitle, setAlert } from "../../../../redux/commonReducers/commonReducers";
 import { connect } from "react-redux";
 import PermissionWrapper from "../../../common/permissionWrapper/PermissionWrapper";
+import DatePickerComponent from "../../../common/datePickerComponent/datePickerComponent";
+import { use } from "react";
 
 const filterOptions = [
     { id: 1, title: 'January', value: 1 },
@@ -45,12 +47,43 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
     const {
         control,
         watch,
+        setValue,
     } = useForm({
         defaultValues: {
+            startDate: null,
+            endDate: (() => {
+                const today = new Date();
+                return `${(today.getMonth() + 1).toString().padStart(2, "0")}/${today.getDate().toString().padStart(2, "0")}/${today.getFullYear()}`;
+            })(),
             selectedUserId: [],
             selectedDepartmentId: [],
         }
     });
+
+    const setDates = () => {
+        const selectedMonth = filter?.value;
+
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
+        const year = today.getFullYear();
+
+        const start = new Date(year, selectedMonth - 1, 1);
+
+        let end;
+        if (selectedMonth === currentMonth) {
+            end = today;
+        } else {
+            end = new Date(year, selectedMonth, 0); // last day of selected month
+        }
+
+        const formatDate = (date) => {
+            return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+        };
+
+        // Update form values
+        setValue('startDate', formatDate(start));
+        setValue('endDate', formatDate(end));
+    };
 
     const handleOpenSalaryDialog = () => {
         setDialog({
@@ -68,6 +101,9 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
     const handleSaveSalary = async () => {
         setLoading(true);
         let data = {
+            startDate: null,
+            endDate: null,
+            timeZone: "",
             month: filter?.value,
             year: selectedYear,
             employeeIds: [],
@@ -76,40 +112,53 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
         if (watch("selectedDepartmentId") && watch("selectedDepartmentId").length > 0) {
             data.departmentIds = watch("selectedDepartmentId");
         }
+        if (watch("selectedUserId") && watch("selectedUserId").length > 0) {
+            data.employeeIds = watch("selectedUserId");
+        }
+        if (watch("startDate")) {
+            data.startDate = watch("startDate")
+        }
+        if (watch("endDate")) {
+            data.endDate = watch("endDate")
+        }
+        let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (userTimeZone === "Asia/Kolkata") {
+            userTimeZone = "Asia/Calcutta";
+        }
+        data.timeZone = userTimeZone;
         try {
-            if (data?.month && data?.year) {
-                const response = await getEmployeeSalaryStatements(data);
-                if (response?.data?.status === 200) {
-                    const newData = response?.data?.result?.map(({ id, ...rest }) => {
-                        return {
-                            ...rest,
-                            month: `${filter?.title}-${selectedYear}`,
-                        };
-                    });
+            const response = await getEmployeeSalaryStatements(data);
+            if (response?.data?.status === 200) {
+                const newData = response?.data?.result?.map(({ id, ...rest }) => {
+                    return {
+                        ...rest,
+                        month: `${filter?.title}-${selectedYear}`,
+                    };
+                });
 
-                    const res = await addSalaryStatement(newData);
-                    if (res?.data?.status === 201) {
-                        setLoading(false);
-                        handleCloseSalaryDialog();
-                        setAlert({
-                            open: true,
-                            type: 'success',
-                            message: 'Salary statements saved successfully!'
-                        })
-                    } else {
-                        setAlert({
-                            open: true,
-                            type: 'error',
-                            message: res?.data?.message || 'Failed to save salary statements!'
-                        })
-                    }
+                const res = await addSalaryStatement(newData);
+                if (res?.data?.status === 201) {
+                    setLoading(false);
+                    handleGetStatements();
+                    handleCloseSalaryDialog();
+                    setAlert({
+                        open: true,
+                        type: 'success',
+                        message: 'Salary statements saved successfully!'
+                    })
                 } else {
                     setAlert({
                         open: true,
                         type: 'error',
-                        message: response?.data?.message || 'Failed to fetch salary statements!'
-                    });
+                        message: res?.data?.message || 'Failed to save salary statements!'
+                    })
                 }
+            } else {
+                setAlert({
+                    open: true,
+                    type: 'error',
+                    message: response?.data?.message || 'Failed to fetch salary statements!'
+                });
             }
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -120,11 +169,25 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
 
     const handleGetStatements = async () => {
         let data = {
+            startDate: null,
+            endDate: null,
+            timeZone: "",
             month: filter?.value,
             year: selectedYear,
             employeeIds: watch("selectedUserId") || [],
             departmentIds: watch("selectedDepartmentId") || [],
         };
+        if (watch("startDate")) {
+            data.startDate = watch("startDate")
+        }
+        if (watch("endDate")) {
+            data.endDate = watch("endDate")
+        }
+        let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (userTimeZone === "Asia/Kolkata") {
+            userTimeZone = "Asia/Calcutta";
+        }
+        data.timeZone = userTimeZone;
         try {
             if (data?.month && data?.year) {
                 const res = await getEmployeeSalaryStatements(data);
@@ -188,11 +251,14 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
     }, []);
 
     useEffect(() => {
-        handleGetStatements();
-    }, [watch("selectedUserId"), watch("selectedDepartmentId"), selectedYear, filter]);
+        setDates();
+    }, [filter]);
 
-    // This memo will now always group if there's data in 'row'.
-    // If specific departments are selected, it filters to those, otherwise groups all.
+    useEffect(() => {
+        handleGetStatements();
+    }, [watch("selectedUserId"), watch("selectedDepartmentId"), selectedYear, watch("startDate"), watch("endDate")]);
+
+
     const groupedDataForDisplay = useMemo(() => {
         if (row.length === 0) return null; // No data, no groups
 
@@ -229,7 +295,6 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
         return { totalEarnings, otherDeductions, totalDeductions, netSalary };
     };
 
-    // Calculate totals for each grouped department
     const groupedDepartmentTotals = useMemo(() => {
         if (groupedDataForDisplay) {
             const departmentTotals = {};
@@ -241,8 +306,6 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
         return null;
     }, [groupedDataForDisplay]);
 
-
-    // Function to create a special total row object for DataGrid
     const createDataGridTotalRow = (totals, idPrefix) => {
         const uniqueId = `${idPrefix}-total-row`;
         return {
@@ -318,7 +381,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                     moduleName="Salary Statement"
                     actionId={1}
                     component={
-                        <Button type={`button`} text={'Generate & Save Salary'} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} />
+                        <Button type={`button`} text={'Generate & Save Salary'} disabled={!watch("startDate") || !watch("endDate")} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} />
                     }
                 />
             </div>
@@ -351,6 +414,14 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                                 setFilter(newValue?.value ? newValue : filterOptions[0]);
                             }}
                         />
+                    </div>
+
+                    <div className='mb-4 w-full md:mb-0'>
+                        <DatePickerComponent setValue={setValue} control={control} name='startDate' label={`Start Date`} minDate={null} maxDate={watch("endDate")} />
+                    </div>
+
+                    <div className='mb-4 w-full md:mb-0'>
+                        <DatePickerComponent setValue={setValue} control={control} name='endDate' label={`End Date`} minDate={watch("startDate")} maxDate={watch("endDate")} />
                     </div>
 
                     <div>

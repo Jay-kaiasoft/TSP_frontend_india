@@ -161,6 +161,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             canteenType: "",
             canteenAmount: "",
             lunchBreak: "",
+            workingHoursIncludeLunch: "",
 
             otId: null,
             accountId: "",
@@ -1801,12 +1802,28 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                                 const numericValue = e.target.value.replace(/[^0-9]/g, '');
                                                                 field.onChange(numericValue);
                                                             }}
-                                                            endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                                         />
                                                     )}
                                                 />
                                             </div>
 
+                                            <div>
+                                                <Controller
+                                                    name="workingHoursIncludeLunch"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Input
+                                                            {...field}
+                                                            label={'Working Hours For Including Lunch'}
+                                                            type={`text`}
+                                                            onChange={(e) => {
+                                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                field.onChange(numericValue);
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
                                             <div>
                                                 <Controller
                                                     name="otId"

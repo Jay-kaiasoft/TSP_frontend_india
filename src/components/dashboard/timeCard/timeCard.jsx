@@ -296,32 +296,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     };
 
     const getTotalRegular = (data) => {
-        let totalRegularHours = 0;
-
-        data?.map((record, index) => {
-            const timeIn = new Date(handleConvertUTCDateToLocalDate(record?.timeIn));
-            const timeOut = new Date(handleConvertUTCDateToLocalDate(record?.timeOut));
-            const totalHours = parseFloat(record?.companyShiftDto?.totalHours) || 0;
-
-            const durationMs = timeOut - timeIn;
-            const workedHours = durationMs / (1000 * 60 * 60);
-            let regularHours = workedHours;
-
-            if (workedHours > totalHours) {
-                regularHours = totalHours;
-            }
-
-            totalRegularHours += regularHours;
-        });
-
-        const totalRegWholeHours = Math.floor(totalRegularHours);
-        const totalRegMinutes = Math.floor((totalRegularHours - totalRegWholeHours) * 60);
-        const formattedTotalRegular =
-            totalRegWholeHours > 0 || totalRegMinutes > 0
-                ? `${totalRegWholeHours > 0 ? `${totalRegWholeHours} hr` : ''}${totalRegMinutes > 0 ? ` ${totalRegMinutes} min` : ''}`.trim()
-                : '00:00';
-
-        return formattedTotalRegular;
+        return data?.reduce((total, row) => {
+            return total + (row?.companyShiftDto?.totalHours ? row?.companyShiftDto?.totalHours : 0);
+        }, 0) || 0;
     }
 
     const formatTotalDuration = (totalMs) => {
@@ -527,28 +504,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                const timeIn = new Date(handleConvertUTCDateToLocalDate(params?.row?.timeIn));
-                const timeOut = new Date(handleConvertUTCDateToLocalDate(params?.row?.timeOut));
-                const totalHours = parseFloat(params?.row?.companyShiftDto?.totalHours) || 0;
-
-                const durationMs = timeOut - timeIn;
-                const workedHours = durationMs / (1000 * 60 * 60);
-
-                let regularHours = workedHours;
-
-                if (workedHours > totalHours) {
-                    regularHours = totalHours;
-                }
-                const regWholeHours = Math.floor(regularHours);
-                const regMinutes = Math.floor((regularHours - regWholeHours) * 60);
-                const formattedRegular =
-                    regWholeHours > 0 || regMinutes > 0
-                        ? `${regWholeHours > 0 ? `${regWholeHours} hr` : ''}${regMinutes > 0 ? ` ${regMinutes} min` : ''}`.trim()
-                        : '00:00';
-
                 return (
                     <div>
-                        {formattedRegular}
+                        {params?.row?.companyShiftDto?.totalHours ? `${params?.row?.companyShiftDto?.totalHours} h` : '0 h'}
                     </div>
                 );
             },
@@ -704,27 +662,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             />
                         </div>
                     ) : null}
-                    {/* {
-                        userInfo?.companyId ? (
-                            <div className='mb-4 w-full md:mb-0'>
-                                <Controller
-                                    name="locationIds"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <SelectMultiple
-                                            options={locations}
-                                            label={"Select Location"}
-                                            placeholder="Select location"
-                                            value={field.value || []}
-                                            onChange={(newValue) => {
-                                                field.onChange(newValue);
-                                            }}
-                                        />
-                                    )}
-                                />
-                            </div>
-                        ) : null
-                    } */}
+
                     <div className='mb-4 w-full md:mb-0'>
                         <Controller
                             name="selectedDepartmentId"
@@ -764,7 +702,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Regular :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{getTotalRegular(rows)}</div>
+                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{getTotalRegular(rows)} HRS</div>
                         </div>
                     </div>
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">

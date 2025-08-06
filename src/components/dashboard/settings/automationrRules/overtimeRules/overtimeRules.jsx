@@ -127,22 +127,7 @@ const OvertimeRules = () => {
                     </>
                 );
             }
-        },
-        {
-            field: 'userIds',
-            headerName: 'Assigned Employees',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 50,
-            renderCell: (params) => {
-                const userIds = params.row.userIds !== null ? JSON.parse(params.row.userIds)?.length : 0;
-                return (
-                    <>
-                        {userIds}
-                    </>
-                );
-            }
-        },
+        },        
         {
             field: 'action',
             headerName: 'action',
@@ -152,23 +137,18 @@ const OvertimeRules = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-center h-full'>
-                        {/* <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleUserModelOpen(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
+                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
                             </Components.IconButton>
-                        </div> */}
-                        <PermissionWrapper
+                        </div>
+                        {/* <PermissionWrapper
                             functionalityName="Company"
                             moduleName="Overtime Rules"
                             actionId={2}
                             Component={
-                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                    <Components.IconButton onClick={() => handleOpen(params.row.id)}>
-                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                                    </Components.IconButton>
-                                </div>
                             }
-                        />
+                        /> */}
 
                         <PermissionWrapper
                             functionalityName="Company"

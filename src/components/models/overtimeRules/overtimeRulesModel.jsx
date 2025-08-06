@@ -121,7 +121,6 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                     otType: overTimeTypes.find(type => type.title === data?.otType)?.id || 1,
                     startTime: data?.startTime ? dayjs(data.startTime) : null,
                     endTime: data?.endTime ? dayjs(data.endTime) : null,
-                    userIds: data?.userIds !== null ? JSON.parse(data?.userIds) : [],
                 });
             }
         }
