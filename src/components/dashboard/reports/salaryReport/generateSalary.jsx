@@ -133,6 +133,9 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                     return {
                         ...rest,
                         month: `${filter?.title}-${selectedYear}`,
+                        startDate: watch("startDate"),
+                        endDate: watch("endDate"),
+                        timeZone: userTimeZone,
                     };
                 });
 

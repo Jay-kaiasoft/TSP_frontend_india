@@ -96,3 +96,13 @@ export const updateUserTimeRecord = async (data) => {
         console.log(error)
     }
 }
+
+export const addClockInOut = async (data) => {
+    try {
+        const response = axiosInterceptor().post(`${userInOutURL}/addClockInOut`,data)
+        return response
+
+    } catch (error) {
+        console.log(error)
+    }
+}

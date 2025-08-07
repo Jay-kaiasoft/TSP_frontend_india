@@ -26,9 +26,9 @@ import Button from '../../common/buttons/button';
 import DetailedPDFTable from './timeCardPDF/detailedPDFTable';
 import { getCompanyDetails } from '../../../service/companyDetails/companyDetailsService';
 import Select from '../../common/select/select';
-import { getAllActiveLocationsByCompanyId } from '../../../service/location/locationService';
 import SelectMultiple from '../../common/select/selectMultiple';
 import { getAllDepartment } from '../../../service/department/departmentService';
+import { AddClockInOut } from '../../models/clockInOut/addClockInOut';
 
 const tabData = [
     {
@@ -55,8 +55,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const [showPdfContent, setShowPdfContent] = useState(false);
-    const [locations, setLocations] = useState([]);
     const [department, setDepartment] = useState([]);
+    const [openInOutModel, setOpenInOutModel] = useState(false);
 
     const {
         control,
@@ -82,6 +82,14 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             selectedDepartmentId: [],
         }
     });
+
+    const handleOpenInOutModal = () => {
+        setOpenInOutModel(true);
+    }
+
+    const handleCloseInOutModal = () => {
+        setOpenInOutModel(false);
+    }
 
     const handleChangeTab = (value) => {
         setSelectedTab(value);
@@ -315,6 +323,15 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     };
 
     const columns = [
+        {
+            field: 'userName',
+            headerName: 'Employee Name',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 120,
+            align: "left",
+            headerAlign: "left",
+        },
         {
             field: 'rowId',
             headerName: 'DAY',
@@ -597,32 +614,19 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     const actionButtons = () => {
         return (
-            <div className='flex justify-start items-center gap-3 w-38'>
+            <div className='flex justify-start items-center gap-3 w-[23rem]'>
                 <Button type={`button`} useFor={'error'} text={'Download PDF'} isLoading={loadingPdf} onClick={() => generatePDF()} startIcon={<CustomIcons iconName="fa-solid fa-file-pdf" css="h-5 w-5" />} />
-                {/* //     
-            //     <p className='text-white'>Generate PDF</p> */}
+                <PermissionWrapper
+                    functionalityName="Time Card"
+                    moduleName="Clock-In-Out"
+                    actionId={1}
+                    component={
+                        <Button type={`button`} text={'Clock In/Out'} onClick={() => handleOpenInOutModal()} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
+                    }
+                />
             </div>
         )
     }
-
-    const handleGetCompanyLocations = async () => {
-        if (userInfo?.companyId) {
-            const res = await getAllActiveLocationsByCompanyId(userInfo?.companyId)
-            if (res?.data?.status === 200) {
-                const data = res?.data?.result?.map((item) => {
-                    return {
-                        title: item?.locationName,
-                        id: item?.id
-                    }
-                })
-                setLocations(data)
-            }
-        }
-    }
-
-    useEffect(() => {
-        handleGetCompanyLocations();
-    }, []);
 
     return (
         <>
@@ -699,12 +703,14 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{formatTotalDuration(getTotalDurationInMs(rows))}</div>
                         </div>
                     </div>
+
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Regular :</div>
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{getTotalRegular(rows)} HRS</div>
                         </div>
                     </div>
+
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">OT : </div>
@@ -719,6 +725,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <DetailedPDFTable data={rows} companyInfo={companyInfo} startDate={watch("startDate")} endDate={watch("endDate")} />
                 </div>
             )}
+            <AddClockInOut open={openInOutModel} handleClose={handleCloseInOutModal} employeeList={users} getRecords={handleGetAllEntriesByUserId} />
         </>
     )
 }
