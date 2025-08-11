@@ -64,11 +64,13 @@ const PFReport = () => {
     const columns = [
         {
             field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 50,
+            sortable: false,
             renderCell: (params) =>
                 params.row.isTotalRow ? null : <span>{params.value}</span>
         },
         {
             field: 'userName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 300,
+            sortable: false,
             renderCell: (params) => params.row.isTotalRow ? <strong className='font-semibold'>Total</strong> : params.value
         },
         {
@@ -77,6 +79,7 @@ const PFReport = () => {
             headerClassName: 'uppercase',
             flex: 1,
             maxWidth: 300,
+            sortable: false,
             align: "right",
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
@@ -88,6 +91,7 @@ const PFReport = () => {
             flex: 1,
             maxWidth: 200,
             align: "right",
+            sortable: false,
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
@@ -98,6 +102,7 @@ const PFReport = () => {
             flex: 1,
             maxWidth: 300,
             align: "right",
+            sortable: false,
             headerAlign: "right",
         },
         {
@@ -107,6 +112,7 @@ const PFReport = () => {
             flex: 1,
             maxWidth: 300,
             align: "right",
+            sortable: false,
             headerAlign: "right",
         },
         {
@@ -116,6 +122,7 @@ const PFReport = () => {
             flex: 1,
             maxWidth: 300,
             align: "right",
+            sortable: false,
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
@@ -126,6 +133,7 @@ const PFReport = () => {
             flex: 1,
             maxWidth: 300,
             align: "right",
+            sortable: false,
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
@@ -136,6 +144,7 @@ const PFReport = () => {
             flex: 1,
             maxWidth: 150,
             align: "right",
+            sortable: false,
             headerAlign: "right",
             renderCell: (params) =>
                 params.row.isTotalRow

@@ -72,6 +72,7 @@ const PTReport = () => {
             headerName: 'Employee Name',
             headerClassName: 'uppercase',
             flex: 1,
+            sortable: false,
             maxWidth: 300,
             renderCell: (params) =>
                 params.row.isTotalRow
@@ -85,6 +86,7 @@ const PTReport = () => {
             flex: 1,
             maxWidth: 250,
             align: "right",
+            sortable: false,
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
@@ -94,6 +96,7 @@ const PTReport = () => {
             headerClassName: 'uppercase',
             flex: 1,
             maxWidth: 300,
+            sortable: false,
             align: "right",
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
@@ -104,6 +107,7 @@ const PTReport = () => {
             headerClassName: 'uppercase',
             flex: 1,
             maxWidth: 300,
+            sortable: false,
             align: "right",
             headerAlign: "right",
             renderCell: (params) =>

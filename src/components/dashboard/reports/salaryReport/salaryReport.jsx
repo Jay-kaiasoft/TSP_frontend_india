@@ -87,6 +87,7 @@ const SalaryReport = ({ handleSetTitle }) => {
             employeeIds: watch("selectedUserId") || [],
             departmentIds: watch("selectedDepartmentId") || [],
         };
+
         try {
             if (selectedMonths && selectedYear) {
                 const res = await getAllHistory(data);
@@ -106,6 +107,7 @@ const SalaryReport = ({ handleSetTitle }) => {
             console.error("Error fetching data:", error);
         }
     };
+
     const handleGetAllUsers = async () => {
         if (userInfo?.companyId) {
             const response = await getAllEmployeeListByCompanyId(userInfo?.companyId);
@@ -234,45 +236,44 @@ const SalaryReport = ({ handleSetTitle }) => {
     };
 
     const columns = [
-        // { field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 100 },
-        { field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 180 },
-        { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', flex: 1, maxWidth: 180 },
+        { field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 180 },
+        { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 180 },
         {
-            field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
+            field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 150,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 120,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 120,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'ptAmount', headerName: 'PT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+            field: 'ptAmount', headerName: 'PT (₹)', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 120,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 200,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'otherDeductions', headerName: 'Other Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            field: 'otherDeductions', headerName: 'Other Deductions', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 200,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'totalDeductions', headerName: 'Total Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+            field: 'totalDeductions', headerName: 'Total Deductions', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 200,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
-            field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
+            field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 180,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'action',
             headerName: 'action',
-            headerClassName: 'uppercase',
+            headerClassName: 'uppercase', sortable: false,
             renderCell: (params) => {
                 if (!params.row.isTotalRow) {
                     return (

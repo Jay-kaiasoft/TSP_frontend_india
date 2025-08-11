@@ -104,6 +104,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
                   { name: "PT Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
                   { name: "Generate Salary", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
                   { name: "Salary Report", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
+                  { name: "GrossSalaryReport", icon: <CustomIcons iconName={'fa-solid fa-circle'} css='cursor-pointer' /> },
                 ]
               });
             }
@@ -188,7 +189,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
               <Components.ListItem disablePadding className='h-12' sx={{ borderRadius: '8px', transition: 'all 0.2s ease', background: (title === item.name || (item.name === "Manage Employees" && (title === "Add Employee" || title === "Update Employee")) || (item.name === "PF Report" && title === "PF Report") || (item.name === "PT Report" && title === "PT Report")) ? theme.palette.primary.main : '', color: (title === item.name || (item.name === "Manage Employees" && (title === "Add Employee" || title === "Update Employee") || (item.name === "PF Report" && title === "PF Report") || (item.name === "PT Report" && title === "PT Report"))) ? "white" : '', '& .MuiListItemButton-root:hover': { background: (title === item.name || (item.name === "Manage Employees" && (title === "Add Employee" || title === "Update Employee") || (item.name === "PF Report" && title === "PF Report") || (item.name === "PT Report" && title === "PT Report"))) ? theme.palette.primary.main : '', color: (title === item.name || (item.name === "Manage Employees" && (title === "Add Employee" || title === "Update Employee") || (item.name === "PF Report" && title === "PF Report") || (item.name === "PT Report" && title === "PT Report"))) ? 'white' : '', borderRadius: '8px' } }} >
                 {
                   !item.child ? (
-                    <NavLink className="w-full" to={`/dashboard/${item.name === "Dashboard" ? "main" : item?.name?.toLowerCase()?.replace(" ", "")}`} key={index} onClick={() => { handleSetTitle(item.name === "Manage User" ? title : item.name); if (isMobile) handleDrawerClose() }}>
+                    <NavLink className="w-full" to={`/dashboard/${item.name === "Dashboard" ? "main" : item?.name?.toLowerCase()?.split(' ').join('')}`} key={index} onClick={() => { handleSetTitle(item.name === "Manage User" ? title : item.name); if (isMobile) handleDrawerClose() }}>
                       <Components.ListItemButton onClick={() => handleToggleChild(item.name, index)} >
                         <Components.ListItemIcon sx={{ color: (title === item.name || (item.name === "Manage Employees" && (title === "Add Employee" || title === "Update Employee")) || (item.name === "PF Report" && title === "PF Report") || (item.name === "PT Report" && title === "PT Report")) ? "white" : '' }}>
                           {item.icon}

@@ -50,6 +50,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
             month: "",
             totalDays: "",
             totalWorkingDays: "",
+            note: "",
         },
     });
 
@@ -185,7 +186,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
 
     useEffect(() => {
         calculateTotalPFAmount();
-    }, [watch("pfAmount"),watch("ptAmount")]);
+    }, [watch("pfAmount"), watch("ptAmount")]);
 
     useEffect(() => {
         handleGetData();
@@ -202,6 +203,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                 <Components.DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
                     Update Salary Statement
                 </Components.DialogTitle>
+
                 <Components.IconButton
                     aria-label="close"
                     onClick={onClose}
@@ -382,206 +384,45 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                 )}
                             />
                         </div>
+
                         <div className='flex justify-start items-center my-2 gap-5'>
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Total Earnings :</p>
                                 <span className='font-semibold'>₹{parseInt(watch("totalEarnings")).toLocaleString("en-IN")}</span>
                             </div>
+
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Total Deductions :</p>
                                 <span className='font-semibold'>₹{parseInt(watch("totalDeductions")).toLocaleString("en-IN")}</span>
                             </div>
+
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Net Salary :</p>
                                 <span className='font-semibold'>₹{parseInt(watch("netSalary")).toLocaleString("en-IN")}</span>
                             </div>
                         </div>
 
-                        {/* <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-                            <Input
-                                label="Employee Name"
-                                type={`text`}
-                                value={watch("employeeName")}
-                                disabled
-                            />
-                            <Input
-                                label="Department Name"
-                                type={`text`}
-                                value={watch("departmentName")}
-                                disabled
-                            />
-                            <Input
-                                label="Basic Salary(per month)"
-                                type={`text`}
-                                value={watch("basicSalary")}
-                                disabled
-                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                            />
-                            <Input
-                                label="Total Days"
-                                type={`text`}
-                                value={watch("totalDays")}
-                                disabled
-                            />
+                        <div className='flex justify-start items-center my-2 gap-5'>
                             <Controller
-                                name="totalWorkingDays"
+                                name="note"
                                 control={control}
-                                rules={{
-                                    required: "Working days is required",
-                                }}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        label="Total Working Days"
+                                        label="Note"
                                         type="text"
-                                        error={errors.totalWorkingDays}
+                                        multiline={true}
+                                        // rows={3}
                                         onChange={(e) => {
-                                            const value = e.target.value.replace(/[^0-9]/g, '');
-                                            if (parseInt(value) > parseInt(watch("totalDays"))) {
-                                                return;
-                                            } else {
-                                                field.onChange(value);
-                                            }
+                                            field.onChange(e.target.value);
                                         }}
                                     />
                                 )}
                             />
+                        </div>
 
-                            <Controller
-                                name="otAmount"
-                                control={control}
-                                rules={{
-                                    required: "OT amount is required",
-                                }}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="OT Amount"
-                                        type={`text`}
-                                        error={errors.otAmount}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/[^0-9]/g, '');
-                                            field.onChange(value);
-                                        }}
-                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                    />
-                                )}
-                            />
-                            {
-                                watch("pfPercentage") > 0 ? (
-                                    <Controller
-                                        name="pfPercentage"
-                                        control={control}
-                                        rules={{
-                                            required: "PF percentage is required",
-                                        }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="PF Percentage"
-                                                type={`text`}
-                                                error={errors.pfPercentage}
-                                                onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(value);
-                                                }}
-                                                endIcon={<CustomIcons iconName={`fa-solid fa-percent`} css={'text-gray-500'} />}
-                                            />
-                                        )}
-                                    />
-                                ) : (
-                                    <Controller
-                                        name="pfAmount"
-                                        control={control}
-                                        rules={{
-                                            required: "PF amount is required",
-                                        }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="Total PF Amount"
-                                                type={`text`}
-                                                error={errors.pfAmount}
-                                                onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(value);
-                                                }}
-                                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                            />
-                                        )}
-                                    />
-                                )
-                            }
-                            <Input
-                                label="Total PF Amount"
-                                type={`text`}
-                                value={watch("totalPfAmount")}
-                                disabled
-                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                            />
-                            <Controller
-                                name="ptAmount"
-                                control={control}
-                                rules={{
-                                    required: "PT amount is required",
-                                }}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="PT Amount"
-                                        type={`text`}
-                                        error={errors.ptAmount}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/[^0-9]/g, '');
-                                            field.onChange(value);
-                                        }}
-                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                    />
-                                )}
-                            />
-                            <Input
-                                label="Total Earnings"
-                                type={`text`}
-                                value={watch("totalEarnings")}
-                                disabled
-                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                            />
-                            <Controller
-                                name="otherDeductions"
-                                control={control}
-                                rules={{
-                                    required: "Other deductions is required",
-                                }}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="Other Deductions"
-                                        type={`text`}
-                                        error={errors.otherDeductions}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/[^0-9]/g, '');
-                                            field.onChange(value);
-                                        }}
-                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                    />
-                                )}
-                            />
-                            <Input
-                                label="Total Deductions"
-                                type={`text`}
-                                value={watch("totalDeductions")}
-                                disabled
-                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                            />
-                            <Input
-                                label="Net Salary"
-                                type={`text`}
-                                value={watch("netSalary")}
-                                disabled
-                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                            />
-                        </div> */}
                     </Components.DialogContent>
+
                     <Components.DialogActions>
                         <div className='flex justify-end'>
                             <Button type={`submit`} text={"Submit"} isLoading={loading} />

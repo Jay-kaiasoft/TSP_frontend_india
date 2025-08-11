@@ -121,10 +121,12 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
         if (watch("endDate")) {
             data.endDate = watch("endDate")
         }
+
         let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (userTimeZone === "Asia/Kolkata") {
             userTimeZone = "Asia/Calcutta";
         }
+
         data.timeZone = userTimeZone;
         try {
             const response = await getEmployeeSalaryStatements(data);
@@ -132,6 +134,8 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                 const newData = response?.data?.result?.map(({ id, ...rest }) => {
                     return {
                         ...rest,
+                        year: selectedYear,
+                        monthNumber: filter?.value,
                         month: `${filter?.title}-${selectedYear}`,
                         startDate: watch("startDate"),
                         endDate: watch("endDate"),
@@ -334,42 +338,42 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
         { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', flex: 1, maxWidth: 180, sortable: false, disableColumnMenu: true },
         {
             field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'ptAmount', headerName: 'PT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'otherDeductions', headerName: 'Other Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'totalDeductions', headerName: 'Total Deductions', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
         {
             field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
-            sortable: false, disableColumnMenu: true,
+            sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         }
     ];
@@ -384,7 +388,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                     moduleName="Salary Statement"
                     actionId={1}
                     component={
-                        <Button type={`button`} text={'Generate & Save Salary'} disabled={!watch("startDate") || !watch("endDate")} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} />
+                        <Button type={`button`} text={'Generate & Save Salary'} disabled={!watch("startDate") && !watch("endDate") && !selectedYear} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} />
                     }
                 />
             </div>

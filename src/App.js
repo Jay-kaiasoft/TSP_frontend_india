@@ -37,12 +37,23 @@ import AutomationRules from "./components/dashboard/settings/automationrRules/au
 import OvertimeRules from "./components/dashboard/settings/automationrRules/overtimeRules/overtimeRules";
 import GenerateSalary from "./components/dashboard/reports/salaryReport/generateSalary";
 import SalaryReport from "./components/dashboard/reports/salaryReport/salaryReport";
+import GrossSalaryReport from "./components/dashboard/reports/grossSalaryReport/grossSalaryReport";
+import Demo from "./demo";
+import OAuthCallback from "./OAuthCallback";
 
 library.add(fas, far)
 
 function App() {
 
-  const router = createBrowserRouter([  
+  const router = createBrowserRouter([
+    {
+      path: "/demo",
+      element: <Demo />,
+    },
+    {
+      path: "/oauth/callback",
+      element: <OAuthCallback />,
+    },
     {
       path: "*",
       element: <PageNotFound />,
@@ -166,6 +177,10 @@ function App() {
         {
           path: "salaryreport",
           element: <SalaryReport />,
+        },
+        {
+          path: "grosssalaryreport",
+          element: <GrossSalaryReport />,
         },
         {
           path: "automationrules",
