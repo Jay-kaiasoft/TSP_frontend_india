@@ -34,6 +34,7 @@ const overTimeTypes = [
 function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId, handleGetAllOvertimeRules }) {
     const theme = useTheme()
     const [loading, setLoading] = useState(false);
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
     const {
         watch,
@@ -64,7 +65,7 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             otAmount: "",
             otType: 1,
             startTime: null,
-            endTime: null,
+            endTime: null,            
         });
         handleClose();
     };
@@ -75,6 +76,7 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
             endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
             companyId: companyId,
+            createdBy: userInfo?.employeeId || null,
             otType: overTimeTypes.find(type => type.id === data.otType)?.title || "",
             userIds: data.userIds?.length > 0 ? JSON.stringify(data.userIds) : null,
         }

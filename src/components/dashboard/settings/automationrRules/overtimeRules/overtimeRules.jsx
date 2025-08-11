@@ -49,17 +49,6 @@ const OvertimeRules = () => {
         }
     }
 
-    // const handleUserModelOpen = (id) => {
-    //     setOverTimeId(id);
-    //     setOpenUserModel(true);
-    // }
-
-    // const handleUserModelClose = () => {
-    //     setOverTimeId(null);
-    //     handleGetAllOvertimeRules();
-    //     setOpenUserModel(false);
-    // }
-
     const handleOpen = (id) => {
         setOverTimeId(id);
         setOpen(true);
@@ -101,6 +90,13 @@ const OvertimeRules = () => {
             minWidth: 100
         },
         {
+            field: 'createdByUserName',
+            headerName: 'Created By',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 100
+        },
+        {
             field: 'otMinutes',
             headerName: 'OT Minutes',
             headerClassName: 'uppercase',
@@ -115,19 +111,19 @@ const OvertimeRules = () => {
             }
         },
         {
-            field: 'otAmount',
-            headerName: 'OT Amount',
+            field: 'otType',
+            headerName: 'OT Type',
             headerClassName: 'uppercase',
             flex: 1,
             minWidth: 100,
             renderCell: (params) => {
                 return (
                     <>
-                        {params.row.otAmount ? `₹${params.row.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}` : '-'}
+                        {params.row.otType ? `${params.row.otType}` : '-'}
                     </>
                 );
             }
-        },        
+        },
         {
             field: 'action',
             headerName: 'action',

@@ -2,7 +2,7 @@ import React from "react";
 import Components from "../../muiComponents/components";
 import { useTheme } from "@mui/material";
 
-const Checkbox = ({ text, onChange, checked = false }) => {
+const Checkbox = ({ text, onChange, checked = false, disabled }) => {
     const theme = useTheme();
 
     return (
@@ -10,6 +10,7 @@ const Checkbox = ({ text, onChange, checked = false }) => {
             <Components.FormControlLabel
                 control={
                     <Components.Checkbox
+                        disabled={disabled}
                         size="small"
                         sx={{
                             "&.Mui-checked": {

@@ -91,6 +91,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                 <Components.DialogTitle sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }} id="customized-dialog-title">
                     Add Clock In/Out
                 </Components.DialogTitle>
+
                 <Components.IconButton
                     aria-label="close"
                     onClick={onClose}
@@ -117,7 +118,6 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                                         label={"Employee List"}
                                         placeholder="Select employees"
                                         value={parseInt(watch("userId")) || null}
-                                        errors={errors?.userId}
                                         onChange={(_, newValue) => {
                                             if (newValue?.id) {
                                                 field.onChange(newValue.id);
@@ -125,6 +125,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                                                 setValue("userId", null);
                                             }
                                         }}
+                                        errors={errors?.userId}
                                     />
                                 )}
                             />
@@ -141,6 +142,9 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                                 label="Clock Out Time"
                                 name="timeOut"
                                 control={control}
+                                   rules={{
+                                    required: "Clock out time is required",
+                                }}
                                 minTime={watch("timeIn")}
                             />
                         </div>

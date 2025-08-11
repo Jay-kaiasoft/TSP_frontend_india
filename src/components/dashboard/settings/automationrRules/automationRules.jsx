@@ -33,6 +33,31 @@ const AutomationRules = () => {
                             </NavLink>
                         </div>
                     </div>
+
+
+                    <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
+                        <div style={{ color: theme.palette.primary.main }}>                            
+                            <CustomIcons iconName={'fa-solid fa-calendar-days'} css='cursor-pointer h-6 w-6' />
+                        </div>
+                        <div className='grow'>
+                            <h2 className='text-lg font-semibold'>Weekly Holidays</h2>
+                            <p className='text-gray-600'>
+                                Configure & manage weekly holidays.
+                            </p>
+                        </div>
+                        <div>
+                            <NavLink to={'/dashboard/automationrules/week-off/templates'}>
+                                <div className='flex justify-center items-center gap-2'>
+                                    <p>
+                                        <span style={{ color: theme.palette.primary.main }} className='font-semibold'>View All</span>
+                                    </p>
+                                    <div>
+                                        <CustomIcons iconName={'fa-solid fa-angle-right'} css='cursor-pointer text-gray-500 h-4 w-4' />
+                                    </div>
+                                </div>
+                            </NavLink>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>

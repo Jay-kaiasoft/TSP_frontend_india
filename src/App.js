@@ -39,7 +39,9 @@ import GenerateSalary from "./components/dashboard/reports/salaryReport/generate
 import SalaryReport from "./components/dashboard/reports/salaryReport/salaryReport";
 import GrossSalaryReport from "./components/dashboard/reports/grossSalaryReport/grossSalaryReport";
 import Demo from "./demo";
-import OAuthCallback from "./OAuthCallback";
+import WeekOffTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/weekOffTemplates";
+import AddWeekOfTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/addWeekOfTemplates";
+import Salesforce from "./salesforce";
 
 library.add(fas, far)
 
@@ -50,9 +52,9 @@ function App() {
       path: "/demo",
       element: <Demo />,
     },
-    {
-      path: "/oauth/callback",
-      element: <OAuthCallback />,
+     {
+      path: "/salesforce",
+      element: <Salesforce />,
     },
     {
       path: "*",
@@ -189,6 +191,18 @@ function App() {
         {
           path: "automationrules/overtimerules",
           element: <OvertimeRules />,
+        },
+        {
+          path: "automationrules/week-off/templates",
+          element: <WeekOffTemplates />,
+        },
+        {
+          path: "automationrules/week-off/add",
+          element: <AddWeekOfTemplates />,
+        },
+        {
+          path: "automationrules/week-off/edit/:id",
+          element: <AddWeekOfTemplates />,
         },
       ]
     },

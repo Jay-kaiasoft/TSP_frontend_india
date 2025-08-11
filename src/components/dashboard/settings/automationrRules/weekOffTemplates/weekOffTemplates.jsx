@@ -1,0 +1,182 @@
+import React, { useEffect, useState } from 'react'
+import CustomIcons from '../../../../common/icons/CustomIcons'
+import { NavLink, useNavigate } from 'react-router-dom'
+import DataTable from '../../../../common/table/table'
+import { deleteWeekOffTemplate, getAllWeekOffTemplate } from '../../../../../service/weeklyOff/WeeklyOffService'
+import { useTheme } from '@mui/material'
+import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWrapper'
+import Button from '../../../../common/buttons/button'
+import Components from '../../../../muiComponents/components'
+import AlertDialog from '../../../../common/alertDialog/alertDialog'
+import { set } from 'react-hook-form'
+
+const WeekOffTemplates = () => {
+    const theme = useTheme();
+    const navigate = useNavigate();
+    const [weekOffTemplates, setWeekOffTemplates] = useState([])
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const [id, setId] = useState(null);
+
+    const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [loading, setLoading] = useState(false);
+
+    const handleOpenDeleteDialog = (id) => {
+        setId(id)
+        setDialog({
+            open: true,
+            title: 'Delete Weekly Off Template',
+            message: 'Are you sure! Do you want to delete this weekly off template?',
+            actionButtonText: 'Delete'
+        })
+    }
+
+    const handleCloseDialog = () => {
+        setId(null)
+        setLoading(false)
+        setDialog({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: ''
+        })
+    }
+
+    const handleDelete = async () =>{
+        setLoading(true);
+        if (id) {
+            const response = await deleteWeekOffTemplate(id);
+            if (response?.data?.status === 200) {
+                setLoading(false)
+                handleCloseDialog();
+                handleGetAllWeekOffTemplate();
+            }else{
+                setLoading(false);
+                handleCloseDialog();
+            }
+        }
+    }
+    const handleGetAllWeekOffTemplate = async () => {
+        if (userInfo?.companyId) {
+            const response = await getAllWeekOffTemplate(userInfo.companyId);
+            if (response?.data?.status === 200) {
+                const data = response.data?.result?.map((item, index) => ({
+                    ...item,
+                    rowId: index + 1,
+                }));
+                setWeekOffTemplates(data);
+            }
+        }
+    }
+
+    useEffect(() => {
+        handleGetAllWeekOffTemplate()
+    }, [])
+
+    const columns = [
+        {
+            field: 'rowId',
+            headerName: 'id',
+            headerClassName: 'uppercase',
+            flex: 1,
+            maxWidth: 80
+        },
+        {
+            field: 'name',
+            headerName: 'Name',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 100
+        },
+        {
+            field: 'createdByUsername',
+            headerName: 'Created By',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 100
+        },
+        {
+            field: 'action',
+            headerName: 'action',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 80,
+            renderCell: (params) => {
+                return (
+                    <div className='flex items-center gap-2 justify-center h-full'>
+                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => navigate(`/dashboard/automationrules/week-off/edit/${params.row.id}`)}>
+                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                            </Components.IconButton>
+                        </div>
+
+                        <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
+                                <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
+                            </Components.IconButton>
+                        </div>
+                        {/* <PermissionWrapper
+                            functionalityName="Company"
+                            moduleName="Overtime Rules"
+                            actionId={3}
+                            component={
+                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        /> */}
+                    </div>
+                );
+            },
+        },
+    ];
+
+    const getRowId = (row) => {
+        return row.id || row.rowId;
+    }
+
+
+    const actionButtons = () => {
+        return (
+            <PermissionWrapper
+                functionalityName="Company"
+                moduleName="Overtime Rules"
+                actionId={1}
+                component={
+                    <div>
+                        <Button type={`button`} text={'Create New Template'} onClick={() => navigate('/dashboard/automationrules/week-off/add')} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
+                    </div>
+                }
+            />
+        )
+    }
+    return (
+        <div className='px-4 lg:px-0'>
+            <div className='mb-4 w-60'>
+                <NavLink to={'/dashboard/automationrules'}>
+                    <div className='flex justify-start items-center gap-3'>
+                        <div style={{ color: theme.palette.primary.main }}>
+                            <CustomIcons iconName={'fa-solid fa-arrow-left'} css='cursor-pointer h-4 w-4' />
+                        </div>
+                        <p className='text-md capitalize'>Back to automation rules</p>
+                    </div>
+                </NavLink>
+            </div>
+
+            <div className='border rounded-lg bg-white w-screen lg:w-full p-4'>
+                <div className='grow mb-4'>
+                    <h2 className='text-lg font-semibold'>Weekly Off Templates</h2>
+                    <p className='text-gray-600'>
+                        Create and manage weekly off templates.
+                    </p>
+                </div>
+                <DataTable columns={columns} rows={weekOffTemplates} getRowId={getRowId} height={480} showButtons={true} buttons={actionButtons} />
+                <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDelete} handleClose={handleCloseDialog} loading={loading} />
+
+            </div>
+        </div>
+    )
+}
+
+export default WeekOffTemplates
