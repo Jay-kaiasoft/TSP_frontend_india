@@ -38,7 +38,6 @@ import OvertimeRules from "./components/dashboard/settings/automationrRules/over
 import GenerateSalary from "./components/dashboard/reports/salaryReport/generateSalary";
 import SalaryReport from "./components/dashboard/reports/salaryReport/salaryReport";
 import GrossSalaryReport from "./components/dashboard/reports/grossSalaryReport/grossSalaryReport";
-import Demo from "./demo";
 import WeekOffTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/weekOffTemplates";
 import AddWeekOfTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/addWeekOfTemplates";
 import Salesforce from "./salesforce";
@@ -47,11 +46,7 @@ library.add(fas, far)
 
 function App() {
 
-  const router = createBrowserRouter([
-    {
-      path: "/demo",
-      element: <Demo />,
-    },
+  const router = createBrowserRouter([  
      {
       path: "/salesforce",
       element: <Salesforce />,

@@ -1,6 +1,7 @@
+import { create } from '@mui/material/styles/createTransitions';
 import React, { useState, useEffect } from 'react';
 
-const CLIENT_ID = "";
+const CLIENT_ID = "3MVG9dAEux2v1sLuQIep.f1x20O7jQa2bEavwD3fvCChoBlZAfO6Tkf.JWGX7B3ryuvweux2IHtPGrRygNITK";
 const REDIRECT_URI = "http://localhost:5000/oauth/callback";
 const LOGIN_URL = "https://login.salesforce.com";
 
@@ -59,7 +60,7 @@ const Salesforce = () => {
     const createOpportunity = async () => {
         const res = await fetch("http://localhost:5000/create-opportunity", {
             method: "POST",
-            headers: { "Content-Type": "application/json" }           
+            headers: { "Content-Type": "application/json" }
         });
 
         const data = await res.json();
@@ -72,6 +73,38 @@ const Salesforce = () => {
         console.log("Opportunity Details:", data);
     }
 
+    const createContact = async () => {
+        try {
+            const res = await fetch("http://localhost:5000/create-contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await res.json();
+            console.log("Contact Created:", data);
+            alert("Contact created successfully!");
+        } catch (error) {
+            console.error("Error creating contact:", error);
+            alert("Failed to create contact. Check console for details.");
+        }
+    }
+
+    const createOpportunityRole = async () => {
+        try {
+
+            const res = await fetch("http://localhost:5000/create-opportunitycontactrole", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await res.json();
+            console.log("Opportunity Role Created:", data);
+            alert("Opportunity role created successfully!");
+        } catch (error) {
+            console.error("Error creating opportunity role:", error);
+            alert("Failed to create opportunity role. Check console for details.");
+        }
+    }
     return (
         <div>
             <h2>Salesforce Integration</h2>
@@ -92,8 +125,14 @@ const Salesforce = () => {
                         <button onClick={createOpportunity} className="bg-red-500 text-white p-2 rounded">
                             Create Opportunity
                         </button>
-                         <button onClick={getOpportunityDetails} className="bg-yellow-500 text-white p-2 rounded">
+                        <button onClick={getOpportunityDetails} className="bg-yellow-500 text-white p-2 rounded">
                             Get Opportunity
+                        </button>
+                        <button onClick={createContact} className="bg-purple-500 text-white p-2 rounded">
+                            Create Contact
+                        </button>
+                        <button onClick={createOpportunityRole} className="bg-purple-500 text-white p-2 rounded">
+                            Create Opportunity Role
                         </button>
                     </div>
                 </>

@@ -18,9 +18,25 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
+const filterOptions = [
+    { id: 1, title: 'January', value: 1 },
+    { id: 2, title: 'February', value: 2 },
+    { id: 3, title: 'March', value: 3 },
+    { id: 4, title: 'April', value: 4 },
+    { id: 5, title: 'May', value: 5 },
+    { id: 6, title: 'June', value: 6 },
+    { id: 7, title: 'July', value: 7 },
+    { id: 8, title: 'August', value: 8 },
+    { id: 9, title: 'September', value: 9 },
+    { id: 10, title: 'October', value: 10 },
+    { id: 11, title: 'November', value: 11 },
+    { id: 12, title: 'December', value: 12 }
+];
+
 function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatements }) {
 
     const [loading, setLoading] = useState(false);
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
     const {
         watch,
@@ -81,9 +97,16 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
     };
 
     const submit = async (data) => {
+        const newData = {
+            ...data,
+            employeeId: userInfo.employeeId,
+            companyId: userInfo.companyId,
+            monthNumber: filterOptions.find(option => option.title === data.month?.split("-")[0])?.value || "",
+            year: data.month?.split("-")[1] || ""
+        }
         if (id) {
             setLoading(true)
-            const response = await updateSalaryStatement(id, data);
+            const response = await updateSalaryStatement(id, newData);
             if (response?.data?.status === 200) {
                 setAlert({ open: true, message: response.data.message, type: "success" })
                 handleGetStatements()

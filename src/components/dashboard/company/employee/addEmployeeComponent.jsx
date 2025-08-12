@@ -30,6 +30,7 @@ import { faceRecognitionAPIBaseURL } from '../../../../config/apiConfig/apiConfi
 import FileInputBox from '../../../common/fileInput/FileInputBox';
 import Checkbox from '../../../common/checkBox/checkbox';
 import { getAllOvertimeRules } from '../../../../service/overtimeRules/overtimeRulesService';
+import { getAllWeekOffTemplate } from '../../../../service/weeklyOff/WeeklyOffService';
 
 const GenderOptions = [
     { id: 1, title: "Male" },
@@ -99,6 +100,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     const [departments, setDepartments] = useState([]);
     const [employeeType, setEmployeeType] = useState([]);
     const [shifts, setShifts] = useState([]);
+    const [weeklyOff, setWeeklyOff] = useState([]);
 
     const [activeStep, setActiveStep] = useState(0)
     const [activeTaxStep, setActiveTaxStep] = useState(0)
@@ -162,6 +164,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             canteenAmount: "",
             lunchBreak: "",
             workingHoursIncludeLunch: "",
+            weeklyOffId: null,
 
             otId: null,
             accountId: "",
@@ -589,6 +592,21 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         }
     }
 
+    const handleGetAllWeeklyOff = async () => {
+        if (userInfo?.companyId) {
+            const response = await getAllWeekOffTemplate(userInfo?.companyId);
+            if (response?.data?.status === 200) {
+                const data = response?.data?.result?.map((item) => {
+                    return {
+                        id: item.id,
+                        title: item.name
+                    }
+                })
+                setWeeklyOff(data)
+            }
+        }
+    }
+
     const submit = async (data, submitType) => {
         const saveAndExit = submitType === "saveAndExit";
         const newData = {
@@ -692,6 +710,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         handleGetAllUserType()
         handleGetAllDepartment()
         handleGetAllShift()
+        handleGetAllWeeklyOff()
     }, [id])
 
     useEffect(() => {
@@ -1755,6 +1774,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                     )}
                                                 />
                                             </div>
+
                                             {
                                                 watch("canteenType") && (
                                                     <div>
@@ -1824,6 +1844,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                     )}
                                                 />
                                             </div>
+
                                             <div>
                                                 <Controller
                                                     name="otId"
@@ -1846,6 +1867,31 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 />
                                             </div>
 
+                                            <div>
+                                                <Controller
+                                                    name="weeklyOffId"
+                                                    control={control}
+                                                    rules={{
+                                                        required: "Weekly Off is required"
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <Select
+                                                            options={weeklyOff}
+                                                            label={"Weekly Off"}
+                                                            placeholder="Select weekly off"
+                                                            value={parseInt(watch("weeklyOffId")) || null}
+                                                            onChange={(_, newValue) => {
+                                                                if (newValue?.id) {
+                                                                    field.onChange(newValue.id);
+                                                                } else {
+                                                                    setValue("weeklyOffId", null);
+                                                                }
+                                                            }}
+                                                            error={errors?.weeklyOffId}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
                                         </div>
                                     </>
                                 )

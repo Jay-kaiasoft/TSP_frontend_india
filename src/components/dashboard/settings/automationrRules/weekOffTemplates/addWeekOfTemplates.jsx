@@ -53,6 +53,7 @@ const AddWeekOfTemplates = ({ setAlert }) => {
         defaultValues: {
             id: "",
             name: "",
+            description: "",
             ...defaultWeeklyOff,
         },
     });
@@ -134,22 +135,37 @@ const AddWeekOfTemplates = ({ setAlert }) => {
                     <h2 className="text-lg font-semibold">Weekly Off Configuration</h2>
                 </div>
 
-                <div className="mb-4 w-60">
-                    <Controller
-                        name="name"
-                        control={control}
-                        rules={{
-                            required: "Template name is required",
-                        }}
-                        render={({ field }) => (
-                            <Input
-                                {...field}
-                                label="Template Name"
-                                type="text"
-                                error={errors.name}
-                            />
-                        )}
-                    />
+                <div className="mb-4 flex justify-start items-center gap-4">
+                    <div className="w-60">
+                        <Controller
+                            name="name"
+                            control={control}
+                            rules={{
+                                required: "Template name is required",
+                            }}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    label="Template Name"
+                                    type="text"
+                                    error={errors.name}
+                                />
+                            )}
+                        />
+                    </div>
+                    <div className="w-96">
+                        <Controller
+                            name="description"
+                            control={control}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    label="Template Description"
+                                    type="text"
+                                />
+                            )}
+                        />
+                    </div>
                 </div>
 
                 <p className="text-sm mb-2 text-gray-600">
