@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import CustomIcons from '../../../../common/icons/CustomIcons'
 import { NavLink, useNavigate } from 'react-router-dom'
 import DataTable from '../../../../common/table/table'
@@ -8,7 +8,7 @@ import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWr
 import Button from '../../../../common/buttons/button'
 import Components from '../../../../muiComponents/components'
 import AlertDialog from '../../../../common/alertDialog/alertDialog'
-import { set } from 'react-hook-form'
+import AssignWeeklyOff from '../../../../models/assignWeeklyOff/assignWeeklyOff'
 
 const WeekOffTemplates = () => {
     const theme = useTheme();
@@ -19,6 +19,17 @@ const WeekOffTemplates = () => {
 
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = (id) => {
+        setId(id)
+        setOpen(true);
+    }
+
+    const handleClose = () => {
+        setId(null)
+        setOpen(false);
+    }
 
     const handleOpenDeleteDialog = (id) => {
         setId(id)
@@ -41,7 +52,7 @@ const WeekOffTemplates = () => {
         })
     }
 
-    const handleDelete = async () =>{
+    const handleDelete = async () => {
         setLoading(true);
         if (id) {
             const response = await deleteWeekOffTemplate(id);
@@ -49,7 +60,7 @@ const WeekOffTemplates = () => {
                 setLoading(false)
                 handleCloseDialog();
                 handleGetAllWeekOffTemplate();
-            }else{
+            } else {
                 setLoading(false);
                 handleCloseDialog();
             }
@@ -103,6 +114,11 @@ const WeekOffTemplates = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-center h-full'>
+                        <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                                <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
+                            </Components.IconButton>
+                        </div>
                         <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                             <Components.IconButton onClick={() => navigate(`/dashboard/automationrules/week-off/edit/${params.row.id}`)}>
                                 <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
@@ -114,18 +130,6 @@ const WeekOffTemplates = () => {
                                 <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
                             </Components.IconButton>
                         </div>
-                        {/* <PermissionWrapper
-                            functionalityName="Company"
-                            moduleName="Overtime Rules"
-                            actionId={3}
-                            component={
-                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                    <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
-                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
-                                    </Components.IconButton>
-                                </div>
-                            }
-                        /> */}
                     </div>
                 );
             },
@@ -151,6 +155,7 @@ const WeekOffTemplates = () => {
             />
         )
     }
+
     return (
         <div className='px-4 lg:px-0'>
             <div className='mb-4 w-60'>
@@ -173,7 +178,7 @@ const WeekOffTemplates = () => {
                 </div>
                 <DataTable columns={columns} rows={weekOffTemplates} getRowId={getRowId} height={480} showButtons={true} buttons={actionButtons} />
                 <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDelete} handleClose={handleCloseDialog} loading={loading} />
-
+                <AssignWeeklyOff open={open} handleClose={handleClose} id={id}/>
             </div>
         </div>
     )

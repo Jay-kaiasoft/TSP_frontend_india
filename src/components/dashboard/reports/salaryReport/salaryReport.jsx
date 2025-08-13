@@ -170,7 +170,7 @@ const SalaryReport = ({ handleSetTitle }) => {
         const grouped = {};
 
         row.forEach(item => {
-            const month = item.month;
+            const month = item.monthYear;
             const deptName = item.departmentName || 'N/A';
 
             if (!grouped[month]) {
@@ -210,10 +210,6 @@ const SalaryReport = ({ handleSetTitle }) => {
 
         return totals;
     }, [groupedDataByMonthAndDepartment]);
-
-
-    // Calculate overall totals (this is still used for the PDF, but not for display in this component)
-    const overallTotals = useMemo(() => calculateTotals(row), [row]);
 
     // Function to create a special total row object for DataGrid
     const createDataGridTotalRow = (totals, idPrefix) => {

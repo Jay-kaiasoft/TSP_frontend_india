@@ -76,14 +76,14 @@ const SalarySlip = ({ data, companyInfo }) => {
                         </div>
 
                         <div className="px-6 sm:px-8 pb-6 sm:pb-8 border-b border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{employee?.month}</h2>
+                            <h2 className="text-xl font-bold text-gray-800 mb-4 text-center">{employee?.monthYear}</h2>
 
                             {/* Employee Pay Summary */}
                             <div className="grid grid-cols-1 md:grid-cols-5 gap-x-8 gap-y-4 text-gray-700">
                                 <div className="col-span-3">
                                     <p className="mb-1"><strong className="w-40 inline-block">Employee Name:</strong> {employee.employeeName}</p>
                                     <p className="mb-1"><strong className="w-40 inline-block">Department:</strong> {employee.departmentName}</p>
-                                    <p className="mb-1"><strong className="w-40 inline-block">Pay Period:</strong> {employee?.month}</p>
+                                    <p className="mb-1"><strong className="w-40 inline-block">Pay Period:</strong> {employee?.monthYear}</p>
                                 </div>
                                 <div className="text-right md:text-left md:pl-8 col-span-2">
                                     <p className="text-lg font-semibold text-gray-800 mb-1">Employee Net Pay</p>

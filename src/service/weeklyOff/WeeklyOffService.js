@@ -22,7 +22,6 @@ export const getWeekOffTemplate = async (id) => {
     }
 }
 
-
 export const createWeekOffTemplate = async (data) => {
     try {
         const response = axiosInterceptor().post(`${weeklyOffURL}/create`, data)
@@ -43,10 +42,19 @@ export const updateWeekOffTemplate = async (id,data) => {
     }
 }
 
-
 export const deleteWeekOffTemplate = async (id) => {
     try {
         const response = axiosInterceptor().delete(`${weeklyOffURL}/delete/${id}`)
+        return response
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const assignEmployees = async (data) => {
+    try {
+        const response = axiosInterceptor().post(`${weeklyOffURL}/assignEmployees`, data)
         return response
 
     } catch (error) {

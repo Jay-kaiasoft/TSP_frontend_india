@@ -21,6 +21,7 @@ export const getHistory = async (id) => {
     }
 }
 
+
 export const addSalaryStatement = async (data) => {
     try {
         const response = axiosInterceptor().post(`${salaryStatementHistoryURL}/addHistory`, data)
@@ -31,7 +32,7 @@ export const addSalaryStatement = async (data) => {
     }
 }
 
-export const updateSalaryStatement = async (id,data) => {
+export const updateSalaryStatement = async (id, data) => {
     try {
         const response = axiosInterceptor().patch(`${salaryStatementHistoryURL}/updateHistory/${id}`, data)
         return response

@@ -101,8 +101,8 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
             ...data,
             employeeId: userInfo.employeeId,
             companyId: userInfo.companyId,
-            monthNumber: filterOptions.find(option => option.title === data.month?.split("-")[0])?.value || "",
-            year: data.month?.split("-")[1] || ""
+            monthNumber: filterOptions?.find(option => option.title === data.monthYear?.split("-")[0])?.value || "",
+            year: data.monthYear?.split("-")[1] || ""
         }
         if (id) {
             setLoading(true)
