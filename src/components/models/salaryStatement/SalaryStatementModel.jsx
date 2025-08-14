@@ -129,74 +129,53 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
         }
     };
 
+
     const calculateTotalEarnings = () => {
-        const basicSalary = parseFloat(watch("basicSalary")) || 0;
-        const otAmount = parseFloat(watch("otAmount")) || 0;
+        const basicSalary = parseInt(watch("basicSalary")) || 0;
+        const totalPaidDays = parseInt(watch("totalPaidDays")) || 0;
+        const otAmount = parseInt(watch("otAmount")) || 0;
 
-        const totalDays = parseFloat(watch("totalDays")) || 0;
-        const totalWorkingDays = parseFloat(watch("totalWorkingDays")) || 0;
+        const totalWorkingDays = parseInt(watch("totalWorkingDays")) || 0;
 
-        const daySalary = totalDays > 0 ? basicSalary / totalDays : 0;
-        const totalSalary = totalWorkingDays * daySalary;
-
+        const daySalary = parseInt(basicSalary / 30) || 0;
+        const totalSalary = parseInt(daySalary * (totalWorkingDays + totalPaidDays));
         const totalEarnings = otAmount + totalSalary;
-        setValue("totalEarnings", Math.round(totalEarnings) || 0);
+
+        setValue("totalEarnings", parseInt(totalEarnings) || 0);
     };
 
     const calculateNetSalary = () => {
-        const totalEarnings = parseFloat(watch("totalEarnings")) || 0;
-        const totalDeductions = parseFloat(watch("totalDeductions")) || 0;
+        const totalEarnings = parseInt(watch("totalEarnings")) || 0;
+        const totalDeductions = parseInt(watch("totalDeductions")) || 0;
 
         const netSalary = totalEarnings - totalDeductions;
-        setValue("netSalary", Math.round(netSalary) || 0);
+        setValue("netSalary", parseInt(netSalary) || 0);
     };
 
     const calculateTotalPFPercentage = () => {
-        const basicSalary = parseFloat(watch("basicSalary")) || 0;
-        const pfPercentage = parseFloat(watch("pfPercentage")) || 0;
-        const ptAmount = parseFloat(watch("ptAmount")) || 0;
-        const otherDeductions = parseFloat(watch("otherDeductions")) || 0;
-
-        const totalDays = parseFloat(watch("totalDays")) || 0;
-        const totalWorkingDays = parseFloat(watch("totalWorkingDays")) || 0;
-
-        const daySalary = totalDays > 0 ? basicSalary / totalDays : 0;
-        const totalSalary = totalWorkingDays * daySalary;
+        const basicSalary = parseInt(watch("basicSalary")) || 0;
+        const pfPercentage = parseInt(watch("pfPercentage")) || 0;
+        const pfAmount = parseInt(watch("pfAmount")) || 0
+        const ptAmount = parseInt(watch("ptAmount")) || 0;
+        const otherDeductions = parseInt(watch("otherDeductions")) || 0;
 
         let totalPF = 0;
         if (pfPercentage > 0) {
-            totalPF = (totalSalary * pfPercentage) / 100;
-            setValue("totalPfAmount", Math.round(totalPF));
+            totalPF = parseInt((basicSalary * pfPercentage) / 100) > 900 ? 900 : parseInt((basicSalary * pfPercentage) / 100);
+            setValue("totalPfAmount", parseInt(totalPF) > 900 ? 900 : parseInt(totalPF));
         }
-
-        const totalDeductions = totalPF + ptAmount + otherDeductions;
-        setValue("totalDeductions", Math.round(totalDeductions) || 0);
-    };
-
-    const calculateTotalPFAmount = () => {
-        const pfAmount = parseFloat(watch("pfAmount")) || 0;
-        const ptAmount = parseFloat(watch("ptAmount")) || 0;
-        const otherDeductions = parseFloat(watch("otherDeductions")) || 0;
-
-        const totalDays = parseFloat(watch("totalDays")) || 0;
-        const totalWorkingDays = parseFloat(watch("totalWorkingDays")) || 0;
-
-        let totalPF = 0;
         if (pfAmount > 0) {
-            let perDayPFAmount = pfAmount / totalDays
-            totalPF = perDayPFAmount * totalWorkingDays;
-            // // totalPF = perDayPFAmount * totalWorkingDays;
-            setValue("totalPfAmount", Math.round(totalPF));
+            setValue("totalPfAmount", parseInt(pfAmount) > 200 ? 200 : parseInt(pfAmount));
         }
 
         const totalDeductions = totalPF + ptAmount + otherDeductions;
-        setValue("totalDeductions", Math.round(totalDeductions) || 0);
+        setValue("totalDeductions", parseInt(totalDeductions) || 0);
     };
+
 
     useEffect(() => {
         calculateTotalEarnings();
         calculateTotalPFPercentage();
-        calculateTotalPFAmount();
     }, [watch("otAmount"), watch("totalWorkingDays")]);
 
     useEffect(() => {
@@ -205,11 +184,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
 
     useEffect(() => {
         calculateTotalPFPercentage();
-    }, [watch("pfPercentage")]);
-
-    useEffect(() => {
-        calculateTotalPFAmount();
-    }, [watch("pfAmount"), watch("ptAmount")]);
+    }, [watch("pfPercentage"), watch("pfAmount"), watch("ptAmount")]);
 
     useEffect(() => {
         handleGetData();
@@ -246,18 +221,14 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                             <div className='flex justify-start items-center gap-2 col-span-1'>
                                 <p>Employee Name :</p>
                                 <span className='font-semibold'>{watch("employeeName")}</span>
-                            </div>
-                            {/* <div className='flex justify-start items-center gap-2'>
-                                <p>Department Name :</p>
-                                <span className='font-semibold'>{watch("departmentName")}</span>
-                            </div> */}
+                            </div>                       
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Basic Salary :</p>
                                 <span className='font-semibold'>₹{parseInt(watch("basicSalary")).toLocaleString("en-IN")}</span>
                             </div>
                             <div className='flex justify-start items-center gap-2'>
-                                <p>Total Days :</p>
-                                <span className='font-semibold'>{watch("totalDays")}</span>
+                                <p>Total Paid Days :</p>
+                                <span className='font-semibold'>{watch("totalPaidDays")}</span>
                             </div>
                         </div>
 
@@ -271,7 +242,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        label="Total Working Days"
+                                        label="Working Days"
                                         type="text"
                                         error={errors.totalWorkingDays}
                                         onChange={(e) => {
@@ -321,7 +292,9 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                                 error={errors.pfAmount}
                                                 onChange={(e) => {
                                                     const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(value);
+                                                    if (parseInt(value) > 0) {
+                                                        field.onChange(value);
+                                                    }
                                                 }}
                                                 endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                             />
@@ -342,7 +315,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                                 error={errors.pfPercentage}
                                                 value={watch("pfPercentage") || ""}
                                                 onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^1-9]/g, '');
+                                                    const value = e.target.value.replace(/[^0-9]/g, '');
                                                     field.onChange(value);
                                                 }}
                                                 endIcon={<CustomIcons iconName={`fa-solid fa-percent`} css={'text-gray-500'} />}
@@ -362,30 +335,26 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                     />
                                 ) : null
                             }
-                            {
-                                watch("ptAmount") > 0 && (
-                                    <Controller
-                                        name="ptAmount"
-                                        control={control}
-                                        rules={{
-                                            required: "PT amount is required",
+                            <Controller
+                                name="ptAmount"
+                                control={control}
+                                rules={{
+                                    required: "PT amount is required",
+                                }}
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        label="PT Amount"
+                                        type={`text`}
+                                        error={errors.ptAmount}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/[^0-9]/g, '');
+                                            field.onChange(value);
                                         }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="PT Amount"
-                                                type={`text`}
-                                                error={errors.ptAmount}
-                                                onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(value);
-                                                }}
-                                                endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                            />
-                                        )}
+                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                     />
-                                )
-                            }
+                                )}
+                            />
                             <Controller
                                 name="otherDeductions"
                                 control={control}
@@ -435,7 +404,6 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                         label="Note"
                                         type="text"
                                         multiline={true}
-                                        // rows={3}
                                         onChange={(e) => {
                                             field.onChange(e.target.value);
                                         }}
