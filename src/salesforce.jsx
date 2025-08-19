@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 
 const Salesforce = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [accessToken, setAccessToken] = useState(null);
-    const [instanceUrl, setInstanceUrl] = useState(null);
+    const [accessToken, setAccessToken] = useState(sessionStorage.getItem("accessToken_salesforce") || "");
+    const [instanceUrl, setInstanceUrl] = useState(sessionStorage.getItem("instanceUrl_salesforce") || "");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -54,6 +54,8 @@ const Salesforce = () => {
                             if (token && url) {
                                 setAccessToken(token);
                                 setInstanceUrl(url);
+                                sessionStorage.setItem("accessToken_salesforce", token);
+                                sessionStorage.setItem("instanceUrl_salesforce", url);
                                 setIsLoggedIn(true);
                                 popup.close();
                                 clearInterval(popupInterval);
@@ -124,8 +126,28 @@ const Salesforce = () => {
         }
     };
 
+    const handleGetAccountDetails = async(selectedAccountId) => {
+        if (!selectedAccountId) return;
+
+        try {
+            const res = await fetch(`http://localhost:8081/salesforce/account/${selectedAccountId}?access_token=${accessToken}&instance_url=${encodeURIComponent(instanceUrl)}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            const data = await res.json();
+            console.log("Data:", data);
+        } catch (err) {
+            setError("Error fetching account details.");
+        }
+    }
+
     useEffect(() => {
         if (accessToken && instanceUrl) {
+            setIsLoggedIn(true);
             fetchSalesforceData();
         }
     }, [accessToken, instanceUrl]);
@@ -166,6 +188,14 @@ const Salesforce = () => {
                                 <tr key={acc.Id}>
                                     <td className="border p-2">{acc.Id}</td>
                                     <td className="border p-2">{acc.Name}</td>
+                                    <td className="border p-2">
+                                        <button
+                                            onClick={() => handleGetAccountDetails(acc.Id)}
+                                            className="bg-blue-500 text-white p-1 rounded"
+                                        >
+                                            View Details
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -183,7 +213,7 @@ const Salesforce = () => {
                             {contacts.map((con) => (
                                 <tr key={con.Id}>
                                     <td className="border p-2">{con.Id}</td>
-                                    <td className="border p-2">{con.Name}</td>
+                                    <td className="border p-2">{con.FirstName + " " + con.LastName}</td>
                                 </tr>
                             ))}
                         </tbody>

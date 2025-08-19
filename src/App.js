@@ -41,13 +41,14 @@ import GrossSalaryReport from "./components/dashboard/reports/grossSalaryReport/
 import WeekOffTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/weekOffTemplates";
 import AddWeekOfTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/addWeekOfTemplates";
 import Salesforce from "./salesforce";
+import AddLateEntryTemplates from "./components/dashboard/settings/automationrRules/addLateEntryTemplates/addLateEntryTemplates";
 
 library.add(fas, far)
 
 function App() {
 
-  const router = createBrowserRouter([  
-     {
+  const router = createBrowserRouter([
+    {
       path: "/salesforce",
       element: <Salesforce />,
     },
@@ -198,6 +199,14 @@ function App() {
         {
           path: "automationrules/week-off/edit/:id",
           element: <AddWeekOfTemplates />,
+        },
+         {
+          path: "automationrules/late-entry/add",
+          element: <AddLateEntryTemplates />,
+        },
+        {
+          path: "automationrules/late-entry/edit/:id",
+          element: <AddLateEntryTemplates />,
         },
       ]
     },
