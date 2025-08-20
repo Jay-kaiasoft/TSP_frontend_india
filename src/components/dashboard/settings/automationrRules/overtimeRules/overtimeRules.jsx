@@ -132,7 +132,7 @@ const OvertimeRules = () => {
             minWidth: 80,
             renderCell: (params) => {
                 return (
-                    <div className='flex items-center gap-2 justify-center h-full'>
+                    <div className='flex items-center gap-2 justify-start h-full'>
                         <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                             <Components.IconButton onClick={() => handleOpen(params.row.id)}>
                                 <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />

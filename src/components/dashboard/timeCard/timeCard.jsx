@@ -51,12 +51,10 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const [rows, setRow] = useState([])
     const [companyInfo, setCompanyInfo] = useState()
 
-    const [editType, setEditType] = useState(null)
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
     const [showPdfContent, setShowPdfContent] = useState(false);
     const [department, setDepartment] = useState([]);
     const [openInOutModel, setOpenInOutModel] = useState(false);
+    const [clockInOutId, setClockInOutId] = useState(null);
 
     const {
         control,
@@ -83,7 +81,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     });
 
-    const handleOpenInOutModal = () => {
+    const handleOpenInOutModal = (id = null) => {
+        setClockInOutId(id);
         setOpenInOutModel(true);
     }
 
@@ -126,7 +125,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         let locationIds = []
         let departmentIds = []
 
-        if (userInfo?.roleName !== "Admin" && userInfo?.companyId && watch("selectedUserId").length === 0) {
+        if (userInfo?.roleName !== "Admin" && userInfo?.roleName !== "Owner" && userInfo?.companyId && watch("selectedUserId").length === 0) {
             params.append("userIds", [userInfo?.employeeId]);
         } else {
             if (watch("selectedUserId") && watch("selectedUserId").length > 0) {
@@ -165,46 +164,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             setRow(res?.data?.result || [])
         } catch (error) {
             console.error("Error fetching data:", error);
-        }
-    }
-
-    const handleOpenTimePicker = (row, type) => {
-        setEditType(type)
-        const createdDate = dayjs(row.createdOn, "MM/DD/YYYY, hh:mm:ss A");
-        const currentTimeZone = dayjs.tz.guess();
-        const timeInUTC = dayjs.utc(row.timeIn, "MM/DD/YYYY, hh:mm:ss A");
-        const timeInLocal = timeInUTC.tz(currentTimeZone);
-
-        const timeOutUTC = dayjs.utc(row.timeOut, "MM/DD/YYYY, hh:mm:ss A");
-        const timeOutLocal = timeOutUTC.tz(currentTimeZone);
-
-        setValue("timeIn", timeInLocal);
-        setValue("timeOut", timeOutLocal);
-
-        setValue("createdOn", createdDate);
-        setValue("id", row.id);
-        setValue("userId", row.userId);
-    };
-
-    const handleUpdateRecord = async () => {
-        const data = {
-            timeIn: watch("timeIn")?.$d,
-            timeOut: watch("timeOut")?.$d,
-            userId: watch("userId"),
-            createdOn: watch("createdOn"),
-            id: watch("id"),
-        }
-        const response = await updateUserTimeRecord(data)
-        if (response?.data?.status === 200) {
-            setEditType(null)
-            setValue("createdOn", null)
-            setValue("timeIn", null)
-            setValue("timeOut", null)
-            setValue("userId", null)
-            setValue("id", null)
-            handleGetAllEntriesByUserId()
-        } else {
-            setAlert({ open: true, message: response?.data?.message, type: "error" })
         }
     }
 
@@ -357,77 +316,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                const handleOpen = (event) => {
-                    handleOpenTimePicker(params.row, "timeIn")
-                    setAnchorEl(event.currentTarget);
-                };
-
-                const handleClose = () => {
-                    setAnchorEl(null);
-                    setEditType(null)
-                    handleUpdateRecord()
-                };
-
-                const id = open ? 'time-picker-popover' : undefined;
-
                 return (
                     <>
                         <div className="flex justify-start items-center gap-3">
-                            <PermissionWrapper
-                                functionalityName="UserClock"
-                                moduleName="UserClock"
-                                actionId={2}
-                                component={
-                                    <div onClick={handleOpen}>
-                                        <CustomIcons iconName="fa-solid fa-pen-to-square" css="cursor-pointer h-4 w-4" />
-                                    </div>
-                                }
-                            />
                             <div className="cursor-pointer">
-                                {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true,
-                                })}
+                                {dayjs(params.row?.timeIn).format("hh:mm A")}
                             </div>
                         </div>
-                        {
-                            editType === "timeIn" && (
-                                <Components.Popover
-                                    id={id}
-                                    open={open}
-                                    anchorEl={anchorEl}
-                                    onClose={handleClose}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
-                                    }}
-                                    sx={{
-                                        "& .MuiPaper-root.MuiPopover-paper": {
-                                            boxShadow: "none",
-                                            border: `2px solid ${theme.palette.primary.main}`
-                                        }
-                                    }}
-                                >
-                                    <div>
-                                        {
-                                            editType === "timeIn" && (
-                                                <DateTimePickerComponent
-                                                    name="timeIn"
-                                                    control={control}
-                                                    setValue={setValue}
-                                                    maxTime={watch("timeOut")}
-                                                />
-                                            )
-                                        }
-                                    </div>
-                                </Components.Popover>
-                            )
-                        }
                     </>
                 );
             },
-
         },
         {
             field: 'timeOut',
@@ -438,73 +336,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                const handleOpen = (event) => {
-                    handleOpenTimePicker(params.row, "timeOut")
-                    setAnchorEl(event.currentTarget);
-                };
-
-                const handleClose = () => {
-                    setAnchorEl(null);
-                    setEditType(null)
-                    handleUpdateRecord()
-                };
-
-                const open = Boolean(anchorEl);
-                const id = open ? 'time-picker-popover' : undefined;
-
                 return (
                     <>
                         {
                             (params.row?.timeOut !== null && params.row?.timeOut !== undefined) ? (
                                 <>
                                     <div className="flex justify-start items-center gap-3">
-                                        <PermissionWrapper
-                                            functionalityName="UserClock"
-                                            moduleName="UserClock"
-                                            actionId={2}
-                                            component={
-                                                <div onClick={handleOpen}>
-                                                    <CustomIcons iconName="fa-solid fa-pen-to-square" css="cursor-pointer h-4 w-4" />
-                                                </div>
-                                            }
-                                        />
                                         <div className="cursor-pointer">
-                                            {handleConvertUTCDateToLocalDate(params.row?.timeOut)?.toLocaleTimeString([], {
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                                hour12: true,
-                                            })}
+                                            {dayjs(params?.row?.timeOut).format("hh:mm A")}
                                         </div>
                                     </div>
-                                    {
-                                        editType === "timeOut" && (
-                                            <Components.Popover
-                                                id={id}
-                                                open={open}
-                                                anchorEl={anchorEl}
-                                                onClose={handleClose}
-                                                anchorOrigin={{
-                                                    vertical: 'bottom',
-                                                    horizontal: 'left',
-                                                }}
-                                                sx={{
-                                                    "& .MuiPaper-root.MuiPopover-paper": {
-                                                        boxShadow: "none",
-                                                        border: `2px solid ${theme.palette.primary.main}`
-                                                    }
-                                                }}
-                                            >
-                                                <div>
-                                                    <DateTimePickerComponent
-                                                        name="timeOut"
-                                                        control={control}
-                                                        setValue={setValue}
-                                                        minTime={watch("timeIn")}
-                                                    />
-                                                </div>
-                                            </Components.Popover>
-                                        )
-                                    }
                                 </>
                             ) : <span>-</span>
                         }
@@ -575,6 +416,32 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 return (
                     <div>
                         {formatDuration(handleConvertUTCDateToLocalDate(params.row?.timeIn), handleConvertUTCDateToLocalDate(params.row?.timeOut))}
+                    </div>
+                );
+            },
+        },
+        {
+            field: 'action',
+            headerName: 'action',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 80,
+            renderCell: (params) => {
+                return (
+                    <div className='flex items-center gap-2 justify-start h-full'>
+
+                        <PermissionWrapper
+                            functionalityName="UserClock"
+                            moduleName="UserClock"
+                            actionId={2}
+                            component={
+                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenInOutModal(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        />
                     </div>
                 );
             },
@@ -725,7 +592,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <DetailedPDFTable data={rows} companyInfo={companyInfo} startDate={watch("startDate")} endDate={watch("endDate")} />
                 </div>
             )}
-            <AddClockInOut open={openInOutModel} handleClose={handleCloseInOutModal} employeeList={users} getRecords={handleGetAllEntriesByUserId} />
+            <AddClockInOut open={openInOutModel} handleClose={handleCloseInOutModal} employeeList={users} getRecords={handleGetAllEntriesByUserId} id={clockInOutId} />
         </>
     )
 }

@@ -8,8 +8,9 @@ import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
 import Select from '../../common/select/select';
-import { addClockInOut } from '../../../service/userInOut/userInOut';
+import { addClockInOut, getUserInOutRecord } from '../../../service/userInOut/userInOut';
 import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
+import dayjs from 'dayjs';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -20,7 +21,7 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
-export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
+export function AddClockInOut({ open, handleClose, employeeList, getRecords, id }) {
     const theme = useTheme()
 
     const [loading, setLoading] = useState(false);
@@ -57,7 +58,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
             companyId: userInfo?.companyId,
         }
         setLoading(true);
-        try {
+        try {           
             const response = await addClockInOut(newData);
             if (response?.data?.status === 201) {
                 setLoading(false);
@@ -78,6 +79,20 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
         }
     }
 
+    const handleGetData = async () => {
+        if (id && open) {
+            const response = await getUserInOutRecord(id);
+            if (response?.data?.status === 200) {
+                reset(response.data?.result);
+                setValue("timeIn", response.data?.result?.timeIn ? dayjs(response.data?.result?.timeIn) : null);
+                setValue("timeOut", response.data?.result?.timeOut ? dayjs(response.data?.result?.timeOut) : null);
+            }
+        }
+    }
+
+    useEffect(() => {
+        handleGetData();
+    }, [open]);
 
     return (
         <React.Fragment>
@@ -89,7 +104,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                 maxWidth='sm'
             >
                 <Components.DialogTitle sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }} id="customized-dialog-title">
-                    Add Clock In/Out
+                    {id ? `Edit Clock In/Out` : `Add Clock In/Out`}
                 </Components.DialogTitle>
 
                 <Components.IconButton
@@ -119,13 +134,13 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                                         placeholder="Select employees"
                                         value={parseInt(watch("userId")) || null}
                                         onChange={(_, newValue) => {
+                                            field.onChange(newValue.id);
                                             if (newValue?.id) {
-                                                field.onChange(newValue.id);
                                             } else {
                                                 setValue("userId", null);
                                             }
                                         }}
-                                        errors={errors?.userId}
+                                        error={errors?.userId}
                                     />
                                 )}
                             />
@@ -141,10 +156,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords }) {
                             <InputTimePicker
                                 label="Clock Out Time"
                                 name="timeOut"
-                                control={control}
-                                   rules={{
-                                    required: "Clock out time is required",
-                                }}
+                                control={control}                          
                                 minTime={watch("timeIn")}
                             />
                         </div>

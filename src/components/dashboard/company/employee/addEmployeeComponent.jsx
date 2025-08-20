@@ -165,7 +165,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             lunchBreak: "",
             workingHoursIncludeLunch: "",
             weeklyOffId: null,
-            penaltyRule: true,
+            lateEntryPenaltyRule: true,
+            earlyExitPenaltyRule: true,
 
             otId: null,
             accountId: "",
@@ -631,7 +632,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
             companyLocation: watch("companyLocation")?.length > 0 ? JSON.stringify(watch("companyLocation")) : null,
             checkGeofence: data.checkGeofence ? 1 : 0,
-            penaltyRule: data.penaltyRule ? 1 : 0,
+            lateEntryPenaltyRule: data.lateEntryPenaltyRule ? 1 : 0,
+            earlyExitPenaltyRule: data.earlyExitPenaltyRule ? 1 : 0,
         }
         if (activeStep === 2) {
             if (watch("employeeTypeId") === 3 && !watch("isPf")) {
@@ -1482,38 +1484,54 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                     )}
                                                 />
                                             </div>
-                                                    
-                                            <div className='flex items-center justify-start'>
-                                                <p>Enable Geo-Fencing For Clock-In-Out</p>
-                                            </div>
 
-                                            <div className='flex justify-end items-center'>
+                                            <div>
                                                 <Controller
                                                     name="checkGeofence"
                                                     control={control}
                                                     render={({ field }) => (
-                                                        <Switch
-                                                            onChange={field.onChange}
-                                                            checked={field.value}
-                                                            size="small"
-                                                        />
+                                                        <div className="flex items-center justify-between border rounded-lg px-4 py-1">
+                                                            <p className="text-sm font-medium">Enable Geo-Fencing For Clock-In-Out</p>
+                                                            <Switch
+                                                                onChange={field.onChange}
+                                                                checked={field.value}
+                                                                size="small"
+                                                            />
+                                                        </div>
                                                     )}
                                                 />
                                             </div>
-                                             <div className='flex items-center justify-start'>
-                                                <p>Enable Penalty Rule</p>
-                                            </div>
 
-                                            <div className='flex justify-end items-center'>
+                                            <div>
                                                 <Controller
-                                                    name="penaltyRule"
+                                                    name="earlyExitPenaltyRule"
                                                     control={control}
                                                     render={({ field }) => (
-                                                        <Switch
-                                                            onChange={field.onChange}
-                                                            checked={field.value}
-                                                            size="small"
-                                                        />
+                                                        <div className="flex items-center justify-between border rounded-lg px-4 py-1">
+                                                            <p className="text-sm font-medium">Enable Early Exit Penalty Rule</p>
+                                                            <Switch
+                                                                onChange={field.onChange}
+                                                                checked={field.value}
+                                                                size="small"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <Controller
+                                                    name="lateEntryPenaltyRule"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <div className="flex items-center justify-between border rounded-lg px-4 py-1">
+                                                            <p className="text-sm font-medium">Enable Late Entry Penalty Rule</p>
+                                                            <Switch
+                                                                onChange={field.onChange}
+                                                                checked={field.value}
+                                                                size="small"
+                                                            />
+                                                        </div>
                                                     )}
                                                 />
                                             </div>

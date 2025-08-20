@@ -1,9 +1,9 @@
 import { attendancePenaltyRulesURL } from "../../config/apiConfig/apiConfig"
 import axiosInterceptor from "../axiosInterceptor/axiosInterceptor"
 
-export const findAllAttendancePenaltyRuleByCompanyId = async (companyId) => {
+export const findAllAttendancePenaltyRuleByCompanyId = async (type,companyId) => {
     try {
-        const response = axiosInterceptor().get(`${attendancePenaltyRulesURL}/get/all/${companyId}`)
+        const response = axiosInterceptor().get(`${attendancePenaltyRulesURL}/get/all/${type}/${companyId}`)
         return response
 
     } catch (error) {
@@ -31,7 +31,7 @@ export const createAttendancePenaltyRule = async (data) => {
     }
 }
 
-export const updateAttendancePenaltyRule = async (id,data) => {
+export const updateAttendancePenaltyRule = async (id, data) => {
     try {
         const response = axiosInterceptor().patch(`${attendancePenaltyRulesURL}/update/${id}`, data)
         return response

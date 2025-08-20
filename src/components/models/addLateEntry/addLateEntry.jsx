@@ -24,11 +24,15 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
 const attendancePenaltyRuleTypes = [
     { id: 1, title: "Fixed Amount" },
     { id: 2, title: "Half Day Salary" },
-    { id: 3, title: "1 day Salary" },
-    { id: 4, title: "1.5 day Salary" },
-    { id: 5, title: "2 day Salary" },
-    { id: 6, title: "2.5 day Salary" },
-    { id: 7, title: "3 day Salary" }
+    { id: 3, title: "5 Min Salary" },
+    { id: 4, title: "15 Min Salary" },
+    { id: 5, title: "30 Min Salary" },
+    { id: 6, title: "1 Hour Salary" },
+    { id: 7, title: "1 Day Salary" },
+    { id: 8, title: "1.5 Day Salary" },
+    { id: 9, title: "2 Day Salary" },
+    { id: 10, title: "2.5 Day Salary" },
+    { id: 11, title: "3 Day Salary" }
 ];
 
 function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenaltyRule }) {
@@ -79,6 +83,7 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
             createdBy: userInfo?.employeeId,
             deductionType: attendancePenaltyRuleTypes.find(type => type.id === data.deductionType)?.title || "",
             amount: data.deductionType === 1 ? data.amount : null,
+            isEarlyExit: false,
         }
         if (id) {
             setLoading(true)
@@ -129,11 +134,9 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
         if (watch("startTime") && watch("endTime")) {
             const start = new Date(watch("startTime"));
             const end = new Date(watch("endTime"));
-            console.log("end.getTime()",end.getTime())
             let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
 
             // If endTime is before startTime, assume it's the next day
-            console.log("diffInMinutes",diffInMinutes)
             if (diffInMinutes < 0) {
                 diffInMinutes += 24 * 60;
             }
@@ -157,7 +160,7 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                 maxWidth='md'
             >
                 <Components.DialogTitle sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }} id="customized-dialog-title">
-                    {id ? "Update" : "Create"} Late Entry
+                    {id ? "Update" : "Create"} Late Entry Rule
                 </Components.DialogTitle>
 
                 <Components.IconButton
@@ -205,7 +208,7 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                                         label="Deduction Type"
                                         placeholder="Select type"
                                         value={parseInt(watch("deductionType")) || null}
-                                        onChange={(_, newValue) => {                                            
+                                        onChange={(_, newValue) => {
                                             field.onChange(newValue?.id || null);
                                         }}
                                     />
@@ -280,6 +283,7 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                             />
                         </div>
                     </Components.DialogContent>
+                    
                     <Components.DialogActions>
                         <div className='flex justify-end'>
                             <Button type={`submit`} text={id ? "Update" : "Submit"} isLoading={loading} />

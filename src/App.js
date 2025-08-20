@@ -42,6 +42,7 @@ import WeekOffTemplates from "./components/dashboard/settings/automationrRules/w
 import AddWeekOfTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/addWeekOfTemplates";
 import Salesforce from "./salesforce";
 import AddLateEntryTemplates from "./components/dashboard/settings/automationrRules/addLateEntryTemplates/addLateEntryTemplates";
+import AddEarlyExitTemplates from "./components/dashboard/settings/automationrRules/addEarlyExitTemplates/addEarlyExitTemplates";
 
 library.add(fas, far)
 
@@ -201,12 +202,12 @@ function App() {
           element: <AddWeekOfTemplates />,
         },
          {
-          path: "automationrules/late-entry/add",
+          path: "automationrules/late-entry",
           element: <AddLateEntryTemplates />,
         },
         {
-          path: "automationrules/late-entry/edit/:id",
-          element: <AddLateEntryTemplates />,
+          path: "automationrules/early-exit",
+          element: <AddEarlyExitTemplates />,
         },
       ]
     },

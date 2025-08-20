@@ -7,9 +7,9 @@ import Input from '../../common/input/input';
 import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
-import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
+import { createAttendancePenaltyRule, getAttendancePenaltyRuleById, updateAttendancePenaltyRule } from '../../../service/attendancePenaltyRules/attendancePenaltyRuleService';
 import Select from '../../common/select/select';
-import { createOvertimeRule, getOvertimeRule, updateOvertimeRule } from '../../../service/overtimeRules/overtimeRulesService';
+import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
 import dayjs from 'dayjs';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
@@ -21,51 +21,55 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
-const overTimeTypes = [
+const attendancePenaltyRuleTypes = [
     { id: 1, title: "Fixed Amount" },
-    { id: 2, title: "Fixed Amount Per Hour" },
-    { id: 3, title: "1 Day Salary" },
-    { id: 4, title: "1.5 Day Salary" },
-    { id: 5, title: "2 Day Salary" },
-    { id: 6, title: "2.5 Day Salary" },
-    { id: 7, title: "3 Day Salary" }
+    { id: 2, title: "Half Day Salary" },
+    { id: 3, title: "5 Min Salary" },
+    { id: 4, title: "15 Min Salary" },
+    { id: 5, title: "30 Min Salary" },
+    { id: 6, title: "1 Hour Salary" },
+    { id: 7, title: "1 Day Salary" },
+    { id: 8, title: "1.5 Day Salary" },
+    { id: 9, title: "2 Day Salary" },
+    { id: 10, title: "2.5 Day Salary" },
+    { id: 11, title: "3 Day Salary" }
 ];
 
-function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId, handleGetAllOvertimeRules }) {
+function AddEarlyExit({ setAlert, open, handleClose, id, handleAttendancePenaltyRule }) {
     const theme = useTheme()
+
     const [loading, setLoading] = useState(false);
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
     const {
-        watch,
-        setValue,
         handleSubmit,
         control,
         reset,
         formState: { errors },
+        watch,
+        setValue,
     } = useForm({
         defaultValues: {
-            id: "",
             ruleName: "",
-            otMinutes: "",
-            otAmount: "",
-            otType: 1,
-
+            minutes: "",
+            amount: "",
+            deductionType: 1,
+            count: 0,
             startTime: null,
-            endTime: null,
+            endTime: null
         },
     });
 
     const onClose = () => {
         setLoading(false);
         reset({
-            id: "",
             ruleName: "",
-            otMinutes: "",
-            otAmount: "",
-            otType: 1,
+            minutes: "",
+            amount: "",
+            deductionType: 1,
+            count: 0,
             startTime: null,
-            endTime: null,            
+            endTime: null
         });
         handleClose();
     };
@@ -75,80 +79,77 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             ...data,
             startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
             endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
-            companyId: companyId,
-            createdBy: userInfo?.employeeId || null,
-            otType: overTimeTypes.find(type => type.id === data.otType)?.title || "",
-            userIds: data.userIds?.length > 0 ? JSON.stringify(data.userIds) : null,
+            companyId: userInfo?.companyId,
+            createdBy: userInfo?.employeeId,
+            deductionType: attendancePenaltyRuleTypes.find(type => type.id === data.deductionType)?.title || "",
+            amount: data.deductionType === 1 ? data.amount : null,
+            isEarlyExit: true,
         }
-        setLoading(true);
-        if (overTimeId) {
-            const response = await updateOvertimeRule(overTimeId, newData);
+        if (id) {
+            setLoading(true)
+            const response = await updateAttendancePenaltyRule(id, newData);
             if (response?.data?.status === 200) {
-                handleGetAllOvertimeRules();
+                // setAlert({ open: true, message: response.data.message, type: "success" })
+                handleAttendancePenaltyRule()
                 onClose();
             } else {
+                setAlert({ open: true, message: response.data.message, type: 'error' });
                 setLoading(false);
-                setAlert({
-                    open: true,
-                    message: response?.data?.message || "Failed to update overtime rule",
-                    type: "error",
-                });
             }
+
         } else {
-            const response = await createOvertimeRule(companyId, newData);
+            setLoading(true)
+            const response = await createAttendancePenaltyRule(newData);
             if (response?.data?.status === 201) {
-                handleGetAllOvertimeRules();
+                handleAttendancePenaltyRule()
                 onClose();
             } else {
+                setAlert({ open: true, message: response.data.message, type: 'error' });
                 setLoading(false);
-                setAlert({
-                    open: true,
-                    message: response?.data?.message || "Failed to create overtime rule",
-                    type: "error",
-                });
             }
         }
     }
 
-    const handleGetOvertimeRuleById = async () => {
-        if (overTimeId !== null && open) {
-            const response = await getOvertimeRule(overTimeId);
-            if (response?.data?.status === 200) {
-                const data = response?.data?.result;
-                reset({
-                    id: data?.id || "",
-                    ruleName: data?.ruleName || "",
-                    otMinutes: data?.otMinutes || "",
-                    otAmount: data?.otAmount || "",
-                    otType: overTimeTypes.find(type => type.title === data?.otType)?.id || 1,
-                    startTime: data?.startTime ? dayjs(data.startTime) : null,
-                    endTime: data?.endTime ? dayjs(data.endTime) : null,
-                });
-            }
+    const handleGetAttendancePenaltyRuleById = async () => {
+        if (!id && !open) return;
+
+        const response = await getAttendancePenaltyRuleById(id);
+        if (response.data.status === 200) {
+            reset({
+                id: response?.data?.result?.id || "",
+                ruleName: response?.data?.result?.ruleName || "",
+                minutes: response?.data?.result?.minutes || "",
+                amount: response?.data?.result?.amount || "",
+                deductionType: attendancePenaltyRuleTypes.find(type => type.title === response?.data?.result?.deductionType)?.id || 1,
+                count: response?.data?.result?.count || "",
+                startTime: response?.data?.result?.startTime ? dayjs(response.data.result.startTime) : null,
+                endTime: response?.data?.result?.endTime ? dayjs(response.data.result.endTime) : null,
+            });
+        } else {
+            setAlert({ message: response.data.message, type: 'error' });
         }
-    }
+    };
 
     useEffect(() => {
         if (watch("startTime") && watch("endTime")) {
             const start = new Date(watch("startTime"));
             const end = new Date(watch("endTime"));
-
             let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
 
             // If endTime is before startTime, assume it's the next day
             if (diffInMinutes < 0) {
                 diffInMinutes += 24 * 60;
             }
-
-            setValue("otMinutes", diffInMinutes.toString());
+            setValue("minutes", diffInMinutes.toString());
         } else {
-            setValue("otMinutes", "");
+            setValue("minutes", "");
         }
     }, [watch("startTime"), watch("endTime")]);
 
     useEffect(() => {
-        handleGetOvertimeRuleById()
-    }, [overTimeId])
+        handleGetAttendancePenaltyRuleById();
+    }, [id])
+
 
     return (
         <React.Fragment>
@@ -159,7 +160,7 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                 maxWidth='md'
             >
                 <Components.DialogTitle sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }} id="customized-dialog-title">
-                    {overTimeId ? "Update" : "Create"} Overtime Rule
+                    {id ? "Update" : "Create"} Early Exit Rule
                 </Components.DialogTitle>
 
                 <Components.IconButton
@@ -196,32 +197,47 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                                     />
                                 )}
                             />
-                            <Input
-                                label="Calculation Type"
-                                type={`text`}
-                                value={'Post Payable Hours/Shift End'}
-                                InputLabelProps={{ shrink: true }}
-                                disabled={true}
-                            />
                             <Controller
-                                name="otType"
+                                name="deductionType"
                                 control={control}
-                                rules={{ required: "OT Type is required" }}
+                                rules={{ required: "Deduction Type is required" }}
                                 render={({ field }) => (
                                     <Select
-                                        options={overTimeTypes}
-                                        error={!!errors.otType}
-                                        label="OT Type"
+                                        options={attendancePenaltyRuleTypes}
+                                        error={!!errors.deductionType}
+                                        label="Deduction Type"
                                         placeholder="Select type"
-                                        value={parseInt(watch("otType")) || null}
+                                        value={parseInt(watch("deductionType")) || null}
                                         onChange={(_, newValue) => {
                                             field.onChange(newValue?.id || null);
                                         }}
                                     />
                                 )}
                             />
-                        </div>
-                        <div className='grid grid-cols-3 gap-4 mt-4'>
+                            {
+                                watch("deductionType") === 1 && (
+                                    <Controller
+                                        name="amount"
+                                        control={control}
+                                        rules={{
+                                            required: watch("deductionType") === 1 ? "Deduction Amount is required" : false,
+                                        }}
+                                        render={({ field }) => (
+                                            <Input
+                                                {...field}
+                                                label="Deduction Amount"
+                                                type={`text`}
+                                                error={errors.amount}
+                                                onChange={(e) => {
+                                                    const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                    field.onChange(numericValue);
+                                                }}
+                                            />
+                                        )}
+                                        disabled={watch("deductionType") !== 1}
+                                    />
+                                )
+                            }
                             <InputTimePicker
                                 label="Start Time"
                                 name="startTime"
@@ -241,42 +257,35 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                                 minTime={watch("startTime")}
                             />
                             <Input
-                                label="Total OT Minutes"
+                                label="Total Minutes"
                                 type={`text`}
-                                value={watch("otMinutes") || 0}
+                                value={watch("minutes") || 0}
                                 InputLabelProps={{ shrink: true }}
                                 disabled={true}
                             />
-                            {
-                                (watch("otType") === 1 || watch("otType") === 2) && (
-                                    <Controller
-                                        name="otAmount"
-                                        control={control}
-                                        rules={{
-                                            required: watch("otType") !== 1 || watch("otType") !== 2 ? "OT Amount is required" : false,
-                                        }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="OT Amount"
-                                                type={`text`}
-                                                error={errors.otAmount}
-                                                onChange={(e) => {
-                                                    const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(numericValue);
-                                                }}
-                                            />
-                                        )}
-                                        disabled={watch("otType") !== 1 && watch("otType") !== 2}
-                                    />
-                                )
-                            }
+                            <Controller
+                                name="count"
+                                control={control}
+                                render={({ field }) => (
+                                    <div className=''>
+                                        <Input
+                                            {...field}
+                                            label="Minimum Occurrences(Exclusive)"
+                                            type={`text`}
+                                            onChange={(e) => {
+                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                field.onChange(numericValue);
+                                            }}
+                                        />
+                                        <span className='text-xs text-gray-500 ml-2'>Fine will be pardoned upto {watch("count") || 0} times</span>
+                                    </div>
+                                )}
+                            />
                         </div>
                     </Components.DialogContent>
-
                     <Components.DialogActions>
                         <div className='flex justify-end'>
-                            <Button type={`submit`} text={overTimeId ? "Update" : "Submit"} isLoading={loading} />
+                            <Button type={`submit`} text={id ? "Update" : "Submit"} isLoading={loading} />
                         </div>
                     </Components.DialogActions>
                 </form>
@@ -289,4 +298,4 @@ const mapDispatchToProps = {
     setAlert,
 };
 
-export default connect(null, mapDispatchToProps)(OvertimeRulesModel)
+export default connect(null, mapDispatchToProps)(AddEarlyExit)

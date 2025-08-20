@@ -9,8 +9,9 @@ import AlertDialog from '../../../../common/alertDialog/alertDialog';
 import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWrapper';
 import { deleteAttendancePenaltyRule, findAllAttendancePenaltyRuleByCompanyId } from '../../../../../service/attendancePenaltyRules/attendancePenaltyRuleService';
 import AddLateEntry from '../../../../models/addLateEntry/addLateEntry';
+import AddEarlyExit from '../../../../models/addEarlyExit/addEarlyExit';
 
-const AddLateEntryTemplates = () => {
+const AddEarlyExitTemplates = () => {
     const theme = useTheme();
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
     const [row, setRow] = useState([]);
@@ -61,7 +62,7 @@ const AddLateEntryTemplates = () => {
 
     const handleAttendancePenaltyRule = async () => {
         if (userInfo?.companyId) {
-            const response = await findAllAttendancePenaltyRuleByCompanyId(0, userInfo?.companyId);
+            const response = await findAllAttendancePenaltyRuleByCompanyId(1, userInfo?.companyId);
             if (response?.data?.status === 200) {
                 const data = response?.data?.result?.map((item, index) => ({
                     ...item,
@@ -200,18 +201,18 @@ const AddLateEntryTemplates = () => {
 
             <div className='border rounded-lg bg-white w-screen lg:w-full p-4'>
                 <div className='grow mb-4'>
-                    <h2 className='text-lg font-semibold'>Late Entry Rules</h2>
+                    <h2 className='text-lg font-semibold'>Early Exit Rules</h2>
                     <p className='text-gray-600'>
-                        Create and manage late entry templates.
+                        Create and manage early exit templates.
                     </p>
                 </div>
                 <DataTable columns={columns} rows={row} getRowId={getRowId} height={480} showButtons={true} buttons={actionButtons} />
             </div>
 
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDelete} handleClose={handleCloseDialog} loading={loading} />
-            <AddLateEntry open={open} handleClose={handleClose} id={id} handleAttendancePenaltyRule={handleAttendancePenaltyRule} />
+            <AddEarlyExit open={open} handleClose={handleClose} id={id} handleAttendancePenaltyRule={handleAttendancePenaltyRule} />
         </div>
     )
 }
 
-export default AddLateEntryTemplates
+export default AddEarlyExitTemplates
