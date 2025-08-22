@@ -1907,10 +1907,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                             <div>
                                                 <Controller
                                                     name="weeklyOffId"
-                                                    control={control}
-                                                    rules={{
-                                                        required: "Weekly Off is required"
-                                                    }}
+                                                    control={control}                                             
                                                     render={({ field }) => (
                                                         <Select
                                                             options={weeklyOff}
@@ -1924,7 +1921,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                                     setValue("weeklyOffId", null);
                                                                 }
                                                             }}
-                                                            error={errors?.weeklyOffId}
                                                         />
                                                     )}
                                                 />

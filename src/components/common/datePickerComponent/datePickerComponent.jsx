@@ -80,6 +80,7 @@ const DatePickerComponent = ({ name, setValue, control, label, minDate, maxDate,
               format="MM/DD/YYYY"
               value={field.value ? dayjs(field.value) : dayjs(maxDate)}
               onChange={(date) => {
+                field.onChange(dayjs(date).format("MM/DD/YYYY"));
                 setValue(name, date ? dayjs(date).format("MM/DD/YYYY") : null);
               }}
               minDate={minDate ? dayjs(minDate) : null}
@@ -89,7 +90,7 @@ const DatePickerComponent = ({ name, setValue, control, label, minDate, maxDate,
                   fullWidth: true,
                   variant: "outlined",
                   error: !!fieldState.error,
-                  helperText: fieldState.error ? "This field is required" : null,
+                  // helperText: fieldState.error ? "This field is required" : null,
                   sx: {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '0.5rem',

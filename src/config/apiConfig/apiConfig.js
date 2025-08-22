@@ -48,6 +48,8 @@ export const salaryStatementHistoryURL = baseURL + '/salaryStatementHistory'
 export const statementMasterURL = baseURL + '/statementMaster'
 export const weeklyOffURL = baseURL + '/weekly-off'
 export const attendancePenaltyRulesURL = baseURL + '/attendancePenaltyRules'
+export const holidayTemplatesURL = baseURL + '/holidayTemplates'
+export const holidayTemplateDetailsURL = baseURL + '/holidayTemplateDetails'
 
 
 export const countryURL = baseURL + '/country'

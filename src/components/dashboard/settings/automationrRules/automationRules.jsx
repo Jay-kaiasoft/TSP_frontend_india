@@ -35,7 +35,7 @@ const AutomationRules = () => {
 
 
                     <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
-                        <div style={{ color: theme.palette.primary.main }}>                            
+                        <div style={{ color: theme.palette.primary.main }}>
                             <CustomIcons iconName={'fa-solid fa-calendar-days'} css='cursor-pointer h-6 w-6' />
                         </div>
                         <div className='grow'>
@@ -58,8 +58,32 @@ const AutomationRules = () => {
                         </div>
                     </div>
 
+                     <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
+                        <div style={{ color: theme.palette.primary.main }}>
+                            <CustomIcons iconName={'fa-solid fa-champagne-glasses'} css='cursor-pointer h-6 w-6' />
+                        </div>
+                        <div className='grow'>
+                            <h2 className='text-lg font-semibold'>Holidays Template</h2>
+                            <p className='text-gray-600'>
+                                Configure & manage holidays templates.
+                            </p>
+                        </div>
+                        <div>
+                            <NavLink to={'/dashboard/automationrules/holidays/templates'}>
+                                <div className='flex justify-center items-center gap-2'>
+                                    <p>
+                                        <span style={{ color: theme.palette.primary.main }} className='font-semibold'>View All</span>
+                                    </p>
+                                    <div>
+                                        <CustomIcons iconName={'fa-solid fa-angle-right'} css='cursor-pointer text-gray-500 h-4 w-4' />
+                                    </div>
+                                </div>
+                            </NavLink>
+                        </div>
+                    </div>
+
                     <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
-                        <div style={{ color: theme.palette.primary.main }}>                            
+                        <div style={{ color: theme.palette.primary.main }}>
                             <CustomIcons iconName={'fa-solid fa-person-walking-arrow-right'} css='cursor-pointer h-6 w-6' />
                         </div>
                         <div className='grow'>
@@ -82,9 +106,9 @@ const AutomationRules = () => {
                         </div>
                     </div>
 
-                            <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
-                        <div style={{ color: theme.palette.primary.main }}>                            
-                            <CustomIcons iconName={'fa-solid fa-person-walking-arrow-right'} css='cursor-pointer h-6 w-6' />
+                    <div className='p-4 border border-gray-300 rounded-lg flex justify-start items-center gap-4 mb-4'>
+                        <div style={{ color: theme.palette.primary.main }}>
+                            <CustomIcons iconName={'fa-solid fa-person-walking-arrow-right'} css='cursor-pointer h-6 w-6 scale-x-[-1]' />
                         </div>
                         <div className='grow'>
                             <h2 className='text-lg font-semibold'>Early Exit Rules</h2>

@@ -61,3 +61,13 @@ export const assignEmployees = async (data) => {
         console.log(error)
     }
 }
+
+export const assignDefaultTemplate = async (id) => {
+    try {
+        const response = axiosInterceptor().get(`${weeklyOffURL}/assignDefaultTemplate/${id}`)
+        return response
+
+    } catch (error) {
+        console.log(error)
+    }
+}

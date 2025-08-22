@@ -244,4 +244,5 @@ const AddWeekOfTemplates = ({ setAlert }) => {
 const mapDispatchToProps = {
     setAlert,
 };
+
 export default connect(null, mapDispatchToProps)(AddWeekOfTemplates);

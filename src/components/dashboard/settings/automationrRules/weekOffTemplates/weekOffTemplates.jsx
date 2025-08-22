@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import CustomIcons from '../../../../common/icons/CustomIcons'
 import { NavLink, useNavigate } from 'react-router-dom'
 import DataTable from '../../../../common/table/table'
-import { deleteWeekOffTemplate, getAllWeekOffTemplate } from '../../../../../service/weeklyOff/WeeklyOffService'
+import { assignDefaultTemplate, deleteWeekOffTemplate, getAllWeekOffTemplate } from '../../../../../service/weeklyOff/WeeklyOffService'
 import { useTheme } from '@mui/material'
 import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWrapper'
 import Button from '../../../../common/buttons/button'
@@ -18,6 +18,7 @@ const WeekOffTemplates = () => {
     const [id, setId] = useState(null);
 
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [dialogAssignTemplate, setDialogAssignTemplate] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
 
@@ -50,6 +51,39 @@ const WeekOffTemplates = () => {
             message: '',
             actionButtonText: ''
         })
+    }
+
+    const handleOpenAssignDefaultTemplateDialog = (id, action) => {
+        setId(id)
+        setDialogAssignTemplate({
+            open: true,
+            title: 'Default Template',
+            message: action === "assign" ? 'Are you sure! Do you want to set this weekly off template as default?' : 'Are you sure! Do you want to remove this weekly off template from default?',
+            actionButtonText: 'Yes'
+        })
+    }
+
+    const handleCloseAssignDefaultTemplateDialog = () => {
+        setId(null)
+        setLoading(false)
+        setDialogAssignTemplate({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: ''
+        })
+    }
+
+    const handleAssignDefaultTemplate = async () => {
+        if (id) {
+            setLoading(true);
+            const response = await assignDefaultTemplate(id);
+            if (response?.data?.status === 200) {
+                setLoading(false);
+                handleCloseAssignDefaultTemplateDialog();
+                handleGetAllWeekOffTemplate();
+            }
+        }
     }
 
     const handleDelete = async () => {
@@ -114,6 +148,21 @@ const WeekOffTemplates = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
+                        {
+                            params?.row?.isDefault ? (
+                                <div className='bg-gray-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenAssignDefaultTemplateDialog(params.row.id, "remove")}>
+                                        <CustomIcons iconName={'fa-solid fa-xmark'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            ) : (
+                                <div className='bg-purple-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenAssignDefaultTemplateDialog(params.row.id, "assign")}>
+                                        <CustomIcons iconName={'fa-solid fa-calendar-week'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            )
+                        }
                         <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                             <Components.IconButton onClick={() => handleOpen(params.row.id)}>
                                 <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
@@ -178,7 +227,9 @@ const WeekOffTemplates = () => {
                 </div>
                 <DataTable columns={columns} rows={weekOffTemplates} getRowId={getRowId} height={480} showButtons={true} buttons={actionButtons} />
                 <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDelete} handleClose={handleCloseDialog} loading={loading} />
-                <AssignWeeklyOff open={open} handleClose={handleClose} id={id}/>
+                <AlertDialog open={dialogAssignTemplate.open} title={dialogAssignTemplate.title} message={dialogAssignTemplate.message} actionButtonText={dialogAssignTemplate.actionButtonText} handleAction={handleAssignDefaultTemplate} handleClose={handleCloseAssignDefaultTemplateDialog} loading={loading} />
+
+                <AssignWeeklyOff open={open} handleClose={handleClose} id={id} />
             </div>
         </div>
     )

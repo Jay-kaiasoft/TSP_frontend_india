@@ -40,19 +40,16 @@ import SalaryReport from "./components/dashboard/reports/salaryReport/salaryRepo
 import GrossSalaryReport from "./components/dashboard/reports/grossSalaryReport/grossSalaryReport";
 import WeekOffTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/weekOffTemplates";
 import AddWeekOfTemplates from "./components/dashboard/settings/automationrRules/weekOffTemplates/addWeekOfTemplates";
-import Salesforce from "./salesforce";
 import AddLateEntryTemplates from "./components/dashboard/settings/automationrRules/addLateEntryTemplates/addLateEntryTemplates";
 import AddEarlyExitTemplates from "./components/dashboard/settings/automationrRules/addEarlyExitTemplates/addEarlyExitTemplates";
+import HolidaysTemplates from "./components/dashboard/settings/automationrRules/holidaysTemplates/holidaysTemplates";
+import AddHolidaysTemplates from "./components/dashboard/settings/automationrRules/holidaysTemplates/addHolidaysTemplates";
 
 library.add(fas, far)
 
 function App() {
 
   const router = createBrowserRouter([
-    {
-      path: "/salesforce",
-      element: <Salesforce />,
-    },
     {
       path: "*",
       element: <PageNotFound />,
@@ -201,13 +198,21 @@ function App() {
           path: "automationrules/week-off/edit/:id",
           element: <AddWeekOfTemplates />,
         },
-         {
+        {
           path: "automationrules/late-entry",
           element: <AddLateEntryTemplates />,
         },
         {
           path: "automationrules/early-exit",
           element: <AddEarlyExitTemplates />,
+        },
+        {
+          path: "automationrules/holidays/templates",
+          element: <HolidaysTemplates />,
+        },
+        {
+          path: "automationrules/holidays-templates/add",
+          element: <AddHolidaysTemplates />,
         },
       ]
     },
