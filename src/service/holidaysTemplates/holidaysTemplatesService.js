@@ -50,3 +50,13 @@ export const deleteHolidaysTemplate = async (id) => {
         console.log(error)
     }
 }
+
+export const assignHolidaysTemplate = async (data) => {
+    try {
+        const response = axiosInterceptor().post(`${holidayTemplatesURL}/assignEmployees`, data)
+        return response
+
+    } catch (error) {
+        console.log(error)
+    }
+}

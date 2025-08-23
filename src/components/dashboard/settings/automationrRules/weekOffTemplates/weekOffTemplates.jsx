@@ -21,14 +21,18 @@ const WeekOffTemplates = () => {
     const [dialogAssignTemplate, setDialogAssignTemplate] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
+    const [assignedEmployeeIds, setAssignedEmployeeIds] = useState([]);
 
-    const handleOpen = (id) => {
+    const handleOpen = (id, assignedEmployeeIds) => {
         setId(id)
+        setAssignedEmployeeIds(assignedEmployeeIds)
         setOpen(true);
     }
 
+
     const handleClose = () => {
         setId(null)
+        setAssignedEmployeeIds([]);
         setOpen(false);
     }
 
@@ -140,6 +144,21 @@ const WeekOffTemplates = () => {
             minWidth: 100
         },
         {
+            field: 'assignedEmployeeIds',
+            headerName: 'Assigned Employees',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 100,
+            renderCell: (params) => {
+                const assignedEmployees = params.row.assignedEmployeeIds || [];
+                return (
+                    <div>
+                        {assignedEmployees?.length}
+                    </div>
+                );
+            }
+        },
+        {
             field: 'action',
             headerName: 'action',
             headerClassName: 'uppercase',
@@ -164,7 +183,7 @@ const WeekOffTemplates = () => {
                             )
                         }
                         <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                            <Components.IconButton onClick={() => handleOpen(params.row.id, params.row.assignedEmployeeIds)}>
                                 <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
                             </Components.IconButton>
                         </div>
@@ -229,7 +248,7 @@ const WeekOffTemplates = () => {
                 <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDelete} handleClose={handleCloseDialog} loading={loading} />
                 <AlertDialog open={dialogAssignTemplate.open} title={dialogAssignTemplate.title} message={dialogAssignTemplate.message} actionButtonText={dialogAssignTemplate.actionButtonText} handleAction={handleAssignDefaultTemplate} handleClose={handleCloseAssignDefaultTemplateDialog} loading={loading} />
 
-                <AssignWeeklyOff open={open} handleClose={handleClose} id={id} />
+                <AssignWeeklyOff open={open} handleClose={handleClose} id={id} assignedEmployeeIds={assignedEmployeeIds} />
             </div>
         </div>
     )

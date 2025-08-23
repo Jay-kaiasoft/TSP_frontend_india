@@ -214,6 +214,10 @@ function App() {
           path: "automationrules/holidays-templates/add",
           element: <AddHolidaysTemplates />,
         },
+         {
+          path: "automationrules/holidays-templates/edit/:id",
+          element: <AddHolidaysTemplates />,
+        },
       ]
     },
   ])

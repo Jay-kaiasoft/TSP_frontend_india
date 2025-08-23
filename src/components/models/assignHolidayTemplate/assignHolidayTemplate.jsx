@@ -7,8 +7,8 @@ import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
 import { getAllCompanyEmployee } from '../../../service/companyEmployee/companyEmployeeService';
-import { assignEmployees } from '../../../service/weeklyOff/WeeklyOffService';
 import CheckBoxSelect from '../../common/select/checkBoxSelect';
+import { assignHolidaysTemplate } from '../../../service/holidaysTemplates/holidaysTemplatesService';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -19,7 +19,7 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
-function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds }) {
+function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmployeeIds }) {
     const theme = useTheme()
 
     const [loading, setLoading] = useState(false);
@@ -49,11 +49,11 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
     const submit = async (data) => {
         const newData = {
             employeeIds: data.employeeIds,
-            weekOffId: id
+            id: id
         }
         if (id) {
             setLoading(true)
-            const response = await assignEmployees(newData);
+            const response = await assignHolidaysTemplate(newData);
             if (response?.data?.status === 200) {
                 setAlert({ open: true, message: response.data.message, type: "success" })
                 onClose();
@@ -91,13 +91,12 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
         <React.Fragment>
             <BootstrapDialog
                 open={open}
-                // onClose={onClose}
                 aria-labelledby="customized-dialog-title"
                 fullWidth
                 maxWidth='sm'
             >
                 <Components.DialogTitle sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }} id="customized-dialog-title">
-                    Assign Weekly-Off To Employees
+                    Assign Holiday Template To Employees
                 </Components.DialogTitle>
 
                 <Components.IconButton
@@ -115,23 +114,6 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
 
                 <form noValidate onSubmit={handleSubmit(submit)}>
                     <Components.DialogContent dividers>
-                        {/* <Controller
-                            name="employeeIds"
-                            control={control}
-                            rules={{ required: 'Please select at least one employee' }}
-                            render={({ field }) => (
-                                <SelectMultiple
-                                    options={employees}
-                                    label={"Select Employees"}
-                                    placeholder="Select employees"
-                                    value={field.value || []}
-                                    onChange={(newValue) => {
-                                        field.onChange(newValue);
-                                    }}
-                                    errors={errors.employeeIds}
-                                />
-                            )}
-                        /> */}
                         <Controller
                             name="employeeIds"
                             control={control}
@@ -173,4 +155,4 @@ const mapDispatchToProps = {
     setAlert,
 };
 
-export default connect(null, mapDispatchToProps)(AssignWeeklyOff)
+export default connect(null, mapDispatchToProps)(AssignHolidayTemplate)

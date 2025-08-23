@@ -8,6 +8,7 @@ import DataTable from '../../../../common/table/table';
 import AlertDialog from '../../../../common/alertDialog/alertDialog';
 import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWrapper';
 import { deleteHolidaysTemplate, getAllHolidaysTemplates } from '../../../../../service/holidaysTemplates/holidaysTemplatesService';
+import AssignHolidayTemplate from '../../../../models/assignHolidayTemplate/assignHolidayTemplate';
 
 const HolidaysTemplates = () => {
     const theme = useTheme();
@@ -19,6 +20,20 @@ const HolidaysTemplates = () => {
 
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [assignedEmployeeIds, setAssignedEmployeeIds] = useState([]);
+
+    const handleOpen = (id, assignedEmployeeIds) => {
+        setId(id)
+        setAssignedEmployeeIds(assignedEmployeeIds)
+        setOpen(true);
+    }
+
+    const handleClose = () => {
+        setId(null)
+        setAssignedEmployeeIds([]);
+        setOpen(false);
+    }
 
     const handleOpenDeleteHolidaysDialog = (id) => {
         setId(id)
@@ -78,6 +93,21 @@ const HolidaysTemplates = () => {
             minWidth: 100
         },
         {
+            field: 'assignedEmployeeIds',
+            headerName: 'Assigned Employees',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 100,
+            renderCell: (params) => {
+                const assignedEmployees = params.row.assignedEmployeeIds || [];
+                return (
+                    <div>
+                        {assignedEmployees?.length}
+                    </div>
+                );
+            }
+        },
+        {
             field: 'action',
             headerName: 'action',
             headerClassName: 'uppercase',
@@ -86,11 +116,16 @@ const HolidaysTemplates = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
-                        {/* <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => navigate('/dashboard/automationrules/holidays-templates/edit/' + params.row.id)}>
                                 <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
                             </Components.IconButton>
-                        </div> */}
+                        </div>
+                        <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => handleOpen(params.row.id, params.row.assignedEmployeeIds)}>
+                                <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
+                            </Components.IconButton>
+                        </div>
                         {/* <PermissionWrapper
                             functionalityName="Company"
                             moduleName="Overtime Rules"
@@ -99,18 +134,18 @@ const HolidaysTemplates = () => {
                             }
                         /> */}
 
-                        <PermissionWrapper
+                        {/* <PermissionWrapper
                             functionalityName="Company"
                             moduleName="Overtime Rules"
                             actionId={3}
                             component={
-                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                    <Components.IconButton onClick={() => handleOpenDeleteHolidaysDialog(params.row.id)}>
-                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
-                                    </Components.IconButton>
-                                </div>
                             }
-                        />
+                        /> */}
+                        <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                            <Components.IconButton onClick={() => handleOpenDeleteHolidaysDialog(params.row.id)}>
+                                <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
+                            </Components.IconButton>
+                        </div>
                     </div>
                 );
             },
@@ -118,7 +153,7 @@ const HolidaysTemplates = () => {
     ];
 
     const getRowId = (row) => {
-        return row.id;
+        return row.rowId;
     }
 
     const handleGetHolidaysTemplates = async () => {
@@ -126,7 +161,11 @@ const HolidaysTemplates = () => {
             if (userInfo?.companyId) {
                 const response = await getAllHolidaysTemplates(userInfo?.companyId);
                 if (response?.data?.status === 200) {
-                    setRow(response?.data?.result || []);
+                    const data = response?.data?.result?.map((item, index) => ({
+                        ...item,
+                        rowId: index + 1,
+                    }));
+                    setRow(data);
                 }
             }
         } catch (error) {
@@ -140,16 +179,16 @@ const HolidaysTemplates = () => {
 
     const actionButtons = () => {
         return (
-            <PermissionWrapper
-                functionalityName="Company"
-                moduleName="Overtime Rules"
-                actionId={1}
-                component={
-                    <div>
-                        <Button type={`button`} text={'Create Holidays Template'} onClick={() => navigate('/dashboard/automationrules/holidays-templates/add')} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
-                    </div>
-                }
-            />
+            // <PermissionWrapper
+            //     functionalityName="Company"
+            //     moduleName="Overtime Rules"
+            //     actionId={1}
+            //     component={
+            //     }
+            //     />
+            <div>
+                <Button type={`button`} text={'Create Holidays Template'} onClick={() => navigate('/dashboard/automationrules/holidays-templates/add')} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
+            </div>
         )
     }
 
@@ -176,6 +215,8 @@ const HolidaysTemplates = () => {
                 <DataTable columns={columns} rows={row} getRowId={getRowId} height={480} showButtons={true} buttons={actionButtons} />
             </div>
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteHolidaysTemplate} handleClose={handleCloseDialog} loading={loading} />
+            <AssignHolidayTemplate open={open} handleClose={handleClose} id={id} assignedEmployeeIds={assignedEmployeeIds} />
+
         </div>
     )
 }

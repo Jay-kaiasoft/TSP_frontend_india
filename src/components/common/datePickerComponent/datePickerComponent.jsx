@@ -78,13 +78,14 @@ const DatePickerComponent = ({ name, setValue, control, label, minDate, maxDate,
               {...field}
               label={label}
               format="MM/DD/YYYY"
-              value={field.value ? dayjs(field.value) : dayjs(maxDate)}
+              value={field.value ? dayjs(field.value) : dayjs(null)}
               onChange={(date) => {
                 field.onChange(dayjs(date).format("MM/DD/YYYY"));
                 setValue(name, date ? dayjs(date).format("MM/DD/YYYY") : null);
               }}
               minDate={minDate ? dayjs(minDate) : null}
-              maxDate={maxDate ? dayjs(maxDate) : dayjs(new Date())}             
+              maxDate={maxDate ? dayjs(maxDate) : dayjs(new Date())}
+              //dayjs(new Date())
               slotProps={{
                 textField: {
                   fullWidth: true,
