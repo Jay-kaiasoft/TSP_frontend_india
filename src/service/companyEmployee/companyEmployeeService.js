@@ -126,3 +126,12 @@ export const updateEmployeeFromTSP = async (id, data) => {
         console.log(error)
     }
 }
+
+export const getLastUserId = async () => {
+    try {
+        const response = axiosInterceptor().get(`${companyEmployeeURL}/getLastUserId`)
+        return response
+    } catch (error) {
+        console.log(error)
+    }
+}

@@ -217,16 +217,16 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
 
                 <form noValidate onSubmit={handleSubmit(submit)}>
                     <Components.DialogContent dividers>
-                        <div className='grid grid-cols-4 mb-4 gap-4'>
-                            <div className='flex justify-start items-center gap-2 col-span-1'>
+                        <div className='grid grid-cols-6 mb-4 gap-4'>
+                            <div className='flex justify-start items-center gap-2 col-span-2'>
                                 <p>Employee Name :</p>
                                 <span className='font-semibold'>{watch("employeeName")}</span>
                             </div>                       
-                            <div className='flex justify-start items-center gap-2'>
+                            <div className='flex justify-start items-center gap-2 col-span-2'>
                                 <p>Basic Salary :</p>
                                 <span className='font-semibold'>₹{parseInt(watch("basicSalary")).toLocaleString("en-IN")}</span>
                             </div>
-                            <div className='flex justify-start items-center gap-2'>
+                            <div className='flex justify-start items-center gap-2 col-span-2'>
                                 <p>Total Paid Days :</p>
                                 <span className='font-semibold'>{watch("totalPaidDays")}</span>
                             </div>

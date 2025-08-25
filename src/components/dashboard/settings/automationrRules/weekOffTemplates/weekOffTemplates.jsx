@@ -167,37 +167,62 @@ const WeekOffTemplates = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
-                        {
-                            params?.row?.isDefault ? (
-                                <div className='bg-gray-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                    <Components.IconButton onClick={() => handleOpenAssignDefaultTemplateDialog(params.row.id, "remove")}>
-                                        <CustomIcons iconName={'fa-solid fa-xmark'} css='cursor-pointer text-white h-4 w-4' />
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Weekly Holidays"
+                            actionId={2}
+                            component={
+                                params?.row?.isDefault ? (
+                                    <div className='bg-gray-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                        <Components.IconButton onClick={() => handleOpenAssignDefaultTemplateDialog(params.row.id, "remove")}>
+                                            <CustomIcons iconName={'fa-solid fa-xmark'} css='cursor-pointer text-white h-4 w-4' />
+                                        </Components.IconButton>
+                                    </div>
+                                ) : (
+                                    <div className='bg-purple-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                        <Components.IconButton onClick={() => handleOpenAssignDefaultTemplateDialog(params.row.id, "assign")}>
+                                            <CustomIcons iconName={'fa-solid fa-calendar-week'} css='cursor-pointer text-white h-4 w-4' />
+                                        </Components.IconButton>
+                                    </div>
+                                )
+                            }
+                        />
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Weekly Holidays"
+                            actionId={2}
+                            component={
+                                <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpen(params.row.id, params.row.assignedEmployeeIds)}>
+                                        <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
                                     </Components.IconButton>
                                 </div>
-                            ) : (
-                                <div className='bg-purple-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                    <Components.IconButton onClick={() => handleOpenAssignDefaultTemplateDialog(params.row.id, "assign")}>
-                                        <CustomIcons iconName={'fa-solid fa-calendar-week'} css='cursor-pointer text-white h-4 w-4' />
+                            }
+                        />
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Weekly Holidays"
+                            actionId={2}
+                            component={
+                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => navigate(`/dashboard/automationrules/week-off/edit/${params.row.id}`)}>
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
                                     </Components.IconButton>
                                 </div>
-                            )
-                        }
-                        <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id, params.row.assignedEmployeeIds)}>
-                                <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => navigate(`/dashboard/automationrules/week-off/edit/${params.row.id}`)}>
-                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-
-                        <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
+                            }
+                        />
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Weekly Holidays"
+                            actionId={3}
+                            component={
+                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        />
                     </div>
                 );
             },
@@ -212,8 +237,8 @@ const WeekOffTemplates = () => {
     const actionButtons = () => {
         return (
             <PermissionWrapper
-                functionalityName="Company"
-                moduleName="Overtime Rules"
+                functionalityName="Automation Rules"
+                moduleName="Weekly Holidays"
                 actionId={1}
                 component={
                     <div>
@@ -248,7 +273,7 @@ const WeekOffTemplates = () => {
                 <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDelete} handleClose={handleCloseDialog} loading={loading} />
                 <AlertDialog open={dialogAssignTemplate.open} title={dialogAssignTemplate.title} message={dialogAssignTemplate.message} actionButtonText={dialogAssignTemplate.actionButtonText} handleAction={handleAssignDefaultTemplate} handleClose={handleCloseAssignDefaultTemplateDialog} loading={loading} />
 
-                <AssignWeeklyOff open={open} handleClose={handleClose} id={id} assignedEmployeeIds={assignedEmployeeIds} />
+                <AssignWeeklyOff open={open} handleClose={handleClose} id={id} assignedEmployeeIds={assignedEmployeeIds} handleGetAllWeekOffTemplate={handleGetAllWeekOffTemplate}/>
             </div>
         </div>
     )

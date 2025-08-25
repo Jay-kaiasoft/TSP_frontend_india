@@ -5,7 +5,7 @@ import Select from "../../../common/select/select";
 import { getAllDepartment } from "../../../../service/department/departmentService";
 import { getEmployeeSalaryStatements } from "../../../../service/employeeSalaryStatement/employeeSalaryStatementService";
 import SelectMultiple from "../../../common/select/selectMultiple";
-import DataTable from "../../../common/table/table"; // Your custom DataTable
+import DataTable from "../../../common/table/table";
 import Button from "../../../common/buttons/button";
 import CustomIcons from "../../../common/icons/CustomIcons";
 import { getListOfYears } from "../../../../service/common/commonService";
@@ -15,7 +15,6 @@ import { handleSetTitle, setAlert } from "../../../../redux/commonReducers/commo
 import { connect } from "react-redux";
 import PermissionWrapper from "../../../common/permissionWrapper/PermissionWrapper";
 import DatePickerComponent from "../../../common/datePickerComponent/datePickerComponent";
-import { use } from "react";
 
 const filterOptions = [
     { id: 1, title: 'January', value: 1 },
@@ -108,6 +107,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             year: selectedYear,
             employeeIds: [],
             departmentIds: [],
+            companyId: userInfo?.companyId || "",
         };
         if (watch("selectedDepartmentId") && watch("selectedDepartmentId").length > 0) {
             data.departmentIds = watch("selectedDepartmentId");
@@ -184,6 +184,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             year: selectedYear,
             employeeIds: watch("selectedUserId") || [],
             departmentIds: watch("selectedDepartmentId") || [],
+            companyId: userInfo?.companyId || "",
         };
         if (watch("startDate")) {
             data.startDate = watch("startDate")
@@ -376,7 +377,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
             sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        }
+        },        
     ];
 
     const getRowIdForDataGrid = (rowItem) => rowItem.id;

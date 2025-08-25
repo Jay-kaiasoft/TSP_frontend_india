@@ -247,22 +247,6 @@ export const getStaticRolesWithPermissions = () => {
                                     4
                                 ]
                             },
-                            {
-                                "moduleId": 16,
-                                "moduleName": "Overtime Rules",
-                                "moduleAssignedActions": [
-                                    1,
-                                    2,
-                                    3,
-                                    4
-                                ],
-                                "roleAssignedActions": [
-                                    1,
-                                    2,
-                                    3,
-                                    4
-                                ]
-                            }
                         ]
                     },
                     {
@@ -326,6 +310,92 @@ export const getStaticRolesWithPermissions = () => {
                             {
                                 "moduleId": 8,
                                 "moduleName": "Clock-In-Out",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                        ]
+                    },
+                    {
+                        "functionalityId": 6,
+                        "functionalityName": "Automation Rules",
+                        "modules": [
+                            {
+                                "moduleId": 16,
+                                "moduleName": "Overtime Rules",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 18,
+                                "moduleName": "Weekly Holidays",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 19,
+                                "moduleName": "Holidays Template",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 20,
+                                "moduleName": "Late Entry Rules",
+                                "moduleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ],
+                                "roleAssignedActions": [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            {
+                                "moduleId": 21,
+                                "moduleName": "Early Exit Rules",
                                 "moduleAssignedActions": [
                                     1,
                                     2,

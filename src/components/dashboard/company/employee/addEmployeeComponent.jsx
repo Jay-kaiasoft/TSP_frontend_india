@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { ReactComponent as User } from "../../../../assets/svgs/user-alt.svg";
 import { Controller, useForm } from 'react-hook-form';
-import { createEmployee, deleteEmployeeAadharImage, deleteEmployeeImage, getCompanyEmployee, updateEmployee, uploadEmployeeAadharImage, uploadEmployeeImage } from '../../../../service/companyEmployee/companyEmployeeService';
+import { createEmployee, deleteEmployeeAadharImage, deleteEmployeeImage, getCompanyEmployee, getLastUserId, updateEmployee, uploadEmployeeAadharImage, uploadEmployeeImage } from '../../../../service/companyEmployee/companyEmployeeService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { handleSetTitle, setAlert } from '../../../../redux/commonReducers/commonReducers';
@@ -77,6 +77,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     const navigate = useNavigate();
     const theme = useTheme()
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+    const [lastUserId, setLastUserId] = useState(null);
 
     const [steps, setSteps] = useState([
         "Employee Info",
@@ -293,6 +294,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     const handleGetEmployee = async () => {
         if (id) {
             handleSetTitle("Update Employee")
+            setLastUserId(id)
             const res = await getCompanyEmployee(id);
             if (res?.data?.status === 200) {
                 reset(res?.data?.result);
@@ -318,6 +320,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             }
         } else {
             handleSetTitle("Add Employee")
+            const res = await getLastUserId();
+            if (res?.data?.status === 200) {
+                setLastUserId(parseInt(res?.data?.result) + 1);
+            }
         }
     }
 
@@ -723,15 +729,18 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     }, [companyId])
 
     useEffect(() => {
-        if (watch("country")) {
             handleGetAllStatesByCountryId(102)
-        }
     }, [watch("country")])
 
-    // useEffect(() => {
-    //     setValue("userName", watch("firstName") + watch("lastName"))
-    // }, [watch("firstName"), watch("lastName")])
+    useEffect(() => {
+        const firstName = watch("firstName");
+        const userName = watch("userName");
 
+        // Only auto-fill if userName is empty or same as auto-generated format
+        if (!userName || userName.startsWith(firstName)) {
+            setValue("userName", `${firstName}00${lastUserId}`);
+        }
+    }, [watch("firstName"), lastUserId]);
     return (
         <div className='px-3 lg:px-0'>
             <div className='border rounded-lg bg-white lg:w-full p-5'>
@@ -813,6 +822,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             error={errors?.firstName}
                                                             onChange={(e) => {
                                                                 field.onChange(e);
+                                                            }}
+                                                            onBlur={(e) => {
+                                                                field.onBlur?.(e);
+                                                                // When user leaves the firstName field, auto-generate username
+                                                                const firstName = e.target.value;
+                                                                if (firstName) {
+                                                                    setValue("userName", `${firstName}00${lastUserId}`);
+                                                                }
                                                             }}
                                                         />
                                                     )}
@@ -904,10 +921,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             error={errors?.userName}
                                                             onChange={(e) => {
                                                                 field.onChange(e);
-                                                                // if (e.target.value !== "" && e.target.value !== null && e.target.value !== undefined) {
-                                                                // } else {
-                                                                //     field.onChange(watch("firstName") + watch("lastName"));
-                                                                // }
                                                             }}
                                                         />
                                                     )}
@@ -1907,7 +1920,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                             <div>
                                                 <Controller
                                                     name="weeklyOffId"
-                                                    control={control}                                             
+                                                    control={control}
                                                     render={({ field }) => (
                                                         <Select
                                                             options={weeklyOff}
@@ -1986,7 +1999,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                     control={control}
                                                     rules={{
                                                         validate: (value) => {
-                                                            if (value === "") return true; // ✅ No error when empty
+                                                            if (value === "" || value === null || value === undefined) return true; // ✅ No error when empty
                                                             const ifscPattern = /^[A-Z]{4}0[A-Z0-9]{6}$/;
                                                             return ifscPattern.test(value) || "(e.g., HDFC0001234)";
                                                         },

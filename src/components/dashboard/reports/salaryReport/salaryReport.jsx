@@ -86,6 +86,7 @@ const SalaryReport = ({ handleSetTitle }) => {
             month: selectedMonths || [],
             employeeIds: watch("selectedUserId") || [],
             departmentIds: watch("selectedDepartmentId") || [],
+            companyId: userInfo?.companyId || "",
         };
 
         try {

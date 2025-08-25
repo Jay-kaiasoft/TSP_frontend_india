@@ -116,36 +116,43 @@ const HolidaysTemplates = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
-                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => navigate('/dashboard/automationrules/holidays-templates/edit/' + params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id, params.row.assignedEmployeeIds)}>
-                                <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        {/* <PermissionWrapper
-                            functionalityName="Company"
-                            moduleName="Overtime Rules"
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Holidays Template"
                             actionId={2}
-                            Component={
+                            component={
+                                <div className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpen(params.row.id, params.row.assignedEmployeeIds)}>
+                                        <CustomIcons iconName={'fa-solid fa-user-plus'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
                             }
-                        /> */}
+                        />
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Holidays Template"
+                            actionId={2}
+                            component={
+                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => navigate('/dashboard/automationrules/holidays-templates/edit/' + params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        />
 
-                        {/* <PermissionWrapper
-                            functionalityName="Company"
-                            moduleName="Overtime Rules"
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Holidays Template"
                             actionId={3}
                             component={
+                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenDeleteHolidaysDialog(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
                             }
-                        /> */}
-                        <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpenDeleteHolidaysDialog(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
+                        />
                     </div>
                 );
             },
@@ -179,16 +186,16 @@ const HolidaysTemplates = () => {
 
     const actionButtons = () => {
         return (
-            // <PermissionWrapper
-            //     functionalityName="Company"
-            //     moduleName="Overtime Rules"
-            //     actionId={1}
-            //     component={
-            //     }
-            //     />
-            <div>
-                <Button type={`button`} text={'Create Holidays Template'} onClick={() => navigate('/dashboard/automationrules/holidays-templates/add')} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
-            </div>
+            <PermissionWrapper
+                functionalityName="Automation Rules"
+                moduleName="Holidays Template"
+                actionId={1}
+                component={
+                    <div>
+                        <Button type={`button`} text={'Create Holidays Template'} onClick={() => navigate('/dashboard/automationrules/holidays-templates/add')} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
+                    </div>
+                }
+            />
         )
     }
 
@@ -215,7 +222,7 @@ const HolidaysTemplates = () => {
                 <DataTable columns={columns} rows={row} getRowId={getRowId} height={480} showButtons={true} buttons={actionButtons} />
             </div>
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteHolidaysTemplate} handleClose={handleCloseDialog} loading={loading} />
-            <AssignHolidayTemplate open={open} handleClose={handleClose} id={id} assignedEmployeeIds={assignedEmployeeIds} />
+            <AssignHolidayTemplate open={open} handleClose={handleClose} id={id} assignedEmployeeIds={assignedEmployeeIds} handleGetHolidaysTemplates={handleGetHolidaysTemplates} />
 
         </div>
     )

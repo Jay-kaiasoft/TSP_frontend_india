@@ -19,7 +19,7 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
-function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmployeeIds }) {
+function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmployeeIds, handleGetHolidaysTemplates }) {
     const theme = useTheme()
 
     const [loading, setLoading] = useState(false);
@@ -32,9 +32,11 @@ function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmploy
         reset,
         formState: { errors },
         setValue,
+        watch
     } = useForm({
         defaultValues: {
-            employeeIds: []
+            employeeIds: [],
+            removeEmployeeIds: []
         },
     });
 
@@ -46,8 +48,10 @@ function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmploy
         handleClose();
     };
 
+    // console.log(watch("removeEmployeeIds"))
     const submit = async (data) => {
         const newData = {
+            removeEmployeeIds: watch("removeEmployeeIds") || [],
             employeeIds: data.employeeIds,
             id: id
         }
@@ -56,6 +60,7 @@ function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmploy
             const response = await assignHolidaysTemplate(newData);
             if (response?.data?.status === 200) {
                 setAlert({ open: true, message: response.data.message, type: "success" })
+                handleGetHolidaysTemplates();
                 onClose();
             } else {
                 setAlert({ open: true, message: response.data.message, type: 'error' });
@@ -117,7 +122,6 @@ function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmploy
                         <Controller
                             name="employeeIds"
                             control={control}
-                            rules={{ required: 'Please select at least one employee' }}
                             render={({ field }) => {
                                 const selectedOptions = employees.filter((emp) =>
                                     (field.value || []).includes(emp.id)
@@ -126,14 +130,38 @@ function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmploy
                                 return (
                                     <CheckBoxSelect
                                         options={employees}
-                                        label={"Select Employees"}
+                                        label="Select Employees"
                                         placeholder="Select employees"
                                         value={selectedOptions}
                                         onChange={(event, newValue) => {
-                                            // store only ids in form
-                                            field.onChange(newValue.map((opt) => opt.id));
+                                            const newIds = newValue.map((opt) => opt.id);
+                                            const prevIds = field.value || [];
+
+                                            // detect removed ones
+                                            const removed = prevIds.filter((id) => !newIds.includes(id));
+                                            // detect added ones
+                                            const added = newIds.filter((id) => !prevIds.includes(id));
+
+                                            // update main field
+                                            field.onChange(newIds);
+
+                                            // handle removeEmployeeIds toggle
+                                            const prev = watch("removeEmployeeIds") || [];
+                                            let updated = [...prev];
+
+                                            // add newly unchecked
+                                            removed.forEach((id) => {
+                                                if (!updated.includes(id)) {
+                                                    updated.push(id);
+                                                }
+                                            });
+
+                                            // if re-checked, remove from removeEmployeeIds
+                                            added.forEach((id) => {
+                                                updated = updated.filter((r) => r !== id);
+                                            });
+                                            setValue("removeEmployeeIds", updated);
                                         }}
-                                        error={errors.employeeIds}
                                         checkAll={true}
                                     />
                                 );

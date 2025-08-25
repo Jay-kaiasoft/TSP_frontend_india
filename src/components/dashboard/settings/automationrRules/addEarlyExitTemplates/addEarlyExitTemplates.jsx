@@ -136,22 +136,22 @@ const AddEarlyExitTemplates = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
-                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        {/* <PermissionWrapper
-                            functionalityName="Company"
-                            moduleName="Overtime Rules"
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
+                            moduleName="Early Exit Rules"
                             actionId={2}
-                            Component={
+                            component={
+                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
                             }
-                        /> */}
+                        />
 
                         <PermissionWrapper
-                            functionalityName="Company"
-                            moduleName="Overtime Rules"
+                            functionalityName="Automation Rules"
+                            moduleName="Early Exit Rules"
                             actionId={3}
                             component={
                                 <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
@@ -173,16 +173,16 @@ const AddEarlyExitTemplates = () => {
 
     const actionButtons = () => {
         return (
-            <div>
-                <Button type={`button`} text={'Create Late Entry Rule'} onClick={() => handleOpen(null)} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
-            </div>
-            // <PermissionWrapper
-            //     functionalityName="Company"
-            //     moduleName="Overtime Rules"
-            //     actionId={1}
-            //     component={
-            //     }
-            // />
+            <PermissionWrapper
+                functionalityName="Automation Rules"
+                moduleName="Early Exit Rules"
+                actionId={1}
+                component={
+                    <div>
+                        <Button type={`button`} text={'Create Early Exit Rule'} onClick={() => handleOpen(null)} startIcon={<CustomIcons iconName="fa-solid fa-plus" css="h-5 w-5" />} />
+                    </div>
+                }
+            />
         )
     }
 

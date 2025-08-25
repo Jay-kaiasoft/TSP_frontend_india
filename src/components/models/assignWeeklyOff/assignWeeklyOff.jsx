@@ -19,7 +19,7 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
-function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds }) {
+function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds, handleGetAllWeekOffTemplate }) {
     const theme = useTheme()
 
     const [loading, setLoading] = useState(false);
@@ -32,9 +32,11 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
         reset,
         formState: { errors },
         setValue,
+        watch
     } = useForm({
         defaultValues: {
-            employeeIds: []
+            employeeIds: [],
+            removeEmployeeIds: []
         },
     });
 
@@ -48,6 +50,7 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
 
     const submit = async (data) => {
         const newData = {
+            removeEmployeeIds: watch("removeEmployeeIds") || [],
             employeeIds: data.employeeIds,
             weekOffId: id
         }
@@ -56,6 +59,7 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
             const response = await assignEmployees(newData);
             if (response?.data?.status === 200) {
                 setAlert({ open: true, message: response.data.message, type: "success" })
+                handleGetAllWeekOffTemplate()
                 onClose();
             } else {
                 setAlert({ open: true, message: response.data.message, type: 'error' });
@@ -114,28 +118,10 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
                 </Components.IconButton>
 
                 <form noValidate onSubmit={handleSubmit(submit)}>
-                    <Components.DialogContent dividers>
-                        {/* <Controller
-                            name="employeeIds"
-                            control={control}
-                            rules={{ required: 'Please select at least one employee' }}
-                            render={({ field }) => (
-                                <SelectMultiple
-                                    options={employees}
-                                    label={"Select Employees"}
-                                    placeholder="Select employees"
-                                    value={field.value || []}
-                                    onChange={(newValue) => {
-                                        field.onChange(newValue);
-                                    }}
-                                    errors={errors.employeeIds}
-                                />
-                            )}
-                        /> */}
+                    <Components.DialogContent dividers>                      
                         <Controller
                             name="employeeIds"
                             control={control}
-                            rules={{ required: 'Please select at least one employee' }}
                             render={({ field }) => {
                                 const selectedOptions = employees.filter((emp) =>
                                     (field.value || []).includes(emp.id)
@@ -144,14 +130,40 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds 
                                 return (
                                     <CheckBoxSelect
                                         options={employees}
-                                        label={"Select Employees"}
+                                        label="Select Employees"
                                         placeholder="Select employees"
                                         value={selectedOptions}
                                         onChange={(event, newValue) => {
-                                            // store only ids in form
-                                            field.onChange(newValue.map((opt) => opt.id));
+                                            const newIds = newValue.map((opt) => opt.id);
+                                            const prevIds = field.value || [];
+
+                                            // detect removed ones
+                                            const removed = prevIds.filter((id) => !newIds.includes(id));
+                                            // detect added ones
+                                            const added = newIds.filter((id) => !prevIds.includes(id));
+
+                                            // update main field
+                                            field.onChange(newIds);
+
+                                            // handle removeEmployeeIds toggle
+                                            const prev = watch("removeEmployeeIds") || [];
+                                            let updated = [...prev];
+
+                                            // add newly unchecked
+                                            removed.forEach((id) => {
+                                                if (!updated.includes(id)) {
+                                                    updated.push(id);
+                                                }
+                                            });
+
+                                            // if re-checked, remove from removeEmployeeIds
+                                            added.forEach((id) => {
+                                                updated = updated.filter((r) => r !== id);
+                                            });
+
+                                            setValue("removeEmployeeIds", updated);
+
                                         }}
-                                        error={errors.employeeIds}
                                         checkAll={true}
                                     />
                                 );

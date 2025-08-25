@@ -133,21 +133,21 @@ const OvertimeRules = () => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
-                        <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                            <Components.IconButton onClick={() => handleOpen(params.row.id)}>
-                                <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
-                            </Components.IconButton>
-                        </div>
-                        {/* <PermissionWrapper
-                            functionalityName="Company"
+                        <PermissionWrapper
+                            functionalityName="Automation Rules"
                             moduleName="Overtime Rules"
                             actionId={2}
-                            Component={
+                            component={
+                                <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpen(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
                             }
-                        /> */}
+                        />
 
                         <PermissionWrapper
-                            functionalityName="Company"
+                            functionalityName="Automation Rules"
                             moduleName="Overtime Rules"
                             actionId={3}
                             component={
@@ -171,7 +171,7 @@ const OvertimeRules = () => {
     const actionButtons = () => {
         return (
             <PermissionWrapper
-                functionalityName="Company"
+                functionalityName="Automation Rules"
                 moduleName="Overtime Rules"
                 actionId={1}
                 component={
