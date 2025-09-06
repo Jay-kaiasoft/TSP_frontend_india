@@ -116,7 +116,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
     }
 
 
-    const submit = async (data) => {        
+    const submit = async (data) => {
         const newData = {
             ...data,
             roles: getStaticRolesWithPermissions(),
@@ -184,6 +184,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
                 } else {
                     setAlert({ open: true, message: res?.data?.message, type: "error" })
                     setLoading(false)
+                    return
                 }
             });
         }

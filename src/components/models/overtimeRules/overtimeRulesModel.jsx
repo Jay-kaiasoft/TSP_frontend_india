@@ -7,10 +7,9 @@ import Input from '../../common/input/input';
 import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
-import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
 import Select from '../../common/select/select';
 import { createOvertimeRule, getOvertimeRule, updateOvertimeRule } from '../../../service/overtimeRules/overtimeRulesService';
-import dayjs from 'dayjs';
+import TimeSelector from '../../common/timeSelector/timeSelector';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -50,9 +49,8 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             otMinutes: "",
             otAmount: "",
             otType: 1,
-
-            startTime: null,
-            endTime: null,
+            hours: 0,
+            minutes: 0,
         },
     });
 
@@ -64,8 +62,8 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             otMinutes: "",
             otAmount: "",
             otType: 1,
-            startTime: null,
-            endTime: null,            
+            hours: 0,
+            minutes: 0,
         });
         handleClose();
     };
@@ -73,8 +71,6 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
     const submit = async (data) => {
         const newData = {
             ...data,
-            startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
-            endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
             companyId: companyId,
             createdBy: userInfo?.employeeId || null,
             otType: overTimeTypes.find(type => type.id === data.otType)?.title || "",
@@ -115,36 +111,52 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             const response = await getOvertimeRule(overTimeId);
             if (response?.data?.status === 200) {
                 const data = response?.data?.result;
+
+                // Split otMinutes into hours and minutes
+                const totalMinutes = parseInt(data?.otMinutes || 0, 10);
+                const hrs = Math.floor(totalMinutes / 60);
+                const mins = totalMinutes % 60;
+
                 reset({
                     id: data?.id || "",
                     ruleName: data?.ruleName || "",
-                    otMinutes: data?.otMinutes || "",
+                    otMinutes: totalMinutes.toString(),
                     otAmount: data?.otAmount || "",
-                    otType: overTimeTypes.find(type => type.title === data?.otType)?.id || 1,
-                    startTime: data?.startTime ? dayjs(data.startTime) : null,
-                    endTime: data?.endTime ? dayjs(data.endTime) : null,
+                    otType:
+                        overTimeTypes.find((type) => type.title === data?.otType)?.id || 1,
+                    hours: hrs,
+                    minutes: mins,
                 });
             }
         }
-    }
+    };
+
+    // useEffect(() => {
+    //     if (watch("startTime") && watch("endTime")) {
+    //         const start = new Date(watch("startTime"));
+    //         const end = new Date(watch("endTime"));
+
+    //         let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+
+    //         // If endTime is before startTime, assume it's the next day
+    //         if (diffInMinutes < 0) {
+    //             diffInMinutes += 24 * 60;
+    //         }
+
+    //         setValue("otMinutes", diffInMinutes.toString());
+    //     } else {
+    //         setValue("otMinutes", "");
+    //     }
+    // }, [watch("startTime"), watch("endTime")]);
 
     useEffect(() => {
-        if (watch("startTime") && watch("endTime")) {
-            const start = new Date(watch("startTime"));
-            const end = new Date(watch("endTime"));
+        const hrs = watch("hours") || 0;
+        const mins = watch("minutes") || 0;
 
-            let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+        const totalMins = hrs * 60 + mins;
+        setValue("otMinutes", totalMins.toString());
+    }, [watch("hours"), watch("minutes")]);
 
-            // If endTime is before startTime, assume it's the next day
-            if (diffInMinutes < 0) {
-                diffInMinutes += 24 * 60;
-            }
-
-            setValue("otMinutes", diffInMinutes.toString());
-        } else {
-            setValue("otMinutes", "");
-        }
-    }, [watch("startTime"), watch("endTime")]);
 
     useEffect(() => {
         handleGetOvertimeRuleById()
@@ -222,7 +234,28 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                             />
                         </div>
                         <div className='grid grid-cols-3 gap-4 mt-4'>
-                            <InputTimePicker
+                            <div>
+                                <Controller
+                                    name="hours"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Controller
+                                            name="minutes"
+                                            control={control}
+                                            render={({ field: fieldMinutes }) => (
+                                                <TimeSelector
+                                                    hours={field.value}
+                                                    minutes={fieldMinutes.value}
+                                                    onChangeHours={(val) => field.onChange(val)}
+                                                    onChangeMinutes={(val) => fieldMinutes.onChange(val)}
+                                                />
+                                            )}
+                                        />
+                                    )}
+                                />
+                            </div>
+
+                            {/* <InputTimePicker
                                 label="Start Time"
                                 name="startTime"
                                 control={control}
@@ -239,7 +272,7 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                                     required: "End time is required",
                                 }}
                                 minTime={watch("startTime")}
-                            />
+                            /> */}
                             <Input
                                 label="Total OT Minutes"
                                 type={`text`}

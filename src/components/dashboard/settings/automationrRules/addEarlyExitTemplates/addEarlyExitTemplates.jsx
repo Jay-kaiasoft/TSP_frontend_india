@@ -8,7 +8,6 @@ import DataTable from '../../../../common/table/table';
 import AlertDialog from '../../../../common/alertDialog/alertDialog';
 import PermissionWrapper from '../../../../common/permissionWrapper/PermissionWrapper';
 import { deleteAttendancePenaltyRule, findAllAttendancePenaltyRuleByCompanyId } from '../../../../../service/attendancePenaltyRules/attendancePenaltyRuleService';
-import AddLateEntry from '../../../../models/addLateEntry/addLateEntry';
 import AddEarlyExit from '../../../../models/addEarlyExit/addEarlyExit';
 
 const AddEarlyExitTemplates = () => {

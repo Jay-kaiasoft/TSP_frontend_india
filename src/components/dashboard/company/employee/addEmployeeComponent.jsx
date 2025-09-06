@@ -5,7 +5,7 @@ import { createEmployee, deleteEmployeeAadharImage, deleteEmployeeImage, getComp
 import { useNavigate, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { handleSetTitle, setAlert } from '../../../../redux/commonReducers/commonReducers';
-import { uploadFiles } from '../../../../service/common/commonService';
+import { formatUtcToLocal, uploadFiles } from '../../../../service/common/commonService';
 import { getAllCompanyRole } from '../../../../service/companyEmployeeRole/companyEmployeeRoleService';
 import Button from '../../../common/buttons/button';
 import CustomIcons from '../../../common/icons/CustomIcons';
@@ -138,7 +138,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             gender: "",
             city: "",
             state: "",
-            country: "",
+            country: "India",
             address1: "",
             address2: "",
             zipCode: "",
@@ -302,6 +302,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 setValue("companyLocation", res?.data?.result?.companyLocation ? JSON.parse(res?.data?.result?.companyLocation) : [])
                 setValue("canteenType", res?.data?.result?.canteenType ? CanteenTypeOptions?.filter((row) => row?.title === res?.data?.result?.canteenType)?.[0]?.id : null)
                 setValue("pfType", PFTypeOptions?.filter((row) => row?.title === res?.data?.result?.pfType)?.[0]?.id || null)
+                setValue("country", "India")
             }
             if (res?.data?.result?.bankAccountId) {
                 const response = await getEmployeeBankInfo(res?.data?.result?.bankAccountId)
@@ -403,34 +404,47 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         }
     }
 
-    const handleUploadImage = (companyId, id) => {
+    const handleUploadImage = async (companyId, id) => {
         if (!formDataFile) {
-            setActiveStep((prev) => prev + 1)
-            return
-        } else {
+            setActiveStep((prev) => prev + 1);
+            return { success: true };
+        }
+
+        try {
             const formData = new FormData();
             formData.append("files", formDataFile);
             formData.append("folderName", `employeeProfile/${id}`);
             formData.append("userId", companyId);
 
-            uploadFiles(formData).then((res) => {
-                if (res.data.status === 200) {
-                    const { imageURL } = res?.data?.result[0];
-                    uploadEmployeeImage({ employee: imageURL, companyId: companyId, employeeId: id }).then((res) => {
-                        if (res.data.status !== 200) {
-                            setAlert({ open: true, message: res?.data?.message, type: "error" })
-                        } else {
-                            setActiveStep((prev) => prev + 1)
-                            return
-                        }
-                    })
+            const res = await uploadFiles(formData);
+
+            if (res.data.status === 200) {
+                const { imageURL } = res?.data?.result[0];
+                const updateRes = await uploadEmployeeImage({
+                    employee: imageURL,
+                    companyId,
+                    employeeId: id,
+                });
+
+                if (updateRes.data.status === 200) {
+                    setActiveStep((prev) => prev + 1);
+                    return { success: true };
                 } else {
-                    setAlert({ open: true, message: res?.data?.message, type: "error" })
-                    setLoading(false)
+                    setAlert({ open: true, message: updateRes?.data?.message, type: "error" });
+                    return { success: false };
                 }
-            });
+            } else {
+                setAlert({ open: true, message: res?.data?.message, type: "error" });
+                setLoading(false);
+                return { success: false };
+            }
+        } catch (error) {
+            console.error("Upload error:", error);
+            setAlert({ open: true, message: "Image upload failed", type: "error" });
+            return { success: false };
         }
-    }
+    };
+
 
     const handleDeleteImage = async (e) => {
         e.preventDefault();
@@ -553,11 +567,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         }
         const data = res?.data?.result?.map((item) => {
             const isHourly = item?.shiftType === "Hourly";
-            const timeFormat = "hh:mm A";
 
             const timeDisplay = isHourly
                 ? `${item.totalHours} hrs`
-                : `${dayjs(item?.timeStart).format(timeFormat)} - ${dayjs(item?.timeEnd).format(timeFormat)}`;
+                : `${formatUtcToLocal(item?.startTime)} - ${formatUtcToLocal(item?.endTime)}`;
 
             return {
                 id: item.id,
@@ -655,11 +668,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 if (res.data?.status === 200) {
                     setValue("employeeId", res?.data?.result?.employeeId)
                     handleUploadAadharImage(companyId, res?.data?.result?.employeeId)
-                    handleUploadImage(companyId, res?.data?.result?.employeeId)
-                    if (saveAndExit) {
-                        handleSetTitle("Manage Employees")
-                        navigate("/dashboard/manageemployees")
-                        return
+                    const success = await handleUploadImage(companyId, res?.data?.result?.employeeId);                    
+                    if (success?.success && saveAndExit) {
+                        handleSetTitle("Manage Employees");
+                        navigate("/dashboard/manageemployees");
                     }
                 } else {
                     setAlert({ open: true, message: res?.data?.message, type: "error" })
@@ -671,7 +683,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 if (res.data?.status === 201) {
                     setValue("employeeId", res?.data?.result?.employeeId)
                     handleUploadAadharImage(companyId, res?.data?.result?.employeeId)
-                    handleUploadImage(companyId, res?.data?.result?.employeeId)
+                    const success = await handleUploadImage(companyId, res?.data?.result?.employeeId);                    
+
                 } else {
                     setActiveStep((prev) => prev + 1)
                 }
@@ -729,7 +742,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     }, [companyId])
 
     useEffect(() => {
-            handleGetAllStatesByCountryId(102)
+        handleGetAllStatesByCountryId(102)
     }, [watch("country")])
 
     useEffect(() => {
@@ -741,6 +754,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             setValue("userName", `${firstName}00${lastUserId}`);
         }
     }, [watch("firstName"), lastUserId]);
+
     return (
         <div className='px-3 lg:px-0'>
             <div className='border rounded-lg bg-white lg:w-full p-5'>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Controller, set, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
 import { fetchAllTimeZones, getStaticRoles, getStaticRolesWithPermissions, indianOrganizationType, oganizationType, uploadFiles } from '../../../service/common/commonService';
 import { deleteGeofence, getCurrentLocation } from '../../../service/common/radarService';

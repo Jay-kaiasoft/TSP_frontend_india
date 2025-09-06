@@ -30,7 +30,6 @@ function AssignHolidayTemplate({ setAlert, open, handleClose, id, assignedEmploy
         handleSubmit,
         control,
         reset,
-        formState: { errors },
         setValue,
         watch
     } = useForm({

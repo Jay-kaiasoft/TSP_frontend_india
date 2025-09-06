@@ -9,8 +9,7 @@ import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
 import { createAttendancePenaltyRule, getAttendancePenaltyRuleById, updateAttendancePenaltyRule } from '../../../service/attendancePenaltyRules/attendancePenaltyRuleService';
 import Select from '../../common/select/select';
-import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
-import dayjs from 'dayjs';
+import TimeSelector from '../../common/timeSelector/timeSelector';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -51,12 +50,12 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
     } = useForm({
         defaultValues: {
             ruleName: "",
-            minutes: "",
             amount: "",
             deductionType: 1,
             count: 0,
-            startTime: null,
-            endTime: null
+            hours: 0,
+            minutes: 0,
+            totalMinutes: 0,
         },
     });
 
@@ -64,12 +63,12 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
         setLoading(false);
         reset({
             ruleName: "",
-            minutes: "",
             amount: "",
             deductionType: 1,
             count: 0,
-            startTime: null,
-            endTime: null
+            hours: 0,
+            minutes: 0,
+            totalMinutes: 0,
         });
         handleClose();
     };
@@ -77,13 +76,13 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
     const submit = async (data) => {
         const newData = {
             ...data,
-            startTime: data.startTime ? new Date(data.startTime).toISOString() : null,
-            endTime: data.endTime ? new Date(data.endTime).toISOString() : null,
+
             companyId: userInfo?.companyId,
             createdBy: userInfo?.employeeId,
             deductionType: attendancePenaltyRuleTypes.find(type => type.id === data.deductionType)?.title || "",
             amount: data.deductionType === 1 ? data.amount : null,
             isEarlyExit: false,
+            minutes: parseInt(data.totalMinutes) || 0,
         }
         if (id) {
             setLoading(true)
@@ -115,36 +114,49 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
 
         const response = await getAttendancePenaltyRuleById(id);
         if (response.data.status === 200) {
+            const totalMinutes = parseInt(response?.data?.result?.minutes || 0, 10);
+            const hrs = Math.floor(totalMinutes / 60);
+            const mins = totalMinutes % 60;
+
             reset({
                 id: response?.data?.result?.id || "",
                 ruleName: response?.data?.result?.ruleName || "",
-                minutes: response?.data?.result?.minutes || "",
                 amount: response?.data?.result?.amount || "",
                 deductionType: attendancePenaltyRuleTypes.find(type => type.title === response?.data?.result?.deductionType)?.id || 1,
                 count: response?.data?.result?.count || "",
-                startTime: response?.data?.result?.startTime ? dayjs(response.data.result.startTime) : null,
-                endTime: response?.data?.result?.endTime ? dayjs(response.data.result.endTime) : null,
+                totalMinutes: totalMinutes,
+                hours: hrs,
+                minutes: mins,
             });
         } else {
             setAlert({ message: response.data.message, type: 'error' });
         }
     };
 
-    useEffect(() => {
-        if (watch("startTime") && watch("endTime")) {
-            const start = new Date(watch("startTime"));
-            const end = new Date(watch("endTime"));
-            let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+    // useEffect(() => {
+    //     if (watch("startTime") && watch("endTime")) {
+    //         const start = new Date(watch("startTime"));
+    //         const end = new Date(watch("endTime"));
+    //         let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
 
-            // If endTime is before startTime, assume it's the next day
-            if (diffInMinutes < 0) {
-                diffInMinutes += 24 * 60;
-            }
-            setValue("minutes", diffInMinutes.toString());
-        } else {
-            setValue("minutes", "");
-        }
-    }, [watch("startTime"), watch("endTime")]);
+    //         // If endTime is before startTime, assume it's the next day
+    //         if (diffInMinutes < 0) {
+    //             diffInMinutes += 24 * 60;
+    //         }
+    //         setValue("minutes", diffInMinutes.toString());
+    //     } else {
+    //         setValue("minutes", "");
+    //     }
+    // }, [watch("startTime"), watch("endTime")]);
+
+
+    useEffect(() => {
+        const hrs = watch("hours") || 0;
+        const mins = watch("minutes") || 0;
+
+        const totalMins = hrs * 60 + mins;
+        setValue("totalMinutes", totalMins.toString());
+    }, [watch("hours"), watch("minutes")]);
 
     useEffect(() => {
         handleGetAttendancePenaltyRuleById();
@@ -238,7 +250,7 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                                     />
                                 )
                             }
-                            <InputTimePicker
+                            {/* <InputTimePicker
                                 label="Start Time"
                                 name="startTime"
                                 control={control}
@@ -255,11 +267,31 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                                     required: "End time is required",
                                 }}
                                 minTime={watch("startTime")}
-                            />
+                            /> */}
+                            <div>
+                                <Controller
+                                    name="hours"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Controller
+                                            name="minutes"
+                                            control={control}
+                                            render={({ field: fieldMinutes }) => (
+                                                <TimeSelector
+                                                    hours={field.value}
+                                                    minutes={fieldMinutes.value}
+                                                    onChangeHours={(val) => field.onChange(val)}
+                                                    onChangeMinutes={(val) => fieldMinutes.onChange(val)}
+                                                />
+                                            )}
+                                        />
+                                    )}
+                                />
+                            </div>
                             <Input
                                 label="Total Minutes"
                                 type={`text`}
-                                value={watch("minutes") || 0}
+                                value={watch("totalMinutes") || 0}
                                 InputLabelProps={{ shrink: true }}
                                 disabled={true}
                             />
@@ -283,7 +315,7 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                             />
                         </div>
                     </Components.DialogContent>
-                    
+
                     <Components.DialogActions>
                         <div className='flex justify-end'>
                             <Button type={`submit`} text={id ? "Update" : "Submit"} isLoading={loading} />

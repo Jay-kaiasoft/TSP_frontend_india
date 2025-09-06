@@ -3,14 +3,13 @@ import { styled, useTheme } from '@mui/material/styles';
 import Components from '../../muiComponents/components';
 import Button from '../../common/buttons/button';
 import { Controller, useForm } from 'react-hook-form';
-import Input from '../../common/input/input';
 import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
 import Select from '../../common/select/select';
 import { addClockInOut, getUserInOutRecord } from '../../../service/userInOut/userInOut';
 import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
-import dayjs from 'dayjs';
+import { apiToLocalTime, localToApiTime } from '../../../service/common/commonService';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -56,9 +55,11 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
         let newData = {
             ...data,
             companyId: userInfo?.companyId,
+            timeIn: localToApiTime(data.timeIn),
+            timeOut: localToApiTime(data.timeOut),
         }
         setLoading(true);
-        try {           
+        try {
             const response = await addClockInOut(newData);
             if (response?.data?.status === 201) {
                 setLoading(false);
@@ -79,17 +80,28 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
         }
     }
 
+    // const handleGetData = async () => {
+    //     if (id && open) {
+    //         const response = await getUserInOutRecord(id);
+    //         if (response?.data?.status === 200) {
+    //             reset(response.data?.result);
+    //             setValue("timeIn", response.data?.result?.timeIn ? dayjs(response.data?.result?.timeIn) : null);
+    //             setValue("timeOut", response.data?.result?.timeOut ? dayjs(response.data?.result?.timeOut) : null);
+    //         }
+    //     }
+    // }
+
     const handleGetData = async () => {
         if (id && open) {
             const response = await getUserInOutRecord(id);
             if (response?.data?.status === 200) {
                 reset(response.data?.result);
-                setValue("timeIn", response.data?.result?.timeIn ? dayjs(response.data?.result?.timeIn) : null);
-                setValue("timeOut", response.data?.result?.timeOut ? dayjs(response.data?.result?.timeOut) : null);
+
+                setValue("timeIn", apiToLocalTime(response.data?.result?.timeIn));
+                setValue("timeOut", apiToLocalTime(response.data?.result?.timeOut));
             }
         }
-    }
-
+    };
     useEffect(() => {
         handleGetData();
     }, [open]);
@@ -156,7 +168,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
                             <InputTimePicker
                                 label="Clock Out Time"
                                 name="timeOut"
-                                control={control}                          
+                                control={control}
                                 minTime={watch("timeIn")}
                             />
                         </div>

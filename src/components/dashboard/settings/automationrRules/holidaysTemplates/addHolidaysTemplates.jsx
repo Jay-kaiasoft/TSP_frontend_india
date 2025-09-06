@@ -4,7 +4,7 @@ import { setAlert } from '../../../../../redux/commonReducers/commonReducers';
 import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '@mui/material';
 import CustomIcons from '../../../../common/icons/CustomIcons';
-import { Controller, useForm, useFieldArray, set } from 'react-hook-form';
+import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import Input from '../../../../common/input/input';
 import DatePickerComponent from '../../../../common/datePickerComponent/datePickerComponent';
 import Components from '../../../../muiComponents/components';
@@ -49,7 +49,6 @@ function AddHolidaysTemplates({ setAlert }) {
 
     const {
         control,
-        reset,
         setValue,
         handleSubmit,
         formState: { errors },

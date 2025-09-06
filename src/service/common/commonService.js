@@ -1,6 +1,16 @@
 import { fileUploadURL } from "../../config/apiConfig/apiConfig"
 import axiosInterceptor from "../axiosInterceptor/axiosInterceptor"
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// get user timezone dynamically
+const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 export const indianOrganizationType = [
     {
         id: 1,
@@ -109,6 +119,11 @@ export function handleFormateUTCDateToLocalDate(utcDateString) {
 
     return `${month} ${day}, ${weekday}`;
 }
+
+export const formatUtcToLocal = (utcTime, format = "hh:mm A") => {
+    if (!utcTime) return "";
+    return dayjs.utc(utcTime).tz(userTimeZone).format(format);
+};
 
 export const fetchAllTimeZones = async () => {
     try {
@@ -416,3 +431,28 @@ export const getStaticRolesWithPermissions = () => {
         }
     })
 }
+
+export const apiToLocalTime = (utcString) => {
+    if (!utcString) return null;
+    return dayjs.utc(utcString, "MM/DD/YYYY, hh:mm:ss A").tz(userTimeZone);
+};
+
+export const localToApiTime = (localTime) => {
+    if (!localTime) return null;
+    return localTime.utc().toISOString(); // ✅ gives "2025-09-06T05:20:14.000Z"
+};
+
+export const formatShiftDisplay = (time) => {
+    if (!time) return "";
+
+    const start = dayjs.utc(time.start).tz(userTimeZone).format("hh:mm A");
+    const end = dayjs.utc(time.end).tz(userTimeZone).format("hh:mm A");
+
+    if (time.shiftType === "Hourly") {
+        return `${time.shiftName} (${time.shiftType} - ${time.hours} hrs)`;
+    } else if (time.shiftType === "Time Based") {
+        return `${time.shiftName} (${time.shiftType} - ${start} - ${end})`;
+    } else {
+        return time.shiftName;
+    }
+};

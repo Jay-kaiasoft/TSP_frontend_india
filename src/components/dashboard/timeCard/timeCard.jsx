@@ -5,7 +5,6 @@ import html2canvas from "html2canvas";
 
 import CustomIcons from '../../common/icons/CustomIcons';
 import DatePickerComponent from '../../common/datePickerComponent/datePickerComponent';
-import { useTheme } from '@mui/material';
 import { Tabs } from '../../common/tabs/tabs';
 import DataTable from '../../common/table/table';
 
@@ -14,12 +13,11 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/plugin/timezone'; // import the timezone data
 
-import { getAllEntriesByUserId, updateUserTimeRecord } from '../../../service/userInOut/userInOut';
+import { getAllEntriesByUserId } from '../../../service/userInOut/userInOut';
 import { handleConvertUTCDateToLocalDate, handleFormateUTCDateToLocalDate } from '../../../service/common/commonService';
 import { getAllEmployeeListByCompanyId } from '../../../service/companyEmployee/companyEmployeeService';
 import { connect } from 'react-redux';
 import { handleSetTitle, setAlert } from '../../../redux/commonReducers/commonReducers';
-import DateTimePickerComponent from '../../common/dateTimePickerComponent/dateTimePicker';
 import Components from '../../muiComponents/components';
 import PermissionWrapper from '../../common/permissionWrapper/PermissionWrapper';
 import Button from '../../common/buttons/button';
@@ -41,7 +39,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     dayjs.extend(timezone);
 
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
-    const theme = useTheme();
 
     const [selectedTab, setSelectedTab] = useState(0);
     const [loadingPdf, setLoadingPdf] = useState(false);
@@ -320,7 +317,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <>
                         <div className="flex justify-start items-center gap-3">
                             <div className="cursor-pointer">
-                                {dayjs(params.row?.timeIn).format("hh:mm A")}
+                                 {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true,
+                                })}
                             </div>
                         </div>
                     </>
@@ -343,7 +344,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                                 <>
                                     <div className="flex justify-start items-center gap-3">
                                         <div className="cursor-pointer">
-                                            {dayjs(params?.row?.timeOut).format("hh:mm A")}
+                                           {handleConvertUTCDateToLocalDate(params?.row?.timeOut)?.toLocaleTimeString([], {
+                                               hour: '2-digit',
+                                               minute: '2-digit',
+                                               hour12: true,
+                                           })}
                                         </div>
                                     </div>
                                 </>
@@ -603,105 +608,3 @@ const mapDispatchToProps = {
 };
 
 export default connect(null, mapDispatchToProps)(TimeCard);
-
-
-// const generateExcel = async () => {
-//     setLoadingExcel(true)
-//     let params = new URLSearchParams();
-//     if (userInfo?.roleId !== 1) {
-//         params.append("userIds", userInfo?.employeeId);
-//     } else {
-//         if (watch("selectedUserId") && watch("selectedUserId").length > 0) {
-//             watch("selectedUserId").forEach(id => params.append("userIds", id)); // append multiple userIds
-//         }
-//     }
-//     if (watch("startDate")) params.append("startDate", watch("startDate"));
-//     if (watch("endDate")) {
-//         const endDate = new Date(watch("endDate"));
-//         const today = new Date();
-//         if (endDate.toDateString() === today.toDateString()) {
-//             params.append("endDate", convertToDesiredFormat(new Date()));
-//         } else {
-//             endDate.setHours(23, 59, 59, 999);
-//             params.append("endDate", convertToDesiredFormat(endDate));
-//         }
-//     }
-
-//     let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-//     if (userTimeZone === "Asia/Kolkata") {
-//         userTimeZone = "Asia/Calcutta";
-//     }
-//     params.append("timeZone", userTimeZone);
-//     try {
-//         const response = await axios.get(`${userInOutURL}/generateExcelReport?${params.toString()}`, {
-//             responseType: "blob",
-//             headers: {
-//                 Authorization: `Bearer ${sessionStorage.getItem("authToken")}`,
-//             },
-//         });
-
-//         if (response.status !== 200) throw new Error("Failed to generate report");
-
-//         // Convert response to Blob and create a download link
-//         const blob = new Blob([response.data], { type: response.headers["content-type"] });
-//         const url = window.URL.createObjectURL(blob);
-//         const a = document.createElement("a");
-//         a.href = url;
-//         a.download = "InOutReport.xlsx";
-//         document.body.appendChild(a);
-//         a.click();
-//         document.body.removeChild(a);
-//         setLoadingExcel(false)
-//     } catch (error) {
-//         console.error("Error:", error);
-//         setLoadingExcel(false)
-//     }
-// };
-
-
-{/* <div className='flex justify-end items-center gap-4 my-2 py-3'>
-                        <div className='w-80 flex justify-end items-center gap-4'>
-                            <Button type={`button`} useFor={'success'} text={'Download Excel'} isLoading={loadingExcel} onClick={generateExcel} />
-                            <Button type={`button`} useFor='error' text={'Download PDF'} isLoading={loadingPdf} onClick={generatePDF} />
-                        </div>
-                    </div>
-
-                    <div className='max-h-[400px] overflow-x-auto'>
-                        <ReportTable data={reportData} tableRef={tableRef} startDay={watch("startDate")} endDay={watch("endDate")} />
-                    </div> */}
-
-
-// const handleGetPaginationRecords = async () => {
-//     let params = new URLSearchParams();
-//     if (userInfo?.roleId !== 1) {
-//         params.append("userIds", userInfo?.employeeId);
-//     } else {
-//         if (watch("selectedUserId") && watch("selectedUserId").length > 0) {
-//             watch("selectedUserId").forEach(id => params.append("userIds", id));
-//         }
-//     }
-//     if (watch("startDate")) params.append("startDate", watch("startDate"));
-//     if (watch("endDate")) {
-//         const endDate = new Date(watch("endDate"));
-//         const today = new Date();
-//         if (endDate.toDateString() === today.toDateString()) {
-//             params.append("endDate", convertToDesiredFormat(new Date()));
-//         } else {
-//             endDate.setHours(23, 59, 59, 999);
-//             params.append("endDate", convertToDesiredFormat(endDate));
-//         }
-//     }
-
-//     let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-//     if (userTimeZone === "Asia/Kolkata") {
-//         userTimeZone = "Asia/Calcutta";
-//     }
-//     params.append("timeZone", userTimeZone);
-
-//     try {
-//         const res = await getAllEntriesWithFilter(params);
-//         setReportData(res?.data?.result?.data || []);
-//     } catch (error) {
-//         console.error("Error fetching data:", error);
-//     }
-// };

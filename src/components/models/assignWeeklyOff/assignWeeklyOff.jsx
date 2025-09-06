@@ -30,7 +30,6 @@ function AssignWeeklyOff({ setAlert, open, handleClose, id, assignedEmployeeIds,
         handleSubmit,
         control,
         reset,
-        formState: { errors },
         setValue,
         watch
     } = useForm({
