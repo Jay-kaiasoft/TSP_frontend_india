@@ -247,7 +247,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                         error={errors.totalWorkingDays}
                                         onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9]/g, '');
-                                            if (parseInt(value) > parseInt(watch("totalDays"))) {
+                                            if (parseInt(value) > parseInt(31)) {
                                                 return;
                                             } else {
                                                 field.onChange(value);
@@ -370,6 +370,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                         onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9]/g, '');
                                             field.onChange(value);
+                                            calculateTotalPFPercentage();
                                         }}
                                         endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                     />

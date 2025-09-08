@@ -352,6 +352,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
     const handleUploadPassbookImage = (companyId, bankId) => {
         if (!bankPassbookImage) {
+            handleSetTitle("Manage Employees")
+            navigate("/dashboard/manageemployees")
             return
         } else {
             const formData = new FormData();
@@ -366,7 +368,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
                         } else {
-                            return
+                            handleSetTitle("Manage Employees")
+                            navigate("/dashboard/manageemployees")
                         }
                     })
                 } else {
@@ -392,8 +395,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                     uploadEmployeeAadharImage({ employee: imageURL, companyId: companyId, employeeId: id }).then((res) => {
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
-                        } else {
-                            return
                         }
                     })
                 } else {
@@ -444,7 +445,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             return { success: false };
         }
     };
-
 
     const handleDeleteImage = async (e) => {
         e.preventDefault();
@@ -668,7 +668,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 if (res.data?.status === 200) {
                     setValue("employeeId", res?.data?.result?.employeeId)
                     handleUploadAadharImage(companyId, res?.data?.result?.employeeId)
-                    const success = await handleUploadImage(companyId, res?.data?.result?.employeeId);                    
+                    const success = await handleUploadImage(companyId, res?.data?.result?.employeeId);
                     if (success?.success && saveAndExit) {
                         handleSetTitle("Manage Employees");
                         navigate("/dashboard/manageemployees");
@@ -683,7 +683,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 if (res.data?.status === 201) {
                     setValue("employeeId", res?.data?.result?.employeeId)
                     handleUploadAadharImage(companyId, res?.data?.result?.employeeId)
-                    const success = await handleUploadImage(companyId, res?.data?.result?.employeeId);                    
+                    const success = await handleUploadImage(companyId, res?.data?.result?.employeeId);
 
                 } else {
                     setActiveStep((prev) => prev + 1)
@@ -695,8 +695,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 const response = await updateEmployeeBankInfo(watch("accountId"), { ...newData, employeeId: id || watch("employeeId") })
                 if (response?.data?.status === 200) {
                     handleUploadPassbookImage(companyId, watch("accountId"))
-                    handleSetTitle("Manage Employees")
-                    navigate("/dashboard/manageemployees")
                     return
                 }
                 else {
@@ -708,7 +706,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 if (response?.data?.status === 201) {
                     setValue("accountId", response?.data?.result?.id)
                     handleUploadPassbookImage(companyId, response?.data?.result?.id)
-                    setActiveStep((prev) => prev + 1)
                 } else {
                     setAlert({ open: true, message: response?.data?.message, type: "error" })
                     return
