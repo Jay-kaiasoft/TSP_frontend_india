@@ -403,7 +403,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
                 const formattedOT =
                     otWholeHours > 0 || otMinutes > 0
-                        ? `${otWholeHours > 0 ? `${otWholeHours} hr` : ''}${otMinutes > 0 ? ` ${otMinutes} min` : ''}`.trim()
+                        ? `${otWholeHours > 0 ? `${otWholeHours} hrs` : ''}${otMinutes > 0 ? ` ${otMinutes} min` : ''}`.trim()
                         : '00:00';
 
                 return <div>{formattedOT}</div>;
@@ -576,16 +576,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                         </div>
                     </div>
 
-                    <div className="md:inline-flex flex-col justify-center items-start gap-3">
+                    {/* <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Regular :</div>
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{getTotalRegular(rows)} HRS</div>
                         </div>
-                    </div>
+                    </div> */}
 
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">OT : </div>
+                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Total OT : </div>
                             <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{formatHoursToHrMin(getTotalOT(rows))}</div>
                         </div>
                     </div>

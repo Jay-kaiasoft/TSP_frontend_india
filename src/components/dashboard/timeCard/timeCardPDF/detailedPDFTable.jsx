@@ -87,22 +87,7 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
                         OT
                     </th>
                     <th className="border border-gray-500 py-2 px-2 text-center text-sm bg-gray-300 h-5">
-                        DT
-                    </th>
-                    <th className="border border-gray-500 py-2 px-2 text-center text-sm bg-gray-300 h-5">
-                        Breaks
-                    </th>
-                    <th className="border border-gray-500 py-2 px-2 text-center text-sm bg-gray-300 h-5">
-                        BP
-                    </th>
-                    <th className="border border-gray-500 py-2 px-2 text-center text-sm bg-gray-300 h-5">
                         Total
-                    </th>
-                    <th className="border border-gray-500 py-2 px-2 text-center text-sm bg-gray-300 h-5">
-                        Rate<br />(Hourly)
-                    </th>
-                    <th className="border border-gray-500 py-2 px-2 text-center text-sm bg-gray-300 h-5">
-                        Amount
                     </th>
                 </tr>
             </thead>
@@ -145,32 +130,9 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
     };
 
     const getTotalRegular = (data) => {
-        let totalRegularHours = 0;
-
-        data?.map((record, index) => {
-            const timeIn = new Date(handleConvertUTCDateToLocalDate(record?.timeIn));
-            const timeOut = new Date(handleConvertUTCDateToLocalDate(record?.timeOut));            
-            const totalHours = parseFloat(record?.companyShiftDto?.totalHours) || 0;
-
-            const durationMs = timeOut - timeIn;
-            const workedHours = durationMs / (1000 * 60 * 60);
-            let regularHours = workedHours;
-
-            if (workedHours > totalHours) {
-                regularHours = totalHours;
-            }
-
-            totalRegularHours += regularHours;
-        });
-
-        const totalRegWholeHours = Math.floor(totalRegularHours);
-        const totalRegMinutes = Math.floor((totalRegularHours - totalRegWholeHours) * 60);
-        const formattedTotalRegular =
-            totalRegWholeHours > 0 || totalRegMinutes > 0
-                ? `${totalRegWholeHours > 0 ? `${totalRegWholeHours} hr` : ''}${totalRegMinutes > 0 ? ` ${totalRegMinutes} min` : ''}`.trim()
-                : '00:00';
-
-        return formattedTotalRegular;
+        return data?.reduce((total, row) => {
+            return total + (row?.companyShiftDto?.totalHours ? row?.companyShiftDto?.totalHours : 0);
+        }, 0) || 0;
     }
 
     const getUserTotalAmount = (records) => records.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0).toFixed(2);
@@ -247,14 +209,14 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
 
                                             const formattedOT =
                                                 otWholeHours > 0 || otMinutes > 0
-                                                    ? `${otWholeHours > 0 ? `${otWholeHours} hr` : ''}${otMinutes > 0 ? ` ${otMinutes} min` : ''}`.trim()
+                                                    ? `${otWholeHours > 0 ? `${otWholeHours} hrs` : ''}${otMinutes > 0 ? ` ${otMinutes} min` : ''}`.trim()
                                                     : '00:00';
 
                                             const regWholeHours = Math.floor(regularHours);
                                             const regMinutes = Math.floor((regularHours - regWholeHours) * 60);
                                             const formattedRegular =
                                                 regWholeHours > 0 || regMinutes > 0
-                                                    ? `${regWholeHours > 0 ? `${regWholeHours} hr` : ''}${regMinutes > 0 ? ` ${regMinutes} min` : ''}`.trim()
+                                                    ? `${regWholeHours > 0 ? `${regWholeHours} hrs` : ''}${regMinutes > 0 ? ` ${regMinutes} min` : ''}`.trim()
                                                     : '00:00';
 
                                             return (
@@ -277,63 +239,32 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
                                                         })}
                                                     </td>
                                                     <td className="border border-gray-500 text-center text-sm h-10">
-                                                        {/* {workedHours.toFixed(2)} */}
-                                                        {formattedRegular}
+                                                        {record?.companyShiftDto?.totalHours} h
                                                     </td>
                                                     <td className="border border-gray-500 text-center text-sm h-10">
                                                         {formattedOT}
                                                     </td>
                                                     <td className="border border-gray-500 text-center text-sm h-10">
-                                                        00:00
-                                                    </td>
-                                                    <td className="border border-gray-500 text-center text-sm h-10">
-                                                        00:00
-                                                    </td>
-                                                    <td className="border border-gray-500 text-center text-sm h-10">
-                                                        00:00
-                                                    </td>
-                                                    <td className="border border-gray-500 text-center text-sm h-10">
                                                         {formatDuration(handleConvertUTCDateToLocalDate(record?.timeIn), handleConvertUTCDateToLocalDate(record?.timeOut))}
-                                                    </td>
-                                                    <td className="border border-gray-500 text-center text-sm h-10">
-                                                        ${record?.hourlyRate}
-                                                    </td>
-                                                    <td className="border border-gray-500 text-center text-sm h-10">
-                                                        ${record?.amount}
                                                     </td>
                                                 </tr>
                                             );
                                         })
                                     }
                                     <tr className="border border-gray-500">
-                                        <td className="border border-gray-500 text-sm h-10 text-end pr-5" colSpan={3}>
+                                        <td className="border border-gray-500 text-sm h-10 text-end pr-5" colSpan={4}>
                                             <strong>Totals:</strong>
                                         </td>
-                                        <td className="border border-gray-500 text-center text-sm h-10">
+                                        {/* <td className="border border-gray-500 text-center text-sm h-10">
                                             <strong>{getTotalRegular(user?.records)}</strong>
-                                        </td>
+                                        </td> */}
                                         <td className="border border-gray-500 text-center text-sm h-10">
                                             <strong>{formatHoursToHrMin(getTotalOT(user?.records))}</strong>
-                                        </td>
-                                        <td className="border border-gray-500 text-center text-sm h-10">
-                                            <strong>00:00</strong>
-                                        </td>
-                                        <td className="border border-gray-500 text-center text-sm h-10">
-                                            <strong>00:00</strong>
-                                        </td>
-                                        <td className="border border-gray-500 text-center text-sm h-10">
-                                            <strong>00:00</strong>
                                         </td>
                                         <td className="border border-gray-500 text-center text-sm h-10">
                                             <strong>
                                                 {formatTotalDuration(getTotalDurationInMs(user?.records))}
                                             </strong>
-                                        </td>
-                                        <td className="border border-gray-500 text-center text-sm h-10">
-                                            <strong>${user?.hourlyRate}</strong>
-                                        </td>
-                                        <td className="border border-gray-500 text-center text-sm h-10">
-                                            <strong>${getUserTotalAmount(user?.records)}</strong>
                                         </td>
                                     </tr>
                                 </tbody>
