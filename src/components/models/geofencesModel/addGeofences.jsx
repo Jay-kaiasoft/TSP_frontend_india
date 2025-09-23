@@ -40,8 +40,7 @@ const center = {
 };
 
 const AddGeofences = ({ setAlert, open, handleClose, selectedLocationRow, companyId, handleGetLocations }) => {
-    const theme = useTheme();
-
+    const theme = useTheme();   
     const [loading, setLoading] = useState(false)
 
     const [polygons, setPolygons] = useState([]);
@@ -280,7 +279,7 @@ const AddGeofences = ({ setAlert, open, handleClose, selectedLocationRow, compan
                     type: 'polygon',
                     coordinates,
                     tag: polygon.tag || 'restricted',
-                    externalId: `timesheetspro_${companyId}_${selectedLocationRow?.index}`
+                    externalId: `timesheetspro_${companyId}_${selectedLocationRow?.id}`
                 };
 
                 if (selectedLocationRow?.geofenceId) {
@@ -457,78 +456,8 @@ const AddGeofences = ({ setAlert, open, handleClose, selectedLocationRow, compan
                                         }}
                                     />
                                 )}
-
-
-                                {/* {polygons?.map((polygon) => (
-                                    <Polygon
-                                        key={polygon.id}
-                                        ref={(ref) => {
-                                            if (ref) {
-                                                polygonRefs.current[polygon.id] = ref;
-                                            } else {
-                                                delete polygonRefs.current[polygon.id];
-                                            }
-                                        }}
-
-                                        path={polygon.path}
-                                        options={{
-                                            fillColor: '#2196F3',
-                                            fillOpacity: 0.5,
-                                            strokeWeight: 2,
-                                            editable: true,
-                                            draggable: true
-                                        }}
-                                        onDragEnd={() => {
-                                            const polygonInstance = polygonRefs.current[polygon.id];
-                                            if (polygonInstance) {
-                                                const path = polygonInstance.getPath();
-                                                const coordinates = [];
-                                                for (let i = 0; i < path.getLength(); i++) {
-                                                    const latLng = path.getAt(i);
-                                                    coordinates.push({ lat: latLng.lat(), lng: latLng.lng() });
-                                                }
-                                                setPolygons(prev => prev.map(p =>
-                                                    p.id === polygon.id ? { ...p, path: coordinates } : p
-                                                ));
-                                            }
-                                        }}
-                                        onRightClick={() => deletePolygon(polygon.id)}
-                                    />
-                                ))} */}
-
-                                {/* {polygons?.map((polygon) => (
-                                    <Polygon
-                                        key={polygon.id || `poly-${JSON.stringify(polygon.path)}`}
-                                        onLoad={(polygonInstance) => {
-                                            polygonRefs.current.set(polygon.id || `poly-${JSON.stringify(polygon.path)}`, polygonInstance);
-                                        }}
-                                        onUnmount={() => {
-                                            polygonRefs.current.delete(polygon.id || `poly-${JSON.stringify(polygon.path)}`);
-                                        }}
-                                        ref={(ref) => {
-                                            if (ref) {
-                                                polygonRefs.current[polygon.id || JSON.stringify(polygon.path)] = ref;
-                                            } else {
-                                                delete polygonRefs.current[polygon.id || JSON.stringify(polygon.path)];
-                                            }
-                                        }}
-                                        path={polygon.path}
-                                        options={{
-                                            fillColor: '#2196F3',
-                                            fillOpacity: 0.5,
-                                            strokeWeight: 2,
-                                            editable: true,
-                                            draggable: true
-                                        }}
-                                        onDragEnd={() => handlePolygonEdit(polygon.id || `poly-${JSON.stringify(polygon.path)}`)}
-                                        onMouseUp={() => handlePolygonEdit(polygon.id || `poly-${JSON.stringify(polygon.path)}`)}
-                                        onMouseDown={() => {
-                                            // Store the active polygon ID to handle edits
-                                            setActivePolygonId(polygon.id || `poly-${JSON.stringify(polygon.path)}`);
-                                        }}
-                                    />
-                                ))} */}
-                                {polygons.map((polygon) => {
+                            
+                                {polygons?.map((polygon) => {
                                     const polygonId = polygon.id || `poly-${JSON.stringify(polygon.path)}`;
                                     return (
                                         <Polygon

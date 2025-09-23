@@ -7,13 +7,13 @@ import Input from '../../common/input/input';
 import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import { createLocation, getLocation, updateLocation } from '../../../service/location/locationService';
-import { fetchAllTimeZones } from '../../../service/common/commonService';
+// import { fetchAllTimeZones } from '../../../service/common/commonService';
 import Select from '../../common/select/select';
 import CustomIcons from '../../common/icons/CustomIcons';
 
 import { getAllCountry } from '../../../service/country/countryService';
 import { getAllStateByCountry } from '../../../service/state/stateService';
-import DatePickerComponent from '../../common/datePickerComponent/datePickerComponent';
+// import DatePickerComponent from '../../common/datePickerComponent/datePickerComponent';
 import dayjs from 'dayjs';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
@@ -25,17 +25,17 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     },
 }));
 
-const payScheduleOptions = [
-    { id: 1, title: "Weekly" },
-    { id: 2, title: "Bi-Weekly" },
-    { id: 3, title: "Semi-Monthly" },
-    { id: 4, title: "Monthly" }
-]
+// const payScheduleOptions = [
+//     { id: 1, title: "Weekly" },
+//     { id: 2, title: "Bi-Weekly" },
+//     { id: 3, title: "Semi-Monthly" },
+//     { id: 4, title: "Monthly" }
+// ]
 
 function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, handleGetLocations }) {
 
     const [loading, setLoading] = useState(false);
-    const [timeZones, setTimeZones] = useState([]);
+    // const [timeZones, setTimeZones] = useState([]);
 
     const [countryData, setCountryData] = useState([])
     const [stateData, setStateData] = useState([])
@@ -50,16 +50,16 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
     } = useForm({
         defaultValues: {
             locationName: "",
-            timeZone: "",
-            timeZoneId: null,
+            // timeZone: "",
+            // timeZoneId: null,
             city: "",
             state: "",
-            country: "",
+            country: "India",
             address1: "",
             address2: "",
             zipCode: "",
             employeeCount: "",
-            companyId: null,
+            companyId: 102,
             isActive: 1,
             payPeriod: null,
             payPeriodStart: new Date(),
@@ -95,6 +95,7 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
             }
         })
         setCountryData(data)
+        handleGetAllStatesByCountryId(102);
     }
 
     const handleGetAllStatesByCountryId = async (id) => {
@@ -113,10 +114,10 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
         }
     }
 
-    const handleFetchAllTimeZones = async () => {
-        const response = await fetchAllTimeZones()
-        setTimeZones(response)
-    }
+    // const handleFetchAllTimeZones = async () => {
+    //     const response = await fetchAllTimeZones()
+    //     setTimeZones(response)
+    // }
 
     const handleGetLocation = async () => {
         if (!locationId) return;
@@ -126,9 +127,9 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
             const locationData = response?.data?.result;
             reset(locationData)
             const selectedState = countryData?.find((row) => row?.title === watch("country")) || null
-            await handleGetAllStatesByCountryId(selectedState?.id || null);
-            const timeZone = timeZones?.find((zone) => zone.zone === locationData?.timeZone);
-            setValue("timeZoneId", timeZone?.id || null);
+            await handleGetAllStatesByCountryId(selectedState?.id || 102);
+            // const timeZone = timeZones?.find((zone) => zone.zone === locationData?.timeZone);
+            // setValue("timeZoneId", timeZone?.id || null);
         }
         setLoading(false);
     }
@@ -168,7 +169,7 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
 
     useEffect(() => {
         handleGetAllCountrys()
-        handleFetchAllTimeZones()
+        // handleFetchAllTimeZones()
     }, []);
 
     useEffect(() => {
@@ -266,24 +267,25 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
                                 <Controller
                                     name="country"
                                     control={control}
-                                    rules={{
-                                        required: "Country is required"
-                                    }}
+                                    // rules={{
+                                    //     required: "Country is required"
+                                    // }}
                                     render={({ field }) => (
                                         <Select
+                                            disabled
                                             options={countryData}
                                             label={"Country"}
                                             placeholder="Select country"
-                                            value={countryData?.filter((row) => row.title === watch("country"))?.[0]?.id || null}
-                                            onChange={(_, newValue) => {
-                                                if (newValue?.id) {
-                                                    field.onChange(newValue.title);
-                                                    handleGetAllStatesByCountryId(newValue.id);
-                                                } else {
-                                                    setValue("country", null);
-                                                }
-                                            }}
-                                            error={errors?.country}
+                                            value={countryData?.filter((row) => row.id === 102)?.[0]?.id || null}
+                                        // onChange={(_, newValue) => {
+                                        //     if (newValue?.id) {
+                                        //         field.onChange(newValue.title);
+                                        //         handleGetAllStatesByCountryId(newValue.id);
+                                        //     } else {
+                                        //         setValue("country", null);
+                                        //     }
+                                        // }}
+                                        // error={errors?.country}
                                         />
                                     )}
                                 />
@@ -381,7 +383,7 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
                                 />
                             </div>
 
-                            <div className="col-span-2">
+                            {/* <div className="col-span-2">
                                 <Controller
                                     name="timeZone"
                                     control={control}
@@ -406,12 +408,12 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
                                         />
                                     )}
                                 />
-                            </div>
+                            </div> */}
                         </div>
 
-                        <div class="my-4 border border-gray-200"></div>
+                        {/* <div class="my-4 border border-gray-200"></div> */}
 
-                        <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
+                        {/* <div className='grid grid-cols-2 md:grid-cols-3 gap-3'>
                             <div>
                                 <Controller
                                     name="payPeriod"
@@ -443,7 +445,7 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
                             <div>
                                 <DatePickerComponent setValue={setValue} control={control} name='payPeriodEnd' label={`Period End Date`} minDate={watch("payPeriodStart")} maxDate={new Date()} />
                             </div>
-                        </div>
+                        </div> */}
                     </Components.DialogContent>
                     <Components.DialogActions>
                         <div className='flex justify-end'>

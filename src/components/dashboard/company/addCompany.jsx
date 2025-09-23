@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form';
 import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
-import { fetchAllTimeZones, getStaticRoles, getStaticRolesWithPermissions, indianOrganizationType, oganizationType, uploadFiles } from '../../../service/common/commonService';
+import { getStaticRoles, getStaticRolesWithPermissions, indianOrganizationType, oganizationType, uploadFiles } from '../../../service/common/commonService';
 import { deleteGeofence, getCurrentLocation } from '../../../service/common/radarService';
 import { createCompanyDetails, getCompanyDetails, updateCompanyDetails, uploadCompanyLogo, deleteCompanyLogo, getLastCompanyDetails } from '../../../service/companyDetails/companyDetailsService';
 import { handleSetTitle, setAlert } from '../../../redux/commonReducers/commonReducers';
@@ -48,7 +48,6 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         },
     ])
 
-    const [timeZones, setTimeZones] = useState([]);
     const [loading, setLoading] = useState(false);
     const fileInputRef = useRef(null);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -304,18 +303,18 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         }
     }
 
-    const handleSetTimeZoneData = () => {
-        if (timeZones && watch("locations")?.length > 0) {
-            const data = watch("locations")?.map((location) => {
-                const filteredTimeZone = timeZones?.filter((item) => item.zone === location?.timeZone);
-                return {
-                    ...location,
-                    timeZoneId: filteredTimeZone[0]?.id,
-                }
-            });
-            setValue("locations", data);
-        }
-    }
+    // const handleSetTimeZoneData = () => {
+    //     if (timeZones && watch("locations")?.length > 0) {
+    //         const data = watch("locations")?.map((location) => {
+    //             const filteredTimeZone = timeZones?.filter((item) => item.zone === location?.timeZone);
+    //             return {
+    //                 ...location,
+    //                 timeZoneId: filteredTimeZone[0]?.id,
+    //             }
+    //         });
+    //         setValue("locations", data);
+    //     }
+    // }
 
     const handleGetCompany = async () => {
         setLocationData([]);
@@ -330,7 +329,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                     label: 'Company Location',
                 },
             ])
-            handleFetchAllTimeZones();
+            // handleFetchAllTimeZones();
             const response = await getCompanyDetails(id);
             if (response.data.status === 200) {
                 reset(response.data.result);
@@ -377,7 +376,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                     companyId: "",
                 }
             })
-            handleFetchAllTimeZones();
+            // handleFetchAllTimeZones();
         }
     };
 
@@ -534,10 +533,10 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         }
     }
 
-    const handleFetchAllTimeZones = async () => {
-        const response = await fetchAllTimeZones()
-        setTimeZones(response)
-    }
+    // const handleFetchAllTimeZones = async () => {
+    //     const response = await fetchAllTimeZones()
+    //     setTimeZones(response)
+    // }
 
     const handleGetLastCompanyDetails = async () => {
         if (id) {
@@ -594,9 +593,9 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         handleGetCompany();
     }, [id])
 
-    useEffect(() => {
-        handleSetTimeZoneData()
-    }, [timeZones])
+    // useEffect(() => {
+    //     handleSetTimeZoneData()
+    // }, [timeZones])
 
     return (
         <div className='py-2 px-4 lg:px-8 border rounded-lg bg-white relative'>
@@ -879,9 +878,9 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                                 <th className="border border-gray-400 px-5 text-sm bg-gray-200 py-2">
                                                     Location Name
                                                 </th>
-                                                <th className="border border-gray-400 px-5 text-sm bg-gray-200 py-2">
+                                                {/* <th className="border border-gray-400 px-5 text-sm bg-gray-200 py-2">
                                                     TimeZone
-                                                </th>
+                                                </th> */}
                                                 <th className="border border-gray-400 px-5 text-sm bg-gray-200 py-2">
                                                     City
                                                 </th>
@@ -910,9 +909,9 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
                                                             <td className="border border-gray-400 p-2 text-center font-bold text-xs lg:text-sm">
                                                                 {field?.locationName}
                                                             </td>
-                                                            <td className="border border-gray-400 p-2 text-center font-bold text-xs lg:text-sm">
+                                                            {/* <td className="border border-gray-400 p-2 text-center font-bold text-xs lg:text-sm">
                                                                 {field?.timeZone}
-                                                            </td>
+                                                            </td> */}
                                                             <td className="border border-gray-400 p-2 text-center font-bold text-xs lg:text-sm">
                                                                 {field?.city}
                                                             </td>

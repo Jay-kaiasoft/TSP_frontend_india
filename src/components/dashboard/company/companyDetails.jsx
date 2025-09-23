@@ -1003,7 +1003,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                         <tr>
                                                             <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">#</th>
                                                             <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">Location Name</th>
-                                                            <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">Time Zone</th>
+                                                            {/* <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">Time Zone</th> */}
                                                             <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">Address</th>
                                                             <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">Country</th>
                                                             <th style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 px-5 text-sm bg-gray-200 h-10">State</th>
@@ -1037,11 +1037,11 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                                         }
                                                                     </td>
 
-                                                                    <td style={{ color: theme.palette.primary.text.main }} className="border border-gray-300 p-2 text-center font-semibold text-sm break-words">
+                                                                    {/* <td style={{ color: theme.palette.primary.text.main }} className="border border-gray-300 p-2 text-center font-semibold text-sm break-words">
                                                                         {
                                                                             item?.timeZone ? item?.timeZone : "-"
                                                                         }
-                                                                    </td>
+                                                                    </td> */}
 
                                                                     <td style={{ color: theme.palette.primary.text.main, }} className="border border-gray-300 p-2 text-center font-semibold text-sm break-words">
                                                                         <p className="pb-1 border-b border-gray-300">
