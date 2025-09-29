@@ -44,6 +44,7 @@ import AddLateEntryTemplates from "./components/dashboard/settings/automationrRu
 import AddEarlyExitTemplates from "./components/dashboard/settings/automationrRules/addEarlyExitTemplates/addEarlyExitTemplates";
 import HolidaysTemplates from "./components/dashboard/settings/automationrRules/holidaysTemplates/holidaysTemplates";
 import AddHolidaysTemplates from "./components/dashboard/settings/automationrRules/holidaysTemplates/addHolidaysTemplates";
+import FaceRegistrationPage from "./pages/faceRegistrationPage";
 
 library.add(fas, far)
 
@@ -53,6 +54,10 @@ function App() {
     {
       path: "*",
       element: <PageNotFound />,
+    },
+    {
+      path: "/faceRegistrationPage",
+      element: <FaceRegistrationPage/>,
     },
     {
       path: "/",
@@ -214,7 +219,7 @@ function App() {
           path: "automationrules/holidays-templates/add",
           element: <AddHolidaysTemplates />,
         },
-         {
+        {
           path: "automationrules/holidays-templates/edit/:id",
           element: <AddHolidaysTemplates />,
         },

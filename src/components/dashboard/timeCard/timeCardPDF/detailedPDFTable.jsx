@@ -129,13 +129,13 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
         }
     };
 
-    const getTotalRegular = (data) => {
-        return data?.reduce((total, row) => {
-            return total + (row?.companyShiftDto?.totalHours ? row?.companyShiftDto?.totalHours : 0);
-        }, 0) || 0;
-    }
+    // const getTotalRegular = (data) => {
+    //     return data?.reduce((total, row) => {
+    //         return total + (row?.companyShiftDto?.totalHours ? row?.companyShiftDto?.totalHours : 0);
+    //     }, 0) || 0;
+    // }
 
-    const getUserTotalAmount = (records) => records.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0).toFixed(2);
+    // const getUserTotalAmount = (records) => records.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0).toFixed(2);
 
     const formatTotalDuration = (totalMs) => {
         const minutes = Math.floor((totalMs / (1000 * 60)) % 60);
@@ -212,12 +212,12 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
                                                     ? `${otWholeHours > 0 ? `${otWholeHours} hrs` : ''}${otMinutes > 0 ? ` ${otMinutes} min` : ''}`.trim()
                                                     : '00:00';
 
-                                            const regWholeHours = Math.floor(regularHours);
-                                            const regMinutes = Math.floor((regularHours - regWholeHours) * 60);
-                                            const formattedRegular =
-                                                regWholeHours > 0 || regMinutes > 0
-                                                    ? `${regWholeHours > 0 ? `${regWholeHours} hrs` : ''}${regMinutes > 0 ? ` ${regMinutes} min` : ''}`.trim()
-                                                    : '00:00';
+                                            // const regWholeHours = Math.floor(regularHours);
+                                            // const regMinutes = Math.floor((regularHours - regWholeHours) * 60);
+                                            // const formattedRegular =
+                                            //     regWholeHours > 0 || regMinutes > 0
+                                            //         ? `${regWholeHours > 0 ? `${regWholeHours} hrs` : ''}${regMinutes > 0 ? ` ${regMinutes} min` : ''}`.trim()
+                                            //         : '00:00';
 
                                             return (
                                                 <tr key={index} className="border border-gray-500">

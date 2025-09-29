@@ -106,3 +106,13 @@ export const addClockInOut = async (data) => {
         console.log(error)
     }
 }
+
+export const addUserTimeInPhone = async (params) => {
+    try {
+        const response = axiosInterceptor().post(`${userInOutURL}/clockInOut?${params}`)
+        return response
+
+    } catch (error) {
+        console.log(error)
+    }
+}

@@ -456,3 +456,57 @@ export const formatShiftDisplay = (time) => {
         return time.shiftName;
     }
 };
+
+
+export async function playBeep() {
+    try {
+        const audio = new Audio('/audio/public-domain-beep-sound.mp3');
+        audio.preload = 'auto';
+        audio.currentTime = 0;
+        await audio.play();
+        console.log("Beep played");
+    } catch (err) {
+        console.warn("Beep playback failed:", err);
+    }
+}
+
+export const speakMessage = (message) => {
+    try {
+        if (!window.speechSynthesis) {
+            console.error("Browser does not support Speech Synthesis");
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(message);
+
+        // Pick a female English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        console.log("Available voices:", voices);
+
+        let selectedVoice = voices.find(
+            (v) => v.lang.toLowerCase().startsWith("en") && /female/i.test(v.name)
+        );
+
+        if (!selectedVoice) {
+            // Fallback: any English voice
+            selectedVoice = voices.find((v) => v.lang.toLowerCase().startsWith("en"));
+        }
+
+        // Final fallback: first available voice
+        if (!selectedVoice && voices.length > 0) {
+            selectedVoice = voices[0];
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
+
+        utterance.rate = 0.8;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+
+        window.speechSynthesis.speak(utterance);
+    } catch (err) {
+        console.error("TTS error:", err);
+    }
+};

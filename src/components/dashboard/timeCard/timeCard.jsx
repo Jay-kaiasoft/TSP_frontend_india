@@ -259,12 +259,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     };
 
-    const getTotalRegular = (data) => {
-        return data?.reduce((total, row) => {
-            return total + (row?.companyShiftDto?.totalHours ? row?.companyShiftDto?.totalHours : 0);
-        }, 0) || 0;
-    }
-
     const formatTotalDuration = (totalMs) => {
         const minutes = Math.floor((totalMs / (1000 * 60)) % 60);
         const hours = Math.floor((totalMs / (1000 * 60 * 60)) % 24);
