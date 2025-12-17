@@ -361,6 +361,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 navigate("/dashboard/manageemployees")
                 return
             }
+            return
         } else {
             const formData = new FormData();
             formData.append("files", bankPassbookImage);
