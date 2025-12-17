@@ -353,9 +353,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
     const handleUploadPassbookImage = (companyId, bankId) => {
         if (!bankPassbookImage) {
-            handleSetTitle("Manage Employees")
-            navigate("/dashboard/manageemployees")
-            return
+            if (steps?.length === 5) {
+                setActiveStep((prev) => prev + 1)
+                return
+            } else {
+                handleSetTitle("Manage Employees")
+                navigate("/dashboard/manageemployees")
+                return
+            }
         } else {
             const formData = new FormData();
             formData.append("files", bankPassbookImage);
@@ -369,8 +374,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
                         } else {
-                            handleSetTitle("Manage Employees")
-                            navigate("/dashboard/manageemployees")
+                            if (steps?.length === 5) {
+                                setActiveStep((prev) => prev + 1)
+                                return
+                            } else {
+                                handleSetTitle("Manage Employees")
+                                navigate("/dashboard/manageemployees")
+                                return
+                            }
                         }
                     })
                 } else {
