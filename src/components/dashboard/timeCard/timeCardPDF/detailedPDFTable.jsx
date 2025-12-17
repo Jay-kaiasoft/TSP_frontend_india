@@ -8,6 +8,8 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
         const {
             userId,
             userName,
+            firstName,
+            lastName,
             timeIn,
             timeOut,
             companyShiftDto,
@@ -182,7 +184,7 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
                 {
                     result?.map((user, index) => (
                         <div>
-                            <h1 className='font-bold my-3'>Name: {user?.userName}</h1>
+                            <h1 className='font-bold my-3'>Name: {user?.firstName} {user?.lastName}</h1>
                             <table key={index} className="min-w-full border-collapse border border-gray-500 h-full">
                                 {header()}
                                 <tbody>

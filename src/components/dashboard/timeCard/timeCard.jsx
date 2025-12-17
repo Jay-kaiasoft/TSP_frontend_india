@@ -281,6 +281,13 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             minWidth: 120,
             align: "left",
             headerAlign: "left",
+            renderCell: (params) => {
+                return (
+                    <div>
+                        {params.row?.firstName} {params.row?.lastName}
+                    </div>
+                );
+            },
         },
         {
             field: 'rowId',
@@ -311,7 +318,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <>
                         <div className="flex justify-start items-center gap-3">
                             <div className="cursor-pointer">
-                                 {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
+                                {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
                                     hour: '2-digit',
                                     minute: '2-digit',
                                     hour12: true,
@@ -338,11 +345,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                                 <>
                                     <div className="flex justify-start items-center gap-3">
                                         <div className="cursor-pointer">
-                                           {handleConvertUTCDateToLocalDate(params?.row?.timeOut)?.toLocaleTimeString([], {
-                                               hour: '2-digit',
-                                               minute: '2-digit',
-                                               hour12: true,
-                                           })}
+                                            {handleConvertUTCDateToLocalDate(params?.row?.timeOut)?.toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true,
+                                            })}
                                         </div>
                                     </div>
                                 </>

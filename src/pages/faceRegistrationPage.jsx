@@ -12,8 +12,8 @@ import CustomIcons from '../components/common/icons/CustomIcons';
 import { playBeep, speakMessage } from '../service/common/commonService';
 import { addUserTimeInPhone } from '../service/userInOut/userInOut';
 import { getAccurateLocation } from '../service/common/radarService';
-import login from '../components/auth/login/login';
 import { getLocations } from '../service/location/locationService';
+import { login } from '../service/auth/authService';
 
 const API_BASE_URL = faceRecognitionAPIBaseURL;
 const modelsPath = faceRecognitionModelURL;
@@ -134,6 +134,7 @@ function FaceRegistrationPage({ setAlert }) {
     };
 
     const submit = async (data) => {
+        console.log("data", data)
         const response = await login(data)
         let locationId = null;
         let companyId = response?.data?.result?.data?.companyId;
@@ -611,13 +612,13 @@ function FaceRegistrationPage({ setAlert }) {
             if (response.ok) {
                 setTimeout(() => {
                     retakePhoto();
-                }, 4000);
+                }, 6000);
                 submit(data);
             } else {
                 await playBeep();
                 setTimeout(() => {
                     retakePhoto();
-                }, 3000);
+                }, 4000);
                 setAlert({
                     open: true,
                     type: 'error',

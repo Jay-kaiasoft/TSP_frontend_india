@@ -10,6 +10,24 @@ import Button from '../../../common/buttons/button';
 import { useParams, useNavigate } from 'react-router-dom';
 import { createEmployeeRole, getAllEmployeeActionsByRole, getAllRoleActions, getEmployeeRole, updateEmployeeRole } from '../../../../service/companyEmployeeRole/companyEmployeeRoleService';
 import { useTheme } from '@mui/material';
+import CustomIcons from '../../../common/icons/CustomIcons';
+import Components from '../../../muiComponents/components';
+
+const MODULE_DESCRIPTIONS = {
+    "Manage Company": "Configure core company details.",
+    "Manage Employees": "Centralized hub for onboarding and personal records.",
+    "Manage Shifts": "Create and manage work schedules, rotating shifts.",
+    "User": "Administrative control over system access and user login credentials.",
+    "Manage Roles": "Define access control levels and assign functional permissions to staff.",
+    "Manage Departments": "Organize your workforce into functional units to streamline reporting.",
+    "Salary Statement": "Generate and manage payroll summaries and individual earnings statements.",
+    "Clock-In-Out": "Monitor real-time attendance tracking and daily punch-in/out logs.",
+    "Overtime Rules": "Define policy-driven thresholds and multipliers for additional working hours.",
+    "Weekly Holidays": "Define and manage recurring weekly rest days to ensure accurate attendance and payroll calculations.",
+    "Holidays Template": "Create standardized holiday calendars to quickly apply public or company-specific holidays across departments.",
+    "Late Entry Rules": "Configure grace periods and penalty thresholds for employees arriving after the scheduled start time.",
+    "Early Exit Rules": "Set policy-driven parameters for employees departing before the completion of their scheduled shift."
+};
 
 const AddRoles = ({ setAlert, handleSetTitle }) => {
     const theme = useTheme()
@@ -126,29 +144,35 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
         }
     }
 
+    const attachDescriptions = (functionalities) => {
+        return functionalities.map(func => ({
+            ...func,
+            modules: func.modules.map(module => ({
+                ...module,
+                // Use the map, or fallback to existing description, or empty string
+                moduleDescription: MODULE_DESCRIPTIONS[module.moduleName] || module.moduleDescription || ""
+            }))
+        }));
+    };
+
     const handleGetAllActionsByRole = async () => {
         if (id) {
-            // handleSetTitle('Update Roles');
             if (!userInfo?.companyId && !userInfo?.employeeId) {
                 const res = await getRole(id);
                 setValue('roleName', res.data?.result?.role?.roleName);
-                replace(res.data?.result?.role?.rolesActions?.functionalities);
+                replace(attachDescriptions(res.data?.result?.role?.rolesActions?.functionalities?.filter((func) => func.functionalityName !== "Users")));
             } else {
                 const res = await getEmployeeRole(id);
                 const data = res.data?.result?.rolesActions?.functionalities?.filter((func) => func.functionalityName !== "Users");
                 setValue('roleName', res.data?.result?.roleName);
-                replace(data);
+                replace(attachDescriptions(data));
             }
         } else {
-            // handleSetTitle('Add Roles');
-            
-            if (!userInfo?.companyId && !userInfo?.employeeId) {
-                const res = await getAllActionsByRole(0);
-                replace(res.data?.result?.functionalities);
-            } else {
-                const res = await getAllEmployeeActionsByRole(0)
-                replace(res.data?.result?.functionalities);
-            }
+            const res = (!userInfo?.companyId && !userInfo?.employeeId)
+                ? await getAllActionsByRole(0)
+                : await getAllEmployeeActionsByRole(0);
+
+            replace(attachDescriptions(res.data?.result?.functionalities?.filter((func) => func.functionalityName !== "Users")));
         }
     }
 
@@ -168,7 +192,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                 const res = await updateEmployeeRole(id, newData);
                 if (res.data.status === 200) {
                     setLoading(false);
-                
+
                     navigate('/dashboard/manageroles');
                 } else {
                     setLoading(false);
@@ -237,19 +261,18 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                                 fullWidth
                                 id="roleName"
                                 placeholder="Enter role name"
-                                label="Role Name*"
+                                label="Role Name"
                                 variant="outlined"
                                 error={!!errors.roleName}
-                                helperText={errors?.roleName?.message}
                             />
                         )}
                     />
                 </div>
                 <div className='overflow-x-auto'>
-                    <table className="md:min-w-full border rounded-lg bg-white border-collapse border border-gray-300">
+                    <table className="md:min-w-full rounded-lg bg-white border-collapse border border-gray-300">
                         <thead>
                             <tr className="border-b static top-0">
-                                <th style={{ color: theme.palette.primary.text.main, }} className="p-4 w-[30rem] text-left text-sm font-semibold">
+                                <th style={{ color: theme.palette.primary.text.main, }} className="p-4 w-[25rem] text-left text-sm font-semibold">
                                     <div className='flex justify-start items-center'>
                                         <Checkbox
                                             checked={watch('functionalities')?.every((func) =>
@@ -266,7 +289,9 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                                         </p>
                                     </div>
                                 </th>
-                                <th style={{ color: theme.palette.primary.text.main, }} className="p-4 w-44 text-left text-sm font-semibold">Module</th>
+                                <th style={{ color: theme.palette.primary.text.main, }} className="p-4 w-52 text-left text-sm font-semibold">
+                                    Module
+                                </th>
                                 {headers?.map((header, index) => (
                                     <th style={{ color: theme.palette.primary.text.main, }} key={index} className="p-4 text-sm font-semibold">
                                         <div>
@@ -310,7 +335,14 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
                                     </tr>
                                     {func?.modules?.map((module, moduleIndex) => (
                                         <tr style={{ color: theme.palette.primary.text.main, }} key={module.moduleId} className="border-b">
-                                            <td className="p-4 text-sm">{module.moduleName}</td>
+                                            <td className="p-4 text-sm flex justify-start items-center gap-2">
+                                                {module.moduleName}
+                                                <Components.Tooltip title={module.moduleDescription || ""} arrow>
+                                                    <span>
+                                                        <CustomIcons iconName={'fa-solid fa-circle-info'} css='cursor-pointer text-gray-600 h-4 w-4' />
+                                                    </span>
+                                                </Components.Tooltip>
+                                            </td>
                                             {headers?.map((header, headerIndex) => {
                                                 const isActionAvailable = module.moduleAssignedActions.includes(header.actionId);
 

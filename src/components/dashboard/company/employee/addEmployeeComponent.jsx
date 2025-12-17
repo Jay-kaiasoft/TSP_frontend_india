@@ -69,7 +69,8 @@ const PFTypeOptions = [
 
 const CanteenTypeOptions = [
     { id: 1, title: "Office Type" },
-    { id: 2, title: "Labour Type" }
+    { id: 2, title: "Labour Type" },
+    { id: 3, title: "No Canteen" },
 ]
 
 const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
@@ -655,14 +656,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             earlyExitPenaltyRule: data.earlyExitPenaltyRule ? 1 : 0,
         }
         if (activeStep === 2) {
-            if (watch("employeeTypeId") === 3 && !watch("isPf")) {
-                setAlert({ open: true, message: "PF is required", type: "error" })
-                return
-            }
-            if (watch("employeeTypeId") === 3 && !watch("isPt")) {
-                setAlert({ open: true, message: "PT is required", type: "error" })
-                return
-            }
+            // if (watch("employeeTypeId") === 3 && !watch("isPf")) {
+            //     setAlert({ open: true, message: "PF is required", type: "error" })
+            //     return
+            // }
+            // if (watch("employeeTypeId") === 3 && !watch("isPt")) {
+            //     setAlert({ open: true, message: "PT is required", type: "error" })
+            //     return
+            // }
             if (id) {
                 const res = await updateEmployee(id, newData)
                 if (res.data?.status === 200) {
@@ -818,7 +819,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                         </div>
 
                                         <div className='grid grid-cols-2 lg:grid-cols-2 gap-6'>
-                                            <div className='col-span-2'>
+                                            <div className='md:col-span-2'>
                                                 <Controller
                                                     name="firstName"
                                                     control={control}
@@ -1571,7 +1572,29 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                         </div>
 
                                         <div className='grid grid-cols-2 gap-6'>
-                                            <div className='col-span-2'>
+                                            <div>
+                                                <Controller
+                                                    name="basicSalary"
+                                                    control={control}
+                                                    rules={{
+                                                        required: "Basic Salary is required",
+                                                    }}
+                                                    render={({ field }) => (
+                                                        <Input
+                                                            {...field}
+                                                            label="Basic Salary"
+                                                            type={`text`}
+                                                            error={errors?.basicSalary}
+                                                            onChange={(e) => {
+                                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                field.onChange(numericValue);
+                                                            }}
+                                                        />
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
                                                 <Controller
                                                     name="grossSalary"
                                                     control={control}
@@ -1593,31 +1616,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 />
                                             </div>
 
-                                            {
-                                                watch("employeeTypeId") !== 3 && (
-                                                    <div>
-                                                        <Controller
-                                                            name="basicSalary"
-                                                            control={control}
-                                                            rules={{
-                                                                required: "Basic Salary is required",
-                                                            }}
-                                                            render={({ field }) => (
-                                                                <Input
-                                                                    {...field}
-                                                                    label="Basic Salary"
-                                                                    type={`text`}
-                                                                    error={errors?.basicSalary}
-                                                                    onChange={(e) => {
-                                                                        const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                                        field.onChange(numericValue);
-                                                                    }}
-                                                                />
-                                                            )}
-                                                        />
-                                                    </div>
-                                                )
-                                            }
 
                                             {
                                                 watch("employeeTypeId") === 3 && (
@@ -1643,7 +1641,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             />
                                                         </div>
 
-                                                        <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
+                                                        {/* <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
                                                             <Controller
                                                                 name="basicSalary"
                                                                 control={control}
@@ -1663,14 +1661,14 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                                     />
                                                                 )}
                                                             />
-                                                        </div>
+                                                        </div> */}
 
                                                         <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
                                                             <Controller
                                                                 name="pfType"
                                                                 control={control}
                                                                 rules={{
-                                                                    required: "PF Type is required"
+                                                                    required: watch("isPf") ? "PF Type is required" : false,
                                                                 }}
                                                                 render={({ field }) => (
                                                                     <Select
@@ -1837,7 +1835,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                             </div>
 
                                             {
-                                                watch("canteenType") && (
+                                                watch("canteenType") !== 3 && (
                                                     <div>
                                                         <Controller
                                                             name="canteenAmount"
@@ -1848,7 +1846,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             render={({ field }) => (
                                                                 <Input
                                                                     {...field}
-                                                                    label={watch("canteenType") === 1 ? "Amount Cut From Salary" : watch("canteenType") === 2 ? "Amount Cut(Per Plate) From Daly Wages" : ""}
+                                                                    label={watch("canteenType") === 1 ? "Amount Cut From Salary Per Month" : watch("canteenType") === 2 ? "Amount Cut(Per Plate) From Daly Wages" : ""}
                                                                     type={`text`}
                                                                     error={errors?.canteenAmount}
                                                                     disabled={!watch("canteenType")}
@@ -1898,8 +1896,23 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                             label={'Working Hours For Including Lunch'}
                                                             type={`text`}
                                                             onChange={(e) => {
-                                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                                field.onChange(numericValue);
+                                                                let value = e.target.value;
+
+                                                                // 1. Remove any character that isn't a digit or a dot
+                                                                value = value.replace(/[^0-9.]/g, '');
+
+                                                                // 2. Prevent multiple dots (keep only the first one)
+                                                                const parts = value.split('.');
+                                                                if (parts.length > 2) {
+                                                                    value = parts[0] + '.' + parts.slice(1).join('');
+                                                                }
+
+                                                                // 3. Limit to 2 digits after the dot
+                                                                if (parts[1] && parts[1].length > 2) {
+                                                                    value = parts[0] + '.' + parts[1].substring(0, 2);
+                                                                }
+
+                                                                field.onChange(value);
                                                             }}
                                                         />
                                                     )}

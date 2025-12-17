@@ -9,6 +9,7 @@ import Button from "../../../../common/buttons/button";
 import { setAlert } from "../../../../../redux/commonReducers/commonReducers";
 import { connect } from "react-redux";
 import { createWeekOffTemplate, getWeekOffTemplate, updateWeekOffTemplate } from "../../../../../service/weeklyOff/WeeklyOffService";
+import Components from "../../../../muiComponents/components";
 
 const days = [
     "Sunday",
@@ -170,6 +171,18 @@ const AddWeekOfTemplates = ({ setAlert }) => {
 
                 <p className="text-sm mb-2 text-gray-600">
                     Select day and frequency for weekly off
+                    <Components.Tooltip
+                        title="Define which days of the week are designated as rest days. You can set a global weekly off by selecting 'All' or specify particular weeks for rotating schedules."
+                        arrow
+                        placement="top"
+                    >
+                        <span className="ml-3">
+                            <CustomIcons
+                                iconName={'fa-solid fa-circle-info'}
+                                css='cursor-pointer text-gray-600 h-4 w-4'
+                            />
+                        </span>
+                    </Components.Tooltip>
                 </p>
 
                 <div className="overflow-x-auto border rounded-lg">
