@@ -1,7 +1,6 @@
 import { handleConvertUTCDateToLocalDate, handleFormateUTCDateToLocalDate } from '../../../../service/common/commonService';
 
 const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
-
     const map = new Map();
 
     data?.forEach(entry => {
@@ -31,6 +30,8 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate }) => {
             map.set(userId, {
                 userId,
                 userName,
+                firstName,
+                lastName,
                 hourlyRate: rate,
                 records: []
             });
