@@ -338,7 +338,7 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                                     </div>
 
                                     <div className='ml-2 mt-2 md:ml-0 md:mt-0'>
-                                        <p style={{ color: theme.palette.primary.main }} className={`capitalize`} onClick={() => handleForgotPin()}>Forgot pin?</p>
+                                        <p style={{ color: theme.palette.primary.main }} className={`capitalize cursor-pointer`} onClick={() => handleForgotPin()}>Forgot pin?</p>
                                     </div>
                                 </div>
                                 <div className='ml-2 mt-2 md:ml-0 md:mt-2'>

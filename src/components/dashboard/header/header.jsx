@@ -34,7 +34,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
         },
     });
 
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+    let userInfo = JSON.parse(localStorage.getItem("userInfo"))
     const [anchorEl, setAnchorEl] = useState(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState(null);
 
@@ -104,7 +104,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
 
     const handleStart = async () => {
         if (!isRunning) {
-            const response = await addUserTimeIn(sessionStorage.getItem("locationId") !== undefined && sessionStorage.getItem("locationId") !== null ? sessionStorage.getItem("locationId") : "",userInfo?.companyId);
+            const response = await addUserTimeIn(sessionStorage.getItem("locationId") !== undefined && sessionStorage.getItem("locationId") !== null ? sessionStorage.getItem("locationId") : "", userInfo?.companyId);
             if (response.data?.status === 201) {
                 setIsRunning(true);
                 setValue("id", response.data?.result?.id);
@@ -204,12 +204,6 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
     };
 
     useEffect(() => {
-        handleGetTodayInOutRecords()
-        handleGetUserLastInOut()
-        handleGetCompany()
-    }, [])
-
-    useEffect(() => {
         let intervalId;
         if (isRunning) {
             intervalId = setInterval(() => {
@@ -296,8 +290,10 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
         }
     };
 
-
     useEffect(() => {
+        handleGetTodayInOutRecords()
+        handleGetUserLastInOut()
+        handleGetCompany()
         checkGeofenceStatus();
         const intervalId = setInterval(checkGeofenceStatus, 60000);
         return () => clearInterval(intervalId);

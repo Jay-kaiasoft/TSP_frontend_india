@@ -45,6 +45,7 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
       middleName: '',
       lastName: '',
       gender: '',
+      dob: '',
       password: '',
       currentPassword: "",
       confirmPassword: '',
@@ -164,6 +165,7 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
     if (userInfo?.companyId && userInfo.employeeId) {
       const response = await updateEmployee(userInfo?.employeeId, newData)
       if (response?.data?.status === 200) {
+        setAlert({ open: true, message: "Profile updated successfully", type: "success" })
         setLoading(false)
         setIsPasswordVisible(false)
         setIsConfirmPasswordVisible(false)
@@ -175,7 +177,7 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
     } else {
       const response = await updateUser(userInfo?.userId, newData)
       if (response?.data?.status === 200) {
-        // setAlert({ open: true, message: response.data.message, type: "success" })
+        setAlert({ open: true, message: "Profile updated successfully", type: "success" })
         setLoading(false)
         setIsPasswordVisible(false)
         setIsConfirmPasswordVisible(false)
@@ -235,12 +237,12 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
         if (userInfo?.companyId && userInfo.employeeId) {
           uploadEmployeeImage({ employee: imageURL, companyId: userInfo?.companyId, employeeId: userInfo?.employeeId }).then((res) => {
             if (res.data.status === 200) {
-              let JsonData = JSON.parse(sessionStorage.getItem('userInfo'))
+              let JsonData = JSON.parse(localStorage.getItem('userInfo'))
               JsonData = {
                 ...JsonData,
                 profileImage: res.data.result
               }
-              sessionStorage.setItem("userInfo", JSON.stringify(JsonData))
+              localStorage.setItem("userInfo", JSON.stringify(JsonData))
             } else {
               setAlert({ open: true, message: res?.data?.message, type: "error" })
             }
@@ -686,11 +688,16 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
                   {/* {
                     (!userInfo?.companyId && !userInfo?.employeeId) && ( */}
                   <div>
-                    <DatePickerComponent setValue={setValue} control={control} name='birthDate' label={`Birth Date`} minDate={null} maxDate={(() => {
-                      const today = new Date();
-                      return `${(today.getMonth() + 1).toString().padStart(2, "0")}/${today.getDate().toString().padStart(2, "0")}/${today.getFullYear()}`;
-                    })()} />
+                    <DatePickerComponent
+                      setValue={setValue}
+                      control={control}
+                      name="dob"
+                      label="Birth Date"
+                      minDate={null}
+                      maxDate={new Date()}   // ✅ pass Date object, not string
+                    />
                   </div>
+
                   {/* )
                   } */}
 
@@ -700,6 +707,14 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
                       control={control}
                       rules={{
                         required: "Phone is required",
+                        maxLength: {
+                          value: 10,
+                          message: 'Enter valid phone number',
+                        },
+                        minLength: {
+                          value: 10,
+                          message: 'Enter valid phone number',
+                        },
                       }}
                       render={({ field }) => (
                         <Input
@@ -708,7 +723,8 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
                           type={`text`}
                           error={errors.phone}
                           onChange={(e) => {
-                            field.onChange(e);
+                            const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                            field.onChange(numericValue);
                           }}
                         />
                       )}
@@ -722,10 +738,11 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
                       <Controller
                         name="emergencyContact"
                         control={control}
+
                         render={({ field }) => (
                           <Input
                             {...field}
-                            label="Emergency Contact"
+                            label="Emergency Contact Name"
                             type={`text`}
                             onChange={(e) => {
                               field.onChange(e);
@@ -739,14 +756,27 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
                       <Controller
                         name="contactPhone"
                         control={control}
+                        rules={{
+                          required: watch("contactPhone") ? "Phone is required" : false,
+                          maxLength: {
+                            value: 10,
+                            message: 'Enter valid phone number',
+                          },
+                          minLength: {
+                            value: 10,
+                            message: 'Enter valid phone number',
+                          },
+                        }}
                         render={({ field }) => (
                           <Input
                             {...field}
                             label="Contact phone"
                             type={`text`}
                             onChange={(e) => {
-                              field.onChange(e);
+                              const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                              field.onChange(numericValue);
                             }}
+                            error={errors.contactPhone}
                           />
                         )}
                       />

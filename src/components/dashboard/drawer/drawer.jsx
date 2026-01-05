@@ -165,7 +165,7 @@ const DrawerMenu = ({ title, handleSetTitle, handleDrawerClose, drawerWidth, set
         className="flex justify-between items-center text-xl font-bold font-['Inter'] py-5 px-2 transition-all duration-300 ease-in-out"
       >
         <div className={`flex-1 text-center  transition-opacity duration-300 ${drawerWidth === 260 ? 'opacity-100' : 'opacity-0'}`}>
-          {drawerWidth === 260 ? <p>TimeSheetsPro</p> : null}
+          {drawerWidth === 260 ? <p>Calculate Salary</p> : null}
         </div>
 
         <div className="hidden lg:flex items-center justify-center w-10 h-10">

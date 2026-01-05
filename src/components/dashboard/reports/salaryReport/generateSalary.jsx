@@ -52,8 +52,11 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             startDate: null,
             endDate: (() => {
                 const today = new Date();
-                return `${(today.getMonth() + 1).toString().padStart(2, "0")}/${today.getDate().toString().padStart(2, "0")}/${today.getFullYear()}`;
+                return `${today.getDate().toString().padStart(2, "0")}/${(today.getMonth() + 1)
+                    .toString()
+                    .padStart(2, "0")}/${today.getFullYear()}`;
             })(),
+
             selectedUserId: [],
             selectedDepartmentId: [],
         }
@@ -76,8 +79,11 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
         }
 
         const formatDate = (date) => {
-            return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+            return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+                .toString()
+                .padStart(2, "0")}/${date.getFullYear()}`;
         };
+
 
         // Update form values
         setValue('startDate', formatDate(start));
@@ -377,7 +383,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             field: 'netSalary', headerName: 'Net Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
             sortable: false,
             align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },        
+        },
     ];
 
     const getRowIdForDataGrid = (rowItem) => rowItem.id;
@@ -429,9 +435,15 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                         <DatePickerComponent setValue={setValue} control={control} name='startDate' label={`Start Date`} minDate={null} maxDate={watch("endDate")} />
                     </div>
 
-                    <div className='mb-4 w-full md:mb-0'>
-                        <DatePickerComponent setValue={setValue} control={control} name='endDate' label={`End Date`} minDate={watch("startDate")} maxDate={watch("endDate")} />
-                    </div>
+                    <DatePickerComponent
+                        setValue={setValue}
+                        control={control}
+                        name="endDate"
+                        label="End Date"
+                        minDate={watch("startDate")}
+                        maxDate={new Date()}
+                    />
+
 
                     <div>
                         <Controller

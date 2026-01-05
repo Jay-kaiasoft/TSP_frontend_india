@@ -110,12 +110,60 @@ export const handleConvertUTCDateToLocalDate = (utcDateString) => {
     }
 };
 
-export function handleFormateUTCDateToLocalDate(utcDateString) {
-    const date = new Date(utcDateString);
+export function handleFormateUTCDateToLocalDate(input) {
+    if (!input) return "-";
 
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const day = date.getDate();
-    const weekday = date.toLocaleString('en-US', { weekday: 'short' });
+    let dateObj = null;
+
+    // 1) Dayjs object support
+    if (typeof input === "object" && input?.$isDayjsObject) {
+        dateObj = input.toDate();
+    }
+    // 2) Already a Date
+    else if (input instanceof Date) {
+        dateObj = input;
+    }
+    // 3) Number timestamp
+    else if (typeof input === "number") {
+        dateObj = new Date(input);
+    }
+    // 4) String parsing
+    else if (typeof input === "string") {
+        const s = input.trim();
+
+        // Handle: "31/12/2025, 12:00:00 AM"
+        // dd/mm/yyyy, hh:mm:ss AM/PM
+        const m = s.match(
+            /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:,\s*(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM))?$/i
+        );
+
+        if (m) {
+            const dd = parseInt(m[1], 10);
+            const mm = parseInt(m[2], 10);
+            const yyyy = parseInt(m[3], 10);
+
+            let hh = m[4] ? parseInt(m[4], 10) : 0;
+            const min = m[5] ? parseInt(m[5], 10) : 0;
+            const sec = m[6] ? parseInt(m[6], 10) : 0;
+            const ampm = (m[7] || "").toUpperCase();
+
+            // convert 12-hour to 24-hour
+            if (ampm === "PM" && hh < 12) hh += 12;
+            if (ampm === "AM" && hh === 12) hh = 0;
+
+            // This creates a LOCAL date-time (because your string has no timezone info)
+            dateObj = new Date(yyyy, mm - 1, dd, hh, min, sec);
+        } else {
+            // Fallback: ISO or browser-parseable string
+            dateObj = new Date(s);
+        }
+    }
+
+    if (!dateObj || Number.isNaN(dateObj.getTime())) return "-";
+
+    const month = dateObj.toLocaleString("en-US", { month: "short" });
+    const day = dateObj.getDate();
+    const weekday = dateObj.toLocaleString("en-US", { weekday: "short" });
 
     return `${month} ${day}, ${weekday}`;
 }
@@ -434,7 +482,7 @@ export const getStaticRolesWithPermissions = () => {
 
 export const apiToLocalTime = (utcString) => {
     if (!utcString) return null;
-    return dayjs.utc(utcString, "MM/DD/YYYY, hh:mm:ss A").tz(userTimeZone);
+    return dayjs.utc(utcString, "DD/MM/YYYY, hh:mm:ss A").tz(userTimeZone);
 };
 
 export const localToApiTime = (localTime) => {

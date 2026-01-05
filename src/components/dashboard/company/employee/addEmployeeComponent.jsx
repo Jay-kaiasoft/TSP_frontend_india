@@ -126,7 +126,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             firstName: "",
             middleName: "",
             lastName: "",
-            dob: new Date(),
+            dob: null,
             email: "",
             phone: "",
             emergencyPhone: "",
@@ -653,13 +653,13 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             accountType: accountTypeOptions?.filter((row) => row?.id === watch("accountType"))?.[0]?.title || null,
             depositDistribution: depositDistributionOptions?.filter((row) => row?.id === watch("depositDistribution"))?.[0]?.title || null,
             hiredDate: dayjs(watch("hiredDate")).isValid()
-                ? dayjs(watch("hiredDate")).format("MM/DD/YYYY")
+                ? dayjs(watch("hiredDate")).format("DD/MM/YYYY")
                 : watch("hiredDate"),
             dob: dayjs(watch("dob")).isValid()
-                ? dayjs(watch("dob")).format("MM/DD/YYYY")
+                ? dayjs(watch("dob")).format("DD/MM/YYYY")
                 : watch("dob"),
             date: dayjs(watch("date")).isValid()
-                ? dayjs(watch("date")).format("MM/DD/YYYY")
+                ? dayjs(watch("date")).format("DD/MM/YYYY")
                 : watch("date"),
 
             companyLocation: watch("companyLocation")?.length > 0 ? JSON.stringify(watch("companyLocation")) : null,
@@ -926,9 +926,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 />
                                             </div>
 
-                                            <div>
+                                            <div>                                                
                                                 <DatePickerComponent setValue={setValue} control={control} name='dob' label={`Birth Date`} minDate={null} maxDate={new Date()} />
                                             </div>
+
 
                                             <div>
                                                 <Controller

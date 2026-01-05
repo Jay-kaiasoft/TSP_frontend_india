@@ -26,7 +26,7 @@ function AddHolidaysTemplates({ setAlert }) {
     const handleOpenDeleteHolidaysDialog = (index, id) => {
         setSelectedIndex(index);
         if (id) {
-            setSelectedId(id);            
+            setSelectedId(id);
         }
         setDialog({
             open: true,
@@ -56,7 +56,7 @@ function AddHolidaysTemplates({ setAlert }) {
         defaultValues: {
             id: "",
             name: "",
-            holidayTemplateDetailsList: [       
+            holidayTemplateDetailsList: [
             ]
         },
     });
@@ -123,7 +123,7 @@ function AddHolidaysTemplates({ setAlert }) {
                 }));
                 setValue("holidayTemplateDetailsList", formattedHolidays);
             }
-        }else{
+        } else {
             setValue("holidayTemplateDetailsList", [{ id: "", name: "", date: null }]);
         }
     }
@@ -154,7 +154,7 @@ function AddHolidaysTemplates({ setAlert }) {
                         Create templates to auto-assign paid leave on public holidays.
                     </p>
                 </div>
-                
+
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Template Name */}
                     <div className='mb-4 w-60'>
@@ -219,7 +219,9 @@ function AddHolidaysTemplates({ setAlert }) {
                                             minDate={null}
                                             maxDate={new Date(new Date().getFullYear(), 11, 31)}
                                             required={true}
+                                            placeholder="DD/MM/YYYY"   // ✅ add this
                                         />
+
                                     </div>
                                     {
                                         fields?.length !== 1 && (

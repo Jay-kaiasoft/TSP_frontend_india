@@ -1407,7 +1407,7 @@
     "id": 235,
     "title": "United States",
     "country_code": "US",
-    "date_format": "MM/DD/YYYY"
+    "date_format": "DD/MM/YYYY"
   },
   {
     "id": 236,

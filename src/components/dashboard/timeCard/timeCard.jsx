@@ -61,12 +61,22 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         defaultValues: {
             startDate: (() => {
                 const today = new Date();
-                return `${(today.getMonth() + 1).toString().padStart(2, "0")}/01/${today.getFullYear()}`;
+                const day = "01";
+                const month = (today.getMonth() + 1).toString().padStart(2, "0");
+                const year = today.getFullYear();
+
+                return `${day}/${month}/${year}`;
             })(),
+
             endDate: (() => {
                 const today = new Date();
-                return `${(today.getMonth() + 1).toString().padStart(2, "0")}/${today.getDate().toString().padStart(2, "0")}/${today.getFullYear()}`;
+                const day = today.getDate().toString().padStart(2, "0");
+                const month = (today.getMonth() + 1).toString().padStart(2, "0");
+                const year = today.getFullYear();
+
+                return `${day}/${month}/${year}`;
             })(),
+
             id: null,
             timeIn: null,
             timeOut: null,
@@ -510,10 +520,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     </div>
 
                     <div className='mb-4 w-full md:mb-0'>
-                        <DatePickerComponent setValue={setValue} control={control} name='endDate' label={`End Date`} minDate={watch("startDate")} maxDate={(() => {
-                            const today = new Date();
-                            return `${(today.getMonth() + 1).toString().padStart(2, "0")}/${today.getDate().toString().padStart(2, "0")}/${today.getFullYear()}`;
-                        })()} />
+                        <DatePickerComponent setValue={setValue} control={control} name='endDate' label={`End Date`} minDate={watch("startDate")} maxDate={new Date()} />
                     </div>
 
                     {((userInfo?.roleName === "Admin" || userInfo?.roleName === "Owner") && userInfo?.companyId) ? (

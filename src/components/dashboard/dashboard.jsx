@@ -12,7 +12,7 @@ function Dashboard({ title }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(true);
 
   useEffect(() => {
-    document.title = "Dashboard-TimeSheetsPro";    
+    document.title = "Dashboard - Calculate Salary";    
   }, []);
   
   return (

@@ -9,7 +9,12 @@ import CustomIcons from '../../common/icons/CustomIcons';
 import Select from '../../common/select/select';
 import { addClockInOut, getUserInOutRecord } from '../../../service/userInOut/userInOut';
 import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
-import { apiToLocalTime, localToApiTime } from '../../../service/common/commonService';
+import { apiToLocalTime } from '../../../service/common/commonService';
+import DatePickerComponent from '../../common/datePickerComponent/datePickerComponent';
+
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -19,6 +24,45 @@ const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
         padding: theme.spacing(1),
     },
 }));
+
+const API_DATETIME_FORMATS = [
+    "DD/MM/YYYY, hh:mm:ss A",
+    "MM/DD/YYYY, hh:mm:ss A"
+];
+
+const DISPLAY_DATE_FORMAT = "DD/MM/YYYY";
+
+const extractDateFromTimeIn = (timeIn) => {
+    if (!timeIn) return null;
+
+    const d = dayjs(timeIn, API_DATETIME_FORMATS, true);
+    if (!d.isValid()) return null;
+
+    return d.format(DISPLAY_DATE_FORMAT); // 👉 "31/12/2025"
+};
+
+const combineDateAndTime = (dateVal, timeVal) => {
+    if (!dateVal || !timeVal) return null;
+
+    // Normalize date -> dayjs
+    let d;
+    if (dayjs.isDayjs(dateVal)) d = dateVal;
+    else if (dateVal instanceof Date) d = dayjs(dateVal);
+    else if (typeof dateVal === "string") d = dayjs(dateVal, DISPLAY_DATE_FORMAT, true);
+    else d = dayjs(dateVal);
+
+    // Normalize time -> dayjs
+    const t = dayjs.isDayjs(timeVal) ? timeVal : dayjs(timeVal);
+
+    if (!d.isValid() || !t.isValid()) return null;
+
+    // Merge: date from d, time from t
+    return d
+        .hour(t.hour())
+        .minute(t.minute())
+        .second(t.second() || 0)
+        .millisecond(0);
+};
 
 export function AddClockInOut({ open, handleClose, employeeList, getRecords, id }) {
     const theme = useTheme()
@@ -38,6 +82,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
             timeIn: null,
             timeOut: null,
             userId: "",
+            date: new Date()
         },
     });
 
@@ -52,18 +97,23 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
     };
 
     const submit = async (data) => {
+        const mergedTimeIn = combineDateAndTime(data.date, data.timeIn);
+        const mergedTimeOut = combineDateAndTime(data.date, data.timeOut);
+
         let newData = {
             ...data,
             companyId: userInfo?.companyId,
-            timeIn: localToApiTime(data.timeIn),
-            timeOut: localToApiTime(data.timeOut),
-        }
+            timeIn: mergedTimeIn ? mergedTimeIn.utc().toISOString() : null,
+            timeOut: mergedTimeOut ? mergedTimeOut.utc().toISOString() : null,
+            createdOn: data.date
+        };
+
         setLoading(true);
         try {
             const response = await addClockInOut(newData);
             if (response?.data?.status === 201) {
                 setLoading(false);
-                getRecords()
+                getRecords();
                 onClose();
             } else {
                 setLoading(false);
@@ -76,20 +126,9 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
         } catch (error) {
             console.error("Error submitting clock in/out:", error);
             setLoading(false);
-            return;
         }
-    }
+    };
 
-    // const handleGetData = async () => {
-    //     if (id && open) {
-    //         const response = await getUserInOutRecord(id);
-    //         if (response?.data?.status === 200) {
-    //             reset(response.data?.result);
-    //             setValue("timeIn", response.data?.result?.timeIn ? dayjs(response.data?.result?.timeIn) : null);
-    //             setValue("timeOut", response.data?.result?.timeOut ? dayjs(response.data?.result?.timeOut) : null);
-    //         }
-    //     }
-    // }
 
     const handleGetData = async () => {
         if (id && open) {
@@ -97,6 +136,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
             if (response?.data?.status === 200) {
                 reset(response.data?.result);
 
+                setValue("date", extractDateFromTimeIn(response.data?.result?.timeIn));
                 setValue("timeIn", apiToLocalTime(response.data?.result?.timeIn));
                 setValue("timeOut", apiToLocalTime(response.data?.result?.timeOut));
             }
@@ -134,7 +174,7 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
 
                 <form noValidate onSubmit={handleSubmit(submit)}>
                     <Components.DialogContent dividers>
-                        <div className='grid grid-cols-3 gap-4'>
+                        <div className='grid grid-cols-2 gap-4'>
                             <Controller
                                 name="userId"
                                 control={control}
@@ -156,6 +196,9 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
                                     />
                                 )}
                             />
+                            <div>
+                                <DatePickerComponent setValue={setValue} control={control} name='date' label={`Date`} minDate={null} maxDate={new Date()} />
+                            </div>
                             <InputTimePicker
                                 label="Clock In Time"
                                 name="timeIn"

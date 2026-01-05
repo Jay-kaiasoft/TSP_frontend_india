@@ -140,10 +140,10 @@ function AddLocationModel({ setAlert, open, handleClose, locationId, companyId, 
             country: "India",
             companyId: companyId,
             payPeriodStart: dayjs(data.payPeriodStart).isValid()
-                ? dayjs(data.payPeriodStart).format("MM/DD/YYYY")
+                ? dayjs(data.payPeriodStart).format("DD/MM/YYYY")
                 : data.payPeriodStart,
             payPeriodEnd: dayjs(data.payPeriodEnd).isValid()
-                ? dayjs(data.payPeriodEnd).format("MM/DD/YYYY")
+                ? dayjs(data.payPeriodEnd).format("DD/MM/YYYY")
                 : data.payPeriodEnd,
         }
         setLoading(true);
