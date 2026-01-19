@@ -394,29 +394,33 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     }
 
     const handleUploadAadharImage = (companyId, id) => {
-        if (!formDataFileAadhar) {
-            return
-        } else {
-            const formData = new FormData();
-            formData.append("files", formDataFileAadhar);
-            formData.append("folderName", `employeeProfile/aadharImage/${id}`);
-            formData.append("userId", companyId);
+        if (!formDataFileAadhar) return;
 
-            uploadFiles(formData).then((res) => {
-                if (res.data.status === 200) {
-                    const { imageURL } = res?.data?.result[0];
-                    uploadEmployeeAadharImage({ employee: imageURL, companyId: companyId, employeeId: id }).then((res) => {
-                        if (res.data.status !== 200) {
-                            setAlert({ open: true, message: res?.data?.message, type: "error" })
-                        }
-                    })
-                } else {
-                    setAlert({ open: true, message: res?.data?.message, type: "error" })
-                    setLoading(false)
+        const formData = new FormData();
+        formData.append("files", formDataFileAadhar);
+        formData.append("folderName", `employeeProfile/aadharImage/${id}`);
+        formData.append("userId", companyId);
+
+        uploadFiles(formData).then((res) => {
+            if (res.data.status === 200) {
+                const { imageURL } = res?.data?.result?.uploadedFiles?.[0] || res?.data?.result?.[0] || {};
+                if (!imageURL) {
+                    setAlert({ open: true, message: "Upload completed but imageURL missing", type: "error" });
+                    return;
                 }
-            });
-        }
-    }
+
+                uploadEmployeeAadharImage({ employee: imageURL, companyId, employeeId: id }).then((res) => {
+                    if (res.data.status !== 200) {
+                        setAlert({ open: true, message: res?.data?.message, type: "error" });
+                    }
+                });
+            } else {
+                setAlert({ open: true, message: res?.data?.message, type: "error" });
+                setLoading(false);
+            }
+        });
+    };
+
 
     const handleUploadImage = async (companyId, id) => {
         if (!formDataFile) {
@@ -926,7 +930,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                                                 />
                                             </div>
 
-                                            <div>                                                
+                                            <div>
                                                 <DatePickerComponent setValue={setValue} control={control} name='dob' label={`Birth Date`} minDate={null} maxDate={new Date()} />
                                             </div>
 

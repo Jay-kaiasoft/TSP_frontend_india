@@ -70,15 +70,67 @@ export const oganizationType = [
     { id: 10, title: 'Franchise' },
 ];
 
+// uploadFilesChunked.js (or replace inside same file)
 export const uploadFiles = async (data) => {
-    try {
-        const response = axiosInterceptor().post(`${fileUploadURL}`, data)
-        return response
+    // data is FormData coming from your existing code
+    // expecting: files, folderName, userId
+    const file = data.get("files");
+    const folderName = data.get("folderName");
+    const userId = data.get("userId");
 
-    } catch (error) {
-        console.log(error)
+    if (!file) throw new Error("No file found in FormData");
+
+    const api = axiosInterceptor();
+
+    // 1) START
+    const startRes = await api.post(`${fileUploadURL}/start`, null, {
+        params: {
+            folderName,
+            userId,
+            fileName: file.name,
+        },
+    });
+
+    const uploadId = startRes?.data?.result?.uploadId || startRes?.data?.data?.uploadId;
+    if (!uploadId) throw new Error("uploadId not returned from server");
+
+    // 2) CHUNKS
+    const chunkSize = 5 * 1024 * 1024; // 5MB (tune 2MB–10MB)
+    const totalChunks = Math.ceil(file.size / chunkSize);
+
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const start = chunkIndex * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const blob = file.slice(start, end);
+
+        const chunkForm = new FormData();
+        chunkForm.append("folderName", folderName);
+        chunkForm.append("userId", userId);
+        chunkForm.append("uploadId", uploadId);
+        chunkForm.append("chunkIndex", chunkIndex);
+        chunkForm.append("totalChunks", totalChunks);
+        chunkForm.append("originalFileName", file.name);
+        chunkForm.append("chunk", blob, file.name);
+
+        await api.post(`${fileUploadURL}/chunk`, chunkForm, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
     }
-}
+
+    // 3) COMPLETE (returns final URL like your old API)
+    const completeRes = await api.post(`${fileUploadURL}/complete`, null, {
+        params: {
+            folderName,
+            userId,
+            uploadId,
+            totalChunks,
+            originalFileName: file.name,
+        },
+    });
+
+    return completeRes;
+};
+
 
 export const handleConvertUTCDateToLocalDate = (utcDateString) => {
     if (!utcDateString) return null;
