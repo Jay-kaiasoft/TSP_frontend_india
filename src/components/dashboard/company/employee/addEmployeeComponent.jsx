@@ -370,7 +370,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
             uploadFiles(formData).then((res) => {
                 if (res.data.status === 200) {
-                    const { imageURL } = res?.data?.result[0];
+                    const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                     uploadPassbookImage({ bank: imageURL, companyId: companyId, bankId: bankId }).then((res) => {
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
@@ -421,7 +421,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
         });
     };
 
-
     const handleUploadImage = async (companyId, id) => {
         if (!formDataFile) {
             setActiveStep((prev) => prev + 1);
@@ -435,9 +434,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             formData.append("userId", companyId);
 
             const res = await uploadFiles(formData);
-
             if (res.data.status === 200) {
-                const { imageURL } = res?.data?.result[0];
+                const { imageURL } = res?.data?.result?.uploadedFiles[0];
                 const updateRes = await uploadEmployeeImage({
                     employee: imageURL,
                     companyId,
@@ -823,7 +821,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
                                             <input
                                                 type="file"
-                                                accept="image/png, image/jpeg"
+                                                accept="image/png, image/jpeg , image/jpg"
                                                 ref={fileInputRef}
                                                 className="hidden"
                                                 onChange={handleImageChange}
