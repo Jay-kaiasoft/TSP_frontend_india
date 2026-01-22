@@ -403,7 +403,7 @@ const AddUser = ({ setAlert, handleSetTitle }) => {
 
         uploadFiles(formData).then((res) => {
             if (res.data.status === 200) {
-                const { imageURL } = res?.data?.result[0];
+                const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                 uploadProfileImage({ profileImage: imageURL, userId: userId }).then((res) => {
                     if (res.data.status !== 200) {
                         setAlert({ open: true, message: res?.data?.message, type: "error" })

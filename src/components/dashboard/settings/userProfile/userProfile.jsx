@@ -3,7 +3,7 @@ import { ReactComponent as User } from "../../../../assets/svgs/user-alt.svg";
 
 import { connect } from 'react-redux';
 import { Controller, useForm } from 'react-hook-form';
-import { handleSetTitle, setAlert } from '../../../../redux/commonReducers/commonReducers';
+import { handleSetTitle, handleSetUserDetails, setAlert } from '../../../../redux/commonReducers/commonReducers';
 import { Tabs } from '../../../common/tabs/tabs'
 import Button from '../../../common/buttons/button';
 
@@ -24,11 +24,10 @@ const GenderOptions = [
   { id: 2, title: "Female" }
 ]
 
-const UserProfile = ({ setAlert, handleSetTitle }) => {
+const UserProfile = ({ setAlert, handleSetTitle, handleSetUserDetails, userDetails }) => {
 
   const theme = useTheme()
-
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+  const userInfo = userDetails || JSON.parse(localStorage.getItem("userInfo"))
   // const [showPasswordRequirement, setShowPasswordRequirement] = useState(false)
 
   const {
@@ -233,16 +232,17 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
 
     uploadFiles(formData).then((res) => {
       if (res.data.status === 200) {
-        const { imageURL } = res?.data?.result[0];
+        const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
         if (userInfo?.companyId && userInfo.employeeId) {
-          uploadEmployeeImage({ employee: imageURL, companyId: userInfo?.companyId, employeeId: userInfo?.employeeId }).then((res) => {
-            if (res.data.status === 200) {
+          uploadEmployeeImage({ employee: imageURL, companyId: userInfo?.companyId, employeeId: userInfo?.employeeId }).then((response) => {
+            if (response.data.status === 200) {
               let JsonData = JSON.parse(localStorage.getItem('userInfo'))
               JsonData = {
                 ...JsonData,
-                profileImage: res.data.result
+                profileImage: response.data.result
               }
               localStorage.setItem("userInfo", JSON.stringify(JsonData))
+              handleSetUserDetails(JsonData)
             } else {
               setAlert({ open: true, message: res?.data?.message, type: "error" })
             }
@@ -280,12 +280,14 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
         return
       }
       setValue("profileImage", "");
-      let JsonData = JSON.parse(sessionStorage.getItem('userInfo'))
+      let JsonData = JSON.parse(localStorage.getItem('userInfo'))
       JsonData = {
         ...JsonData,
         profileImage: ""
       }
-      sessionStorage.setItem("userInfo", JSON.stringify(JsonData))
+      localStorage.setItem("userInfo", JSON.stringify(JsonData))
+      handleSetUserDetails(JSON.stringify(JsonData))
+
       fileInputRef.current.value = null;
     } else {
       const res = await deleteProfileImage();
@@ -993,11 +995,13 @@ const UserProfile = ({ setAlert, handleSetTitle }) => {
 
 const mapStateToProps = (state) => ({
   title: state.common.title,
+  userDetails: state.common.userDetails,
 });
 
 const mapDispatchToProps = {
   setAlert,
-  handleSetTitle
+  handleSetTitle,
+  handleSetUserDetails
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserProfile)

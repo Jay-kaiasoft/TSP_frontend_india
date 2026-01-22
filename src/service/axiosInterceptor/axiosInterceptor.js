@@ -54,11 +54,11 @@ const axiosInterceptor = () => {
             }
             if (response?.data?.error?.toLowerCase() === "unauthorized") {
                 Cookies.remove('authToken');
-                window.location.href = "/sigin";
+                window.location.href = "/signin";
             }
             if (response.data?.code === 403) {
                 Cookies.remove('authToken');
-                window.location.href = "/sigin";
+                window.location.href = "/signin";
             }
             store.dispatch(setLoading(false)); // Set loading to false
             return response; // Return the whole response object for further handling

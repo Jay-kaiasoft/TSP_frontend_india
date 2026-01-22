@@ -114,7 +114,7 @@ const ForgotPassword = ({ setAlert }) => {
                             </div>
 
                             <div>
-                                <NavLink to={`/sigin`} style={{ color: theme.palette.primary.main }} className={`flex justify-center items-center gap-3 mt-1`}>
+                                <NavLink to={`/signin`} style={{ color: theme.palette.primary.main }} className={`flex justify-center items-center gap-3 mt-1`}>
                                     <CustomIcons iconName={'fa-solid fa-arrow-left'} css=' cursor-pointer h-5 w-5' />
                                     <span>
                                         Back to login

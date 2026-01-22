@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
+import Cookies from 'js-cookie';
+
 import { ReactComponent as User } from "../../../../assets/svgs/user-alt.svg";
 import { Controller, useForm } from 'react-hook-form';
 import { createEmployee, deleteEmployeeAadharImage, deleteEmployeeImage, getCompanyEmployee, getLastUserId, updateEmployee, uploadEmployeeAadharImage, uploadEmployeeImage } from '../../../../service/companyEmployee/companyEmployeeService';
@@ -110,6 +112,9 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [showFaceRegistration, setShowFaceRegistration] = useState(false);
     const [dialogFaceRegistration, setDialogFaceRegistration] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [dialogLogin, setDialogLogin] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [oldData, setOldData] = useState({ userName: null, password: null });
+    const [saveNewData, setSaveNewData] = useState(null);
 
     const {
         handleSubmit,
@@ -182,6 +187,44 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             passbookImage: "",
         },
     });
+
+    const handleOpenDialogLogin = (data) => {
+        setSaveNewData(data)
+        setDialogLogin({
+            open: true,
+            title: 'Login Again',
+            message: 'Your username or password is change. Please re-login again to continue.\nAre you sure! Do you want to logout?',
+            actionButtonText: 'Yes',
+        });
+    }
+
+    const handleCloseDialogLogin = () => {
+        setDialogLogin({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: ''
+        });
+        setValue("userName", oldData?.userName)
+        setValue("password", oldData?.password)
+    }
+
+    const handleUpdate = async () => {
+        const res = await updateEmployee(id, saveNewData)
+        if (res.data?.status === 200) {
+            handleCloseDialogLogin()
+            Cookies.remove('authToken');
+            localStorage.removeItem('theme')
+            localStorage.removeItem('authToken')
+            localStorage.removeItem('permissions')
+            localStorage.removeItem('userInfo')
+            localStorage.removeItem('timeInAllow')
+            navigate("/signin")
+        } else {
+            setAlert({ open: true, message: res?.data?.message, type: "error" })
+            return
+        }
+    }
 
     const handleOpenFaceRegistrationDialog = () => {
         setDialogFaceRegistration({
@@ -304,6 +347,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 setValue("canteenType", res?.data?.result?.canteenType ? CanteenTypeOptions?.filter((row) => row?.title === res?.data?.result?.canteenType)?.[0]?.id : null)
                 setValue("pfType", PFTypeOptions?.filter((row) => row?.title === res?.data?.result?.pfType)?.[0]?.id || null)
                 setValue("country", "India")
+                setOldData({
+                    userName: res?.data?.result?.userName,
+                    password: res?.data?.result?.password,
+                })
             }
             if (res?.data?.result?.bankAccountId) {
                 const response = await getEmployeeBankInfo(res?.data?.result?.bankAccountId)
@@ -403,7 +450,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
         uploadFiles(formData).then((res) => {
             if (res.data.status === 200) {
-                const { imageURL } = res?.data?.result?.uploadedFiles?.[0] || res?.data?.result?.[0] || {};
+                const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                 if (!imageURL) {
                     setAlert({ open: true, message: "Upload completed but imageURL missing", type: "error" });
                     return;
@@ -435,7 +482,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
             const res = await uploadFiles(formData);
             if (res.data.status === 200) {
-                const { imageURL } = res?.data?.result?.uploadedFiles[0];
+                const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                 const updateRes = await uploadEmployeeImage({
                     employee: imageURL,
                     companyId,
@@ -679,6 +726,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
             //     return
             // }
             if (id) {
+                if (oldData?.userName !== watch("userName") || oldData?.password !== watch("password")) {
+                    handleOpenDialogLogin(newData);
+                    return;
+                }
                 const res = await updateEmployee(id, newData)
                 if (res.data?.status === 200) {
                     setValue("employeeId", res?.data?.result?.employeeId)
@@ -759,10 +810,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
     useEffect(() => {
         const firstName = watch("firstName");
-        const userName = watch("userName");
 
-        // Only auto-fill if userName is empty or same as auto-generated format
-        if (!userName || userName.startsWith(firstName)) {
+        if (firstName && !watch("userName")) {
             setValue("userName", `${firstName}00${lastUserId}`);
         }
     }, [watch("firstName"), lastUserId]);
@@ -2220,6 +2269,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleCreateShift} handleClose={handleCloseDialog} />
             <AlertDialog open={dialogFaceRegistration.open} title={dialogFaceRegistration.title} message={dialogFaceRegistration.message} actionButtonText={dialogFaceRegistration.actionButtonText} handleAction={handleDeleteFaceRegistration} handleClose={handleCloseFaceRegistrationDialog} />
+            <AlertDialog open={dialogLogin.open} title={dialogLogin.title} message={dialogLogin.message} actionButtonText={dialogLogin.actionButtonText} handleAction={handleUpdate} handleClose={handleCloseDialogLogin} />
 
             <FaceRegistration open={showFaceRegistration} handleClose={handleCloseFaceRegistration} employeeId={watch("employeeId") || id} type="register" />
         </div>

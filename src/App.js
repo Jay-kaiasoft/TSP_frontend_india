@@ -61,10 +61,10 @@ function App() {
     },
     {
       path: "/",
-      element: <Navigate to="/sigin" replace />,
+      element: <Navigate to="/signin" replace />,
     },
     {
-      path: "/sigin",
+      path: "/signin",
       element: <Login />,
     },
     {

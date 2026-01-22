@@ -11,7 +11,8 @@ const initialState = {
   theme: null,
   openSettingDrawer: false,
   settingDrawerWidth: 0,
-  timeIn: null
+  timeIn: null,
+  companyLogo: null
 };
 
 const commonReducersSlice = createSlice({
@@ -66,10 +67,13 @@ const commonReducersSlice = createSlice({
     },
     handleSetTimeIn(state, action) {
       state.timeIn = action.payload
-    }
+    },
+    handleSetCompanyLogo(state, action) {
+      state.companyLogo = action.payload
+    },
   },
 });
 
-export const { setLoading, setAlert, setUploadedFiles, userDetails, handleDrawerOpen, handleDrawerClose, handleSetTitle, handleSetUserDetails, handleSetUserPermissions, handleSetTheme, handleToogleSettingDrawer, handleResetTheme, handleSetTimeIn } = commonReducersSlice.actions;
+export const { setLoading, setAlert, setUploadedFiles, userDetails, handleDrawerOpen, handleDrawerClose, handleSetTitle, handleSetUserDetails, handleSetUserPermissions, handleSetTheme, handleToogleSettingDrawer, handleResetTheme, handleSetTimeIn, handleSetCompanyLogo, companyLogo } = commonReducersSlice.actions;
 
 export default commonReducersSlice.reducer;

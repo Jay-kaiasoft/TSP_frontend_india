@@ -57,7 +57,7 @@ const ResetPassword = ({ setAlert }) => {
         const response = await resetPassword(newData)
         if (response.data.status === 200) {
             // setAlert({ open: true, message: response.data.message, type: "success" })
-            navigate("/sigin")
+            navigate("/signin")
         } else {
             setAlert({ open: true, message: response.data.message, type: "error" })
         }
@@ -193,7 +193,7 @@ const ResetPassword = ({ setAlert }) => {
                             </div>
 
                             <div>
-                                <NavLink to={`/sigin`} style={{ color: theme.palette.primary.main }} className={` flex justify-center items-center gap-3 mt-1`}>
+                                <NavLink to={`/signin`} style={{ color: theme.palette.primary.main }} className={` flex justify-center items-center gap-3 mt-1`}>
                                     <CustomIcons iconName={'fa-solid fa-arrow-left'} css=' cursor-pointer h-5 w-5' />
                                     <span>
                                         Back to login

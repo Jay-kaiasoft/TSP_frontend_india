@@ -171,7 +171,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
 
             uploadFiles(formData).then((res) => {
                 if (res.data.status === 200) {
-                    const { imageURL } = res?.data?.result[0];
+                    const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                     uploadEmployeeImage({ employee: imageURL, companyId: companyId, employeeId: employeeId }).then((res) => {
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
@@ -263,7 +263,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
     return (
         <div className='relative h-full'>
             <form onSubmit={handleSubmit(submit)}>
-                <div className="flex items-center justify-center  mb-5">
+                <div className="flex items-center justify-center mb-5 mt-2">
                     <div
                         className="h-32 w-32 border rounded-full flex items-center justify-center  cursor-pointer relative"
                         onClick={handleDivClick}
@@ -652,26 +652,7 @@ const AddEmployee = ({ setAlert, companyId, employeeId = null, setAddEmployee, s
                                 />
                             )}
                         />
-                    </div>
-
-                    <div>
-                        <Controller
-                            name="hourlyRate"
-                            control={control}
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    label="Hourly Rate"
-                                    type={`text`}
-                                    onChange={(e) => {
-                                        const inputValue = e.target.value;
-                                        const numericValue = inputValue.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
-                                        field.onChange(numericValue);
-                                    }}
-                                />
-                            )}
-                        />
-                    </div>
+                    </div>                   
 
                     <div>
                         <Controller
@@ -716,3 +697,22 @@ const mapDispatchToProps = {
 };
 
 export default connect(null, mapDispatchToProps)(AddEmployee)
+
+//  <div>
+//                         <Controller
+//                             name="hourlyRate"
+//                             control={control}
+//                             render={({ field }) => (
+//                                 <Input
+//                                     {...field}
+//                                     label="Hourly Rate"
+//                                     type={`text`}
+//                                     onChange={(e) => {
+//                                         const inputValue = e.target.value;
+//                                         const numericValue = inputValue.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+//                                         field.onChange(numericValue);
+//                                     }}
+//                                 />
+//                             )}
+//                         />
+//                     </div>

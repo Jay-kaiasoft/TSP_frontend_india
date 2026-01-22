@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import Cookies from 'js-cookie';
+import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
 
 import Components from '../../muiComponents/components'
-import { handleDrawerOpen, handleToogleSettingDrawer, handleResetTheme, handleSetTimeIn, setLoading } from '../../../redux/commonReducers/commonReducers';
+import { handleDrawerOpen, handleToogleSettingDrawer, handleResetTheme, handleSetTimeIn, setLoading, handleSetUserDetails, handleSetCompanyLogo } from '../../../redux/commonReducers/commonReducers';
 import { connect } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import AlertDialog from '../../common/alertDialog/alertDialog';
@@ -19,7 +20,7 @@ import { getAccurateLocation } from '../../../service/common/radarService';
 import { radarPKAPIKey } from '../../../config/apiConfig/apiConfig';
 import { getLocations } from '../../../service/location/locationService';
 
-const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSettingDrawer, handleResetTheme, handleSetTimeIn, timeIn, title }) => {
+const Header = ({ handleSetCompanyLogo, companyLogo, userDetails, handleSetUserDetails, setLoading, handleDrawerOpen, drawerWidth, handleToogleSettingDrawer, handleResetTheme, handleSetTimeIn, timeIn, title }) => {
     const navigate = useNavigate()
     const location = useLocation()
     const theme = useTheme();
@@ -34,7 +35,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
         },
     });
 
-    let userInfo = JSON.parse(localStorage.getItem("userInfo"))
+    let userInfo = userDetails || JSON.parse(localStorage.getItem("userInfo"))
     const [anchorEl, setAnchorEl] = useState(null);
     const [profileAnchorEl, setProfileAnchorEl] = useState(null);
 
@@ -44,7 +45,6 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
     const [timer, setTimer] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
     const [userTimeRecords, setUserTimeRecords] = useState([]);
-    const [companyDetails, setCompanyDetails] = useState();
 
     const open = Boolean(anchorEl);
     const openProfile = Boolean(profileAnchorEl);
@@ -158,7 +158,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
         localStorage.removeItem('userInfo')
         localStorage.removeItem('timeInAllow')
         setLogOutDialog({ open: false, title: "", message: "", actionButtonText: "" })
-        navigate("/sigin")
+        navigate("/signin")
     }
 
     const handleCloseLogoutModel = () => {
@@ -198,7 +198,7 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
         if (userInfo?.companyId) {
             const response = await getCompanyDetails(userInfo?.companyId);
             if (response.data.status === 200) {
-                setCompanyDetails(response.data?.result);
+                handleSetCompanyLogo(response.data?.result?.companyLogo)
             }
         }
     };
@@ -291,6 +291,9 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
     };
 
     useEffect(() => {
+        if (JSON.parse(localStorage.getItem("userInfo"))) {
+            handleSetUserDetails(JSON.parse(localStorage.getItem("userInfo")))
+        }
         handleGetTodayInOutRecords()
         handleGetUserLastInOut()
         handleGetCompany()
@@ -335,13 +338,21 @@ const Header = ({ setLoading, handleDrawerOpen, drawerWidth, handleToogleSetting
 
                         <Components.Box sx={{ flexGrow: 1 }}>
                             <div className="flex justify-start items-center gap-3">
-                                <div className='w-12 h-12 rounded-full'>
-                                    <img
-                                        src={companyDetails?.companyLogo}
-                                        alt="Preview"
-                                        className="h-full w-full object-cover border rounded-full"
-                                    />
-                                </div>
+                                {
+                                    <div className='w-12 h-12 rounded-full'>
+                                        {companyLogo ? (
+                                            <img
+                                                src={companyLogo}
+                                                alt="Preview"
+                                                className="h-full w-full object-cover border rounded-full"
+                                            />
+                                        ) :
+                                            <div className='mt-2'>
+                                                <User height={30} width={30} fill="#CED4DA" />
+                                            </div>
+                                        }
+                                    </div>
+                                }
                                 <div>
                                     <p style={{ color: theme.palette.primary.text.main, fontWeight: "bold", fontSize: 20 }}>
                                         {title}
@@ -500,13 +511,17 @@ const mapDispatchToProps = {
     handleToogleSettingDrawer,
     handleResetTheme,
     handleSetTimeIn,
-    setLoading
+    setLoading,
+    handleSetUserDetails,
+    handleSetCompanyLogo
 };
 
 const mapStateToProps = (state) => ({
     drawerOpen: state.common.drawerOpen,
     timeIn: state.common.timeIn,
     title: state.common.title,
+    userDetails: state.common.userDetails,
+    companyLogo: state.common.companyLogo,
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header)

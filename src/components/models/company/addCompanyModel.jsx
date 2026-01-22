@@ -128,7 +128,7 @@ function AddCompanyModel({ setAlert, open, handleClose, companyId, handleGetComp
 
         uploadFiles(formData).then((res) => {
             if (res.data.status === 200) {
-                const { imageURL } = res?.data?.result[0];
+                const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                 uploadCompanyLogo({ companyLogo: imageURL, companyId: companyId }).then((res) => {
                     if (res.data.status !== 200) {
                         setAlert({ open: true, message: res?.data?.message, type: "error" })

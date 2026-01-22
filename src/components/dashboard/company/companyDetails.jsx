@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { connect } from 'react-redux';
 import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
 
-import { handleSetTitle, setAlert } from '../../../redux/commonReducers/commonReducers';
+import { handleSetCompanyLogo, handleSetTitle, setAlert } from '../../../redux/commonReducers/commonReducers';
 import AlertDialog from '../../common/alertDialog/alertDialog';
 import { deleteCompanyDetails, deleteCompanyLogo, getAllCompanyDetails, getCompanyDetails, searchCompany, updateCompanyDetails, uploadCompanyLogo } from '../../../service/companyDetails/companyDetailsService';
 import SearchInput from '../../common/input/searchInput/searchInput';
@@ -50,7 +50,7 @@ const options = [
     }
 ];
 
-const CompanyDetails = ({ setAlert, handleSetTitle }) => {
+const CompanyDetails = ({ setAlert, handleSetTitle, handleSetCompanyLogo }) => {
     const theme = useTheme();
     const fileInputRef = useRef(null);
     const [formDataFile, setFormDataFile] = useState(null)
@@ -551,11 +551,12 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
 
             uploadFiles(formData).then((res) => {
                 if (res.data.status === 200) {
-                    const { imageURL } = res?.data?.result[0];
-                    uploadCompanyLogo({ companyLogo: imageURL, companyId: companyId }).then((res) => {
-                        if (res.data.status !== 200) {
-                            setAlert({ open: true, message: res?.data?.message, type: "error" })
+                    const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
+                    uploadCompanyLogo({ companyLogo: imageURL, companyId: companyId }).then((response) => {
+                        if (response.data.status !== 200) {
+                            setAlert({ open: true, message: response?.data?.message, type: "error" })
                         } else {
+                            handleSetCompanyLogo(response.data?.result)
                             setFormDataFile(null)
                             setLoading(false);
                         }
@@ -583,6 +584,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                     return newRow
                 })
                 setFormDataFile(null);
+                handleSetCompanyLogo(null)
             } else {
                 setAlert({ open: true, message: response.data.message, type: "error" })
             }
@@ -703,7 +705,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                 />
-                                <div>
+                                {/* <div>
                                     <Components.IconButton
                                         aria-controls={open ? 'long-menu' : undefined}
                                         aria-expanded={open ? 'true' : undefined}
@@ -737,7 +739,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                             </Components.MenuItem>
                                         ))}
                                     </Menu>
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className='overflow-y-auto h-full'>
@@ -891,7 +893,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
 
                                     {selectedTab === 0 && (
                                         <div className='mt-4'>
-                                            <div className='md:flex justify-start gap-4 md:items-center'>
+                                            <div className='md:flex justify-start gap-6 md:items-start'>
                                                 <PermissionWrapper
                                                     functionalityName="Company"
                                                     moduleName="Manage Company"
@@ -899,7 +901,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                     component={
                                                         <div className='flex justify-center mb-4 md:grow'>
                                                             <div
-                                                                className="w-28 h-28 lg:h-32 lg:w-32 border rounded-full flex items-center justify-center  cursor-pointer relative"
+                                                                className="w-28 h-28 border rounded-full flex items-center justify-center  cursor-pointer relative"
                                                                 onClick={handleDivClick}
                                                             >
                                                                 {(selectdCompanyDetails?.companyLogo !== null && selectdCompanyDetails?.companyLogo !== "") ? (
@@ -934,7 +936,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                     fallbackComponent={
                                                         <div className='flex justify-center mb-4 md:grow'>
                                                             <div
-                                                                className="w-28 h-28 lg:h-32 lg:w-32 border rounded-full flex items-center justify-center  cursor-pointer relative"
+                                                                className="w-28 h-28 border rounded-full flex items-center justify-center  cursor-pointer relative"
                                                             >
                                                                 {(selectdCompanyDetails?.companyLogo !== null && selectdCompanyDetails?.companyLogo !== "") ? (
                                                                     <img
@@ -951,7 +953,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                         </div>
                                                     }
                                                 />
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-10 w-full">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 w-full">
                                                     <div className="flex">
                                                         <span style={{ color: theme.palette.primary.text.main, }} className="grow md:grow-0 text-sm md:text-medium font-semibold min-w-[120px] lg:min-w-[140px]">Company Id </span>
                                                         <span style={{ color: theme.palette.primary.text.main, }}>{selectdCompanyDetails?.companyNo ? selectdCompanyDetails?.companyNo : "-"}</span>
@@ -1096,18 +1098,18 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
                                                                         <div className="flex justify-center items-center gap-2">
                                                                             {/* {
                                                                                 !userInfo?.userId && ( */}
-                                                                                    <PermissionWrapper
-                                                                                        functionalityName={"Company"}
-                                                                                        moduleName={"Manage Company"}
-                                                                                        actionId={2}
-                                                                                        component={
-                                                                                            <div className="h-6 w-6 md:h-8 md:w-8 flex justify-center items-center bg-green-600 cursor-pointer rounded-full text-white"
-                                                                                                onClick={() => handleOpenGeofencesModel(index, item)}>
-                                                                                                <CustomIcons iconName={'fa-solid fa-location-dot'} css='cursor-pointer' />
-                                                                                            </div>
-                                                                                        }
-                                                                                    />
-                                                                                {/* )
+                                                                            <PermissionWrapper
+                                                                                functionalityName={"Company"}
+                                                                                moduleName={"Manage Company"}
+                                                                                actionId={2}
+                                                                                component={
+                                                                                    <div className="h-6 w-6 md:h-8 md:w-8 flex justify-center items-center bg-green-600 cursor-pointer rounded-full text-white"
+                                                                                        onClick={() => handleOpenGeofencesModel(index, item)}>
+                                                                                        <CustomIcons iconName={'fa-solid fa-location-dot'} css='cursor-pointer' />
+                                                                                    </div>
+                                                                                }
+                                                                            />
+                                                                            {/* )
                                                                             } */}
                                                                             <PermissionWrapper
                                                                                 functionalityName={"Company"}
@@ -1263,7 +1265,8 @@ const CompanyDetails = ({ setAlert, handleSetTitle }) => {
 
 const mapDispatchToProps = {
     setAlert,
-    handleSetTitle
+    handleSetTitle,
+    handleSetCompanyLogo
 };
 
 export default connect(null, mapDispatchToProps)(CompanyDetails)

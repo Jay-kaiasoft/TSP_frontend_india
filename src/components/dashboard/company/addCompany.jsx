@@ -409,7 +409,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
 
             uploadFiles(formData).then((res) => {
                 if (res.data.status === 200) {
-                    const { imageURL } = res?.data?.result[0];
+                    const { imageURL } = res?.data?.result?.uploadedFiles?.[0];
                     uploadCompanyLogo({ companyLogo: imageURL, companyId: companyId }).then((res) => {
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
@@ -462,8 +462,7 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
         let contact = []
         setContactRow((prev) => {
             if (prev) {
-                const allValid = requiredContactKeys.every(field => isValid(prev[field]));
-                console.log(allValid)
+                const allValid = requiredContactKeys.every(field => isValid(prev[field]));            
                 if (allValid) {
                     contact = [...prev];
                 }
@@ -487,15 +486,12 @@ const AddCompany = ({ setShowCompanyDetails, setAlert, setCompanyId, id, setAddC
     }
 
     const submit = async (data) => {
-
         if (selectedTab === 1 && locationData?.length === 0) {
             setAlert({ open: true, message: "Please add at least one location", type: 'warning' });
             return;
         }
 
-        const filteredContact = getAllNewContact()?.filter(connect =>
-            requiredContactKeys.every(key => connect[key]?.trim() !== "" && connect[key]?.trim() !== undefined)
-        );
+        const filteredContact = getAllNewContact()
 
         const filterRoles = getStaticRolesWithPermissions()
 
