@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Cookies from 'js-cookie';
 import { ReactComponent as User } from "../../../assets/svgs/user-alt.svg";
 
@@ -24,6 +24,8 @@ const Header = ({ handleSetCompanyLogo, companyLogo, userDetails, handleSetUserD
     const navigate = useNavigate()
     const location = useLocation()
     const theme = useTheme();
+    const geoCheckInFlight = useRef(false);
+    const intervalRef = useRef(null);
 
     const {
         setValue,
@@ -221,86 +223,224 @@ const Header = ({ handleSetCompanyLogo, companyLogo, userDetails, handleSetUserD
     }, [timeIn])
 
     const checkGeofenceStatus = async () => {
+        // ✅ prevent overlapping checks
+        if (geoCheckInFlight.current) return;
+        geoCheckInFlight.current = true;
+
         try {
-            if (userInfo?.companyId && userInfo?.checkGeofence === 1 && userInfo?.roleName !== "Admin" && userInfo?.roleName !== "Owner") {
-                setLoading(true);
-                const locations = await getLocations(JSON.parse(userInfo?.companyLocation));
-                if (locations.data.status === 200) {
-                    const locationData = locations?.data?.result?.map(item => ({
-                        externalId: item.externalId,
-                    }));
-
-                    const allowedExternalIds = locationData?.map((loc, i) => `${loc.externalId}`);
-                    const loc = await getAccurateLocation();
-
-                    if (!window.Radar) {
-                        console.error("Radar SDK not loaded.");
-                        return false;
-                    }
-
-                    if (!loc?.latitude || !loc?.longitude) {
-                        console.error("Location data not available.");
-                        return false;
-                    }
-
-                    const { latitude, longitude, accuracy } = loc;
-
-                    const formattedLatitude = parseFloat(latitude.toFixed(5));
-                    const formattedLongitude = parseFloat(longitude.toFixed(5));
-
-                    window.Radar.initialize(radarPKAPIKey);
-                    window.Radar.setUserId(`timesheetspro_user_${userInfo?.employeeId}`);
-
-                    window.Radar.trackOnce(
-                        {
-                            latitude: formattedLatitude,
-                            longitude: formattedLongitude,
-                            accuracy: Math.min(accuracy, 30),
-                        },
-                        (status, loc, user, events) => {
-                            const geofences = [
-                                ...(user?.user?.geofences || []),
-                                ...(events?.map(e => e?.geofence).filter(Boolean) || []),
-                            ];
-
-                            for (const g of geofences) {
-                                const geofenceExternalId = g?.externalId;
-                                if (allowedExternalIds.includes(geofenceExternalId)) {
-                                    console.log("✅ Matched geofence:", geofenceExternalId);
-                                    localStorage.setItem("timeInAllow", 1)
-                                    return;
-                                }
-                            }
-
-                            console.log("❌ No matching geofence found.");
-                            localStorage.setItem("timeInAllow", 0)
-                        }
-                    );
-
-                } else {
-                    console.error("Failed to fetch locations:", locations.data.message);
-                    setLoading(false);
-                    return;
-                }
-            } else {
+            // If geofence is not required, allow directly
+            if (
+                !(
+                    userInfo?.companyId &&
+                    userInfo?.checkGeofence === 1 &&
+                    userInfo?.roleName !== "Admin" &&
+                    userInfo?.roleName !== "Owner"
+                )
+            ) {
                 localStorage.setItem("timeInAllow", 1);
+                return;
+            }
+
+            setLoading(true);
+
+            const locations = await getLocations(JSON.parse(userInfo?.companyLocation));
+            if (locations?.data?.status !== 200) {
+                console.error("Failed to fetch locations:", locations?.data?.message);
+                return;
+            }
+
+            const allowedExternalIds =
+                locations?.data?.result?.map((item) => ({
+                    externalId: item.externalId,
+                    locationId: item.id,
+                })) || [];
+
+            const loc = await getAccurateLocation();
+
+            if (!window.Radar) {
+                console.error("Radar SDK not loaded.");
+                return;
+            }
+
+            if (!loc?.latitude || !loc?.longitude) {
+                console.error("Location data not available.");
+                return;
+            }
+
+            const { latitude, longitude, accuracy } = loc;
+
+            const formattedLatitude = parseFloat(Number(latitude).toFixed(5));
+            const formattedLongitude = parseFloat(Number(longitude).toFixed(5));
+
+            window.Radar.initialize(radarPKAPIKey);
+            window.Radar.setUserId(`timesheetspro_user_${userInfo?.employeeId}`);
+
+            // ✅ make trackOnce awaitable (so results won't race)
+            const matched = await new Promise((resolve) => {
+                window.Radar.trackOnce(
+                    {
+                        latitude: formattedLatitude,
+                        longitude: formattedLongitude,
+                        accuracy: Math.min(accuracy || 0, 30),
+                    },
+                    (status, radarLocation, user, events) => {
+                        const geofences = [
+                            ...(user?.user?.geofences || []),
+                            ...(events?.map((e) => e?.geofence).filter(Boolean) || []),
+                        ];
+
+                        for (const g of geofences) {
+                            const geofenceExternalId = g?.externalId;
+
+                            const matchedLocation = allowedExternalIds.find(
+                                (x) => x.externalId === geofenceExternalId
+                            );
+
+                            if (matchedLocation?.locationId !== undefined) {
+                                console.log("✅ Matched geofence:", geofenceExternalId);
+                                resolve(true); // ✅ stop here
+                                return;
+                            }
+                        }
+
+                        console.log("❌ No matching geofence found.");
+                        resolve(false);
+                    }
+                );
+            });
+
+            localStorage.setItem("timeInAllow", matched ? 1 : 0);
+
+            // ✅ OPTIONAL: stop future checks after first success
+            if (matched && intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
             }
         } catch (error) {
             console.error("Error checking geofence status:", error);
+        } finally {
+            geoCheckInFlight.current = false;
+            setLoading(false);
         }
     };
 
+    // const checkGeofenceStatus = async () => {
+    //     try {
+    //         if (userInfo?.companyId && userInfo?.checkGeofence === 1 && userInfo?.roleName !== "Admin" && userInfo?.roleName !== "Owner") {
+    //             setLoading(true);
+    //             const locations = await getLocations(JSON.parse(userInfo?.companyLocation));
+    //             if (locations.data.status === 200) {
+    //                 const locationData = locations?.data?.result?.map(item => ({
+    //                     externalId: item.externalId,
+    //                     locationId: item.id
+    //                 }));
+
+    //                 const allowedExternalIds = locationData?.map((loc, i) => {
+    //                     return {
+    //                         externalId: loc.externalId,
+    //                         locationId: loc.locationId
+    //                     }
+    //                 });
+    //                 const loc = await getAccurateLocation();
+
+    //                 if (!window.Radar) {
+    //                     console.error("Radar SDK not loaded.");
+    //                     return false;
+    //                 }
+
+    //                 if (!loc?.latitude || !loc?.longitude) {
+    //                     console.error("Location data not available.");
+    //                     return false;
+    //                 }
+
+    //                 const { latitude, longitude, accuracy } = loc;
+
+    //                 const formattedLatitude = parseFloat(latitude.toFixed(5));
+    //                 const formattedLongitude = parseFloat(longitude.toFixed(5));
+
+    //                 window.Radar.initialize(radarPKAPIKey);
+    //                 window.Radar.setUserId(`timesheetspro_user_${userInfo?.employeeId}`);
+
+    //                 window.Radar.trackOnce(
+    //                     {
+    //                         latitude: formattedLatitude,
+    //                         longitude: formattedLongitude,
+    //                         accuracy: Math.min(accuracy, 30),
+    //                     },
+    //                     (status, loc, user, events) => {
+    //                         const geofences = [
+    //                             ...(user?.user?.geofences || []),
+    //                             ...(events?.map(e => e?.geofence).filter(Boolean) || []),
+    //                         ];
+    //                         for (const g of geofences) {
+    //                             const geofenceExternalId = g?.externalId;
+
+    //                             const matchedLocation = allowedExternalIds.find(
+    //                                 loc => loc.externalId === geofenceExternalId
+    //                             );
+
+    //                             if (matchedLocation?.locationId !== undefined) {
+    //                                 console.log("✅ Matched geofence:", geofenceExternalId);
+    //                                 localStorage.setItem("timeInAllow", 1)
+    //                                 return;
+    //                             }
+    //                         }
+    //                         console.log("❌ No matching geofence found.");
+    //                         localStorage.setItem("timeInAllow", 0)
+    //                     }
+    //                 );
+
+    //             } else {
+    //                 console.error("Failed to fetch locations:", locations.data.message);
+    //                 setLoading(false);
+    //                 return;
+    //             }
+    //         } else {
+    //             localStorage.setItem("timeInAllow", 1);
+    //         }
+    //     } catch (error) {
+    //         console.error("Error checking geofence status:", error);
+    //     }
+    // };
+
     useEffect(() => {
-        if (JSON.parse(localStorage.getItem("userInfo"))) {
-            handleSetUserDetails(JSON.parse(localStorage.getItem("userInfo")))
+        const stored = localStorage.getItem("userInfo");
+        const parsedUser = stored ? JSON.parse(stored) : null;
+
+        if (parsedUser) {
+            handleSetUserDetails(parsedUser);
         }
-        handleGetTodayInOutRecords()
-        handleGetUserLastInOut()
-        handleGetCompany()
+
+        handleGetTodayInOutRecords();
+        handleGetUserLastInOut();
+        handleGetCompany();
+
+        // First immediate check
         checkGeofenceStatus();
-        const intervalId = setInterval(checkGeofenceStatus, 60000);
-        return () => clearInterval(intervalId);
+
+        // Repeat every 60 sec
+        intervalRef.current = setInterval(() => {
+            checkGeofenceStatus();
+        }, 60000);
+
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+
+    // useEffect(() => {
+    //     if (JSON.parse(localStorage.getItem("userInfo"))) {
+    //         handleSetUserDetails(JSON.parse(localStorage.getItem("userInfo")))
+    //     }
+    //     handleGetTodayInOutRecords()
+    //     handleGetUserLastInOut()
+    //     handleGetCompany()
+    //     checkGeofenceStatus();
+    //     const intervalId = setInterval(checkGeofenceStatus, 60000);
+    //     return () => clearInterval(intervalId);
+    // }, []);
 
     return (
         <>

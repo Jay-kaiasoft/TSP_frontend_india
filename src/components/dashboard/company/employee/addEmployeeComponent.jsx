@@ -6,7 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { createEmployee, deleteEmployeeAadharImage, deleteEmployeeImage, getCompanyEmployee, getLastUserId, updateEmployee, uploadEmployeeAadharImage, uploadEmployeeImage } from '../../../../service/companyEmployee/companyEmployeeService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { handleSetTitle, setAlert } from '../../../../redux/commonReducers/commonReducers';
+import { handleSetTitle, handleSetUserDetails, setAlert } from '../../../../redux/commonReducers/commonReducers';
 import { formatUtcToLocal, uploadFiles } from '../../../../service/common/commonService';
 import { getAllCompanyRole } from '../../../../service/companyEmployeeRole/companyEmployeeRoleService';
 import Button from '../../../common/buttons/button';
@@ -75,7 +75,7 @@ const CanteenTypeOptions = [
     { id: 3, title: "No Canteen" },
 ]
 
-const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
+const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }) => {
     const { companyId, id } = useParams();
     const navigate = useNavigate();
     const theme = useTheme()
@@ -490,6 +490,13 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
                 });
 
                 if (updateRes.data.status === 200) {
+                    let JsonData = JSON.parse(localStorage.getItem('userInfo'))
+                    JsonData = {
+                        ...JsonData,
+                        profileImage: updateRes.data.result
+                    }
+                    localStorage.setItem("userInfo", JSON.stringify(JsonData))
+                    handleSetUserDetails(JsonData)
                     setActiveStep((prev) => prev + 1);
                     return { success: true };
                 } else {
@@ -2279,6 +2286,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle }) => {
 const mapDispatchToProps = {
     setAlert,
     handleSetTitle,
+    handleSetUserDetails
 }
 
 export default connect(null, mapDispatchToProps)(AddEmployeeComponent)

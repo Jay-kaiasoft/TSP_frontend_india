@@ -286,7 +286,7 @@ const UserProfile = ({ setAlert, handleSetTitle, handleSetUserDetails, userDetai
         profileImage: ""
       }
       localStorage.setItem("userInfo", JSON.stringify(JsonData))
-      handleSetUserDetails(JSON.stringify(JsonData))
+      handleSetUserDetails(JsonData)
 
       fileInputRef.current.value = null;
     } else {

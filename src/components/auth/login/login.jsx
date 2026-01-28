@@ -95,19 +95,37 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                             ...(user?.user?.geofences || []),
                             ...(events?.map(e => e?.geofence).filter(Boolean) || []),
                         ];
-
                         for (const g of geofences) {
                             const geofenceExternalId = g?.externalId;
-                            if (allowedExternalIds.map(loc => loc.externalId).includes(geofenceExternalId)) {
-                                const locationId = allowedExternalIds.find(loc => loc.externalId === geofenceExternalId)?.locationId;
-                                if (locationId !== undefined) {
-                                    sessionStorage.setItem("locationId", locationId);
-                                    console.log("✅ Matched geofence:", geofenceExternalId);
-                                    resolve({ isInside: true, location });
-                                    return;
-                                }
+
+                            const matchedLocation = allowedExternalIds.find(
+                                loc => loc.externalId === geofenceExternalId
+                            );
+
+                            if (matchedLocation?.locationId !== undefined) {
+                                sessionStorage.setItem("locationId", matchedLocation.locationId);
+                                console.log("✅ Matched geofence:", geofenceExternalId);
+                                resolve({ isInside: true, location });
+                                return; // 🔥 breaks loop + exits function
                             }
                         }
+
+                        console.log("❌ No matching geofence found.");
+                        resolve({ isInside: false, location });
+
+                        // for (const g of geofences) {
+                        //     const geofenceExternalId = g?.externalId;
+                        //     if (allowedExternalIds.map(loc => loc.externalId).includes(geofenceExternalId)) {
+                        //         console.log("allowedExternalIds",allowedExternalIds)
+                        //         const locationId = allowedExternalIds.find(loc => loc.externalId === geofenceExternalId)?.locationId;
+                        //         if (locationId !== undefined) {
+                        //             sessionStorage.setItem("locationId", locationId);
+                        //             console.log("✅ Matched geofence:", geofenceExternalId);
+                        //             resolve({ isInside: true, location });
+                        //             return;
+                        //         }
+                        //     }
+                        // }
 
                         console.log("❌ No matching geofence found.");
                         resolve({ isInside: false, location });
@@ -149,13 +167,14 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                         localStorage.setItem("theme", JSON.stringify(theme.data.result))
                         handleSetTheme(theme.data.result)
                     }
-                    
+
                     if (response?.data?.result?.data?.checkGeofence === 1 && response?.data?.result?.data?.roleName !== 'Admin' && response?.data?.result?.data?.roleName !== 'Owner') {
                         if (response.data.result?.data?.companyLocation) {
                             const locations = await getLocations(JSON.parse(response.data.result?.data?.companyLocation));
                             if (locations.data.status === 200) {
                                 const locationData = locations?.data?.result?.map(item => ({
                                     externalId: item.externalId,
+                                    locationId: item.id
                                 }));
 
                                 setLoading(true)
@@ -172,10 +191,9 @@ const Login = ({ setAlert, handleSetUserDetails, handleSetTheme, setLoading }) =
                                 const allowedExternalIds = locationData?.map((loc, i) => {
                                     return {
                                         externalId: loc.externalId,
-                                        locationId: i.id
+                                        locationId: loc.locationId
                                     }
                                 });
-
                                 const isInsideGeofence = await checkGeofenceStatus(allowedExternalIds, response.data.result?.data?.employeeId);
                                 localStorage.setItem("timeInAllow", isInsideGeofence?.isInside ? 1 : 0)
                                 Cookies.set('authToken', response.data.result?.token, { expires: 1 });

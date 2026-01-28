@@ -34,6 +34,25 @@ const tabData = [
     },
 ]
 
+const parseDDMMYYYY = (s) => {
+    if (!s || typeof s !== "string") return null;
+
+    const [dd, mm, yyyy] = s.split("/").map((v) => parseInt(v, 10));
+    if (!dd || !mm || !yyyy) return null;
+
+    const d = new Date(yyyy, mm - 1, dd);
+
+    // validate (prevents 32/13/2026 etc)
+    if (
+        d.getFullYear() !== yyyy ||
+        d.getMonth() !== mm - 1 ||
+        d.getDate() !== dd
+    ) return null;
+
+    return d;
+};
+
+
 const TimeCard = ({ handleSetTitle, setAlert }) => {
     dayjs.extend(utc);
     dayjs.extend(timezone);
@@ -128,51 +147,69 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     const handleGetAllEntriesByUserId = async () => {
         let params = new URLSearchParams();
-        let userIds = []
-        let locationIds = []
-        let departmentIds = []
+        let userIds = [];
+        let locationIds = [];
+        let departmentIds = [];
 
-        if (userInfo?.roleName !== "Admin" && userInfo?.roleName !== "Owner" && userInfo?.companyId && watch("selectedUserId").length === 0) {
+        if (
+            userInfo?.roleName !== "Admin" &&
+            userInfo?.roleName !== "Owner" &&
+            userInfo?.companyId &&
+            watch("selectedUserId").length === 0
+        ) {
             params.append("userIds", [userInfo?.employeeId]);
         } else {
             if (watch("selectedUserId") && watch("selectedUserId").length > 0) {
-                watch("selectedUserId").forEach(id => userIds.push(id));
-                params.append("userIds", userIds)
+                watch("selectedUserId").forEach((id) => userIds.push(id));
+                params.append("userIds", userIds);
             }
         }
+
         if (watch("locationIds") && watch("locationIds").length > 0) {
-            watch("locationIds").forEach(id => locationIds.push(id));
-            params.append("locationIds", locationIds)
+            watch("locationIds").forEach((id) => locationIds.push(id));
+            params.append("locationIds", locationIds);
         }
+
         if (watch("selectedDepartmentId") && watch("selectedDepartmentId").length > 0) {
-            watch("selectedDepartmentId").forEach(id => departmentIds.push(id));
-            params.append("departmentIds", departmentIds)
+            watch("selectedDepartmentId").forEach((id) => departmentIds.push(id));
+            params.append("departmentIds", departmentIds);
         }
-        if (watch("startDate")) params.append("startDate", watch("startDate"));
-        if (watch("endDate")) {
-            const endDate = new Date(watch("endDate"));
+
+        // ✅ parse DD/MM/YYYY properly
+        const start = parseDDMMYYYY(watch("startDate"));
+        const end = parseDDMMYYYY(watch("endDate"));
+
+        if (start) params.append("startDate", watch("startDate"));
+
+        if (end) {
             const today = new Date();
-            if (endDate.toDateString() === today.toDateString()) {
+            const endCopy = new Date(end);
+
+            if (endCopy.toDateString() === today.toDateString()) {
                 params.append("endDate", convertToDesiredFormat(new Date()));
             } else {
-                endDate.setHours(23, 59, 59, 999);
-                params.append("endDate", convertToDesiredFormat(endDate));
+                endCopy.setHours(23, 59, 59, 999);
+                params.append("endDate", convertToDesiredFormat(endCopy));
             }
+        } else if (watch("endDate")) {
+            console.warn("Invalid endDate:", watch("endDate"));
+            // optional: show toast / set error
         }
+
         params.append("companyId", userInfo?.companyId);
+
         let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        if (userTimeZone === "Asia/Kolkata") {
-            userTimeZone = "Asia/Calcutta";
-        }
+        if (userTimeZone === "Asia/Kolkata") userTimeZone = "Asia/Calcutta";
         params.append("timeZone", userTimeZone);
 
         try {
-            const res = await getAllEntriesByUserId(params)
-            setRow(res?.data?.result || [])
+            const res = await getAllEntriesByUserId(params);
+            setRow(res?.data?.result || []);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
-    }
+    };
+
 
     const handleGetCompanyInfo = async () => {
         if (userInfo?.companyId) {
