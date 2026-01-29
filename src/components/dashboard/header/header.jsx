@@ -176,25 +176,48 @@ const Header = ({ handleSetCompanyLogo, companyLogo, userDetails, handleSetUserD
         // navigate("/dashboard/profile")
     }
 
+    const parseUTCToLocal = (s) => {
+        if (!s) return null;
+
+        const [datePart, timePartRaw] = s.split(",").map(t => t.trim());
+        const [dd, mm, yyyy] = datePart.split("/").map(Number);
+
+        const [timePart, ampm] = timePartRaw.split(" ");
+        let [hh, min, ss] = timePart.split(":").map(Number);
+
+        if (ampm === "PM" && hh < 12) hh += 12;
+        if (ampm === "AM" && hh === 12) hh = 0;
+
+        // 👇 treat as UTC explicitly
+        return new Date(Date.UTC(yyyy, mm - 1, dd, hh, min, ss));
+    };
+
     const handleGetUserLastInOut = async () => {
         if (userInfo?.employeeId) {
-            const res = await getUserLastInOut(userInfo?.employeeId)
+            const res = await getUserLastInOut(userInfo?.employeeId);
+
             if (res.data.result) {
                 const date1 = new Date();
-                const date2 = new Date(handleConvertUTCDateToLocalDate(res.data.result?.timeIn));
-                // const diffInSeconds = Math.round((date1 - date2) / 1000);
-                const diffInSeconds = Math.max(0, Math.round((date1 - date2) / 1000));
-                // const diffInSeconds = Math.round((date1 - date2) / 1000);
-                setTimer(diffInSeconds)
-                setIsRunning(true)
+                const date2 = parseUTCToLocal(res.data.result.timeIn); // ✅ parse correctly
+
+                if (!date2 || Number.isNaN(date2.getTime())) {
+                    setTimer(0);
+                    setIsRunning(false);
+                    return;
+                }
+
+                const diffInSeconds = Math.max(0, Math.floor((date1.getTime() - date2.getTime()) / 1000));
+
+                setTimer(diffInSeconds);
+                setIsRunning(true);
             } else {
-                setTimer(0)
-                setIsRunning(false)
+                setTimer(0);
+                setIsRunning(false);
                 setValue("id", null);
-                handleGetTodayInOutRecords();
             }
         }
-    }
+    };
+
 
     const handleGetCompany = async () => {
         if (userInfo?.companyId) {
@@ -218,9 +241,8 @@ const Header = ({ handleSetCompanyLogo, companyLogo, userDetails, handleSetUserD
         return () => clearInterval(intervalId);
     }, [isRunning]);
 
-    useEffect(() => {
-        handleGetUserLastInOut()
-    }, [timeIn])
+    // useEffect(() => {
+    // }, [timeIn])
 
     const checkGeofenceStatus = async () => {
         // ✅ prevent overlapping checks
