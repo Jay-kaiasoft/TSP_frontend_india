@@ -43,7 +43,7 @@ const OvertimeRules = () => {
     const handleDeleteOvertime = async () => {
         const response = await deleteOvertimeRule(overTimeId);
         if (response?.data?.status === 200) {
-            // handleCloseDialog()
+            handleCloseDialog()
             setOverTimeId(null);
             handleGetAllOvertimeRules();
         }

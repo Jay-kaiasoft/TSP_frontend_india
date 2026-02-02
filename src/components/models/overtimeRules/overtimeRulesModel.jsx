@@ -8,8 +8,13 @@ import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
 import Select from '../../common/select/select';
-import { createOvertimeRule, getOvertimeRule, updateOvertimeRule } from '../../../service/overtimeRules/overtimeRulesService';
+import {
+    createOvertimeRule,
+    getOvertimeRule,
+    updateOvertimeRule
+} from '../../../service/overtimeRules/overtimeRulesService';
 import TimeSelector from '../../common/timeSelector/timeSelector';
+import AlertDialog from '../../common/alertDialog/alertDialog';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -30,10 +35,28 @@ const overTimeTypes = [
     { id: 7, title: "3 Day Salary" }
 ];
 
-function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId, handleGetAllOvertimeRules }) {
-    const theme = useTheme()
+function OvertimeRulesModel({
+    setAlert,
+    open,
+    handleClose,
+    companyId,
+    overTimeId,
+    handleGetAllOvertimeRules
+}) {
+    const theme = useTheme();
     const [loading, setLoading] = useState(false);
+
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+    // ✅ store submit data until user confirms "Yes"
+    const [pendingData, setPendingData] = useState(null);
+
+    const [dialog, setDialog] = useState({
+        open: false,
+        title: '',
+        message: '',
+        actionButtonText: ''
+    });
 
     const {
         watch,
@@ -51,11 +74,34 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             otType: 1,
             hours: 0,
             minutes: 0,
+            userIds: [],
         },
     });
 
+    const handleOpenDialog = () => {
+        setDialog({
+            open: true,
+            title: 'Update Rule Warning',
+            message:
+                'Updating this rule will affect salary calculations. Are you sure you want to proceed?',
+            actionButtonText: 'Yes',
+        });
+    };
+
+    const handleCloseDialog = () => {
+        setDialog({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: '',
+        });
+        setPendingData(null);
+        setLoading(false);
+    };
+
     const onClose = () => {
         setLoading(false);
+        setPendingData(null);
         reset({
             id: "",
             ruleName: "",
@@ -64,10 +110,12 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             otType: 1,
             hours: 0,
             minutes: 0,
+            userIds: [],
         });
         handleClose();
     };
 
+    // ✅ form submit
     const submit = async (data) => {
         const newData = {
             ...data,
@@ -75,23 +123,13 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
             createdBy: userInfo?.employeeId || null,
             otType: overTimeTypes.find(type => type.id === data.otType)?.title || "",
             userIds: data.userIds?.length > 0 ? JSON.stringify(data.userIds) : null,
-        }
-        setLoading(true);
-        if (overTimeId) {
-            const response = await updateOvertimeRule(overTimeId, newData);
-            if (response?.data?.status === 200) {
-                handleGetAllOvertimeRules();
-                onClose();
-            } else {
-                setLoading(false);
-                setAlert({
-                    open: true,
-                    message: response?.data?.message || "Failed to update overtime rule",
-                    type: "error",
-                });
-            }
-        } else {
+        };
+
+        // CREATE -> direct submit
+        if (!overTimeId) {
+            setLoading(true);
             const response = await createOvertimeRule(companyId, newData);
+
             if (response?.data?.status === 201) {
                 handleGetAllOvertimeRules();
                 onClose();
@@ -103,12 +141,39 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                     type: "error",
                 });
             }
+            return;
         }
-    }
+
+        // UPDATE -> open dialog first, save data for confirm
+        setPendingData(newData);
+        handleOpenDialog();
+    };
+
+    // ✅ called when user clicks YES in AlertDialog
+    const handleConfirmUpdate = async () => {
+        if (!overTimeId || !pendingData) return;
+
+        setLoading(true);
+        const response = await updateOvertimeRule(overTimeId, pendingData);
+
+        if (response?.data?.status === 200) {
+            handleCloseDialog();
+            handleGetAllOvertimeRules();
+            onClose();
+        } else {
+            setLoading(false);
+            setAlert({
+                open: true,
+                message: response?.data?.message || "Failed to update overtime rule",
+                type: "error",
+            });
+        }
+    };
 
     const handleGetOvertimeRuleById = async () => {
         if (overTimeId !== null && open) {
             const response = await getOvertimeRule(overTimeId);
+
             if (response?.data?.status === 200) {
                 const data = response?.data?.result;
 
@@ -122,45 +187,29 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                     ruleName: data?.ruleName || "",
                     otMinutes: totalMinutes.toString(),
                     otAmount: data?.otAmount || "",
-                    otType:
-                        overTimeTypes.find((type) => type.title === data?.otType)?.id || 1,
+                    otType: overTimeTypes.find((type) => type.title === data?.otType)?.id || 1,
                     hours: hrs,
                     minutes: mins,
+                    userIds: data?.userIds ? JSON.parse(data.userIds) : [],
                 });
             }
         }
     };
 
-    // useEffect(() => {
-    //     if (watch("startTime") && watch("endTime")) {
-    //         const start = new Date(watch("startTime"));
-    //         const end = new Date(watch("endTime"));
-
-    //         let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
-
-    //         // If endTime is before startTime, assume it's the next day
-    //         if (diffInMinutes < 0) {
-    //             diffInMinutes += 24 * 60;
-    //         }
-
-    //         setValue("otMinutes", diffInMinutes.toString());
-    //     } else {
-    //         setValue("otMinutes", "");
-    //     }
-    // }, [watch("startTime"), watch("endTime")]);
-
+    // keep otMinutes synced with hours + minutes
     useEffect(() => {
         const hrs = watch("hours") || 0;
         const mins = watch("minutes") || 0;
-
         const totalMins = hrs * 60 + mins;
         setValue("otMinutes", totalMins.toString());
-    }, [watch("hours"), watch("minutes")]);
-
+    }, [watch("hours"), watch("minutes"), setValue, watch]);
 
     useEffect(() => {
-        handleGetOvertimeRuleById()
-    }, [overTimeId])
+        handleGetOvertimeRuleById();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [overTimeId, open]);
+
+    const otTypeVal = parseInt(watch("otType"), 10);
 
     return (
         <React.Fragment>
@@ -170,7 +219,10 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                 fullWidth
                 maxWidth='md'
             >
-                <Components.DialogTitle sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }} id="customized-dialog-title">
+                <Components.DialogTitle
+                    sx={{ m: 0, p: 2, color: theme.palette.primary.text.main }}
+                    id="customized-dialog-title"
+                >
                     {overTimeId ? "Update" : "Create"} Overtime Rule
                 </Components.DialogTitle>
 
@@ -193,28 +245,26 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                             <Controller
                                 name="ruleName"
                                 control={control}
-                                rules={{
-                                    required: "Rule name is required",
-                                }}
+                                rules={{ required: "Rule name is required" }}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
                                         label="Rule Name"
-                                        type={`text`}
+                                        type="text"
                                         error={errors.ruleName}
-                                        onChange={(e) => {
-                                            field.onChange(e);
-                                        }}
+                                        onChange={(e) => field.onChange(e)}
                                     />
                                 )}
                             />
+
                             <Input
                                 label="Calculation Type"
-                                type={`text`}
-                                value={'Post Payable Hours/Shift End'}
+                                type="text"
+                                value="Post Payable Hours/Shift End"
                                 InputLabelProps={{ shrink: true }}
-                                disabled={true}
+                                disabled
                             />
+
                             <Controller
                                 name="otType"
                                 control={control}
@@ -225,14 +275,13 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                                         error={!!errors.otType}
                                         label="OT Type"
                                         placeholder="Select type"
-                                        value={parseInt(watch("otType")) || null}
-                                        onChange={(_, newValue) => {
-                                            field.onChange(newValue?.id || null);
-                                        }}
+                                        value={otTypeVal || null}
+                                        onChange={(_, newValue) => field.onChange(newValue?.id || null)}
                                     />
                                 )}
                             />
                         </div>
+
                         <div className='grid grid-cols-3 gap-4 mt-4'>
                             <div>
                                 <Controller
@@ -255,65 +304,60 @@ function OvertimeRulesModel({ setAlert, open, handleClose, companyId, overTimeId
                                 />
                             </div>
 
-                            {/* <InputTimePicker
-                                label="Start Time"
-                                name="startTime"
-                                control={control}
-                                rules={{
-                                    required: "Start time is required",
-                                }}
-                                maxTime={watch("endTime")}
-                            />
-                            <InputTimePicker
-                                label="End Time"
-                                name="endTime"
-                                control={control}
-                                rules={{
-                                    required: "End time is required",
-                                }}
-                                minTime={watch("startTime")}
-                            /> */}
                             <Input
                                 label="Total OT Minutes"
-                                type={`text`}
+                                type="text"
                                 value={watch("otMinutes") || 0}
                                 InputLabelProps={{ shrink: true }}
-                                disabled={true}
+                                disabled
                             />
-                            {
-                                (watch("otType") === 1 || watch("otType") === 2) && (
-                                    <Controller
-                                        name="otAmount"
-                                        control={control}
-                                        rules={{
-                                            required: watch("otType") !== 1 || watch("otType") !== 2 ? "OT Amount is required" : false,
-                                        }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="OT Amount"
-                                                type={`text`}
-                                                error={errors.otAmount}
-                                                onChange={(e) => {
-                                                    const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(numericValue);
-                                                }}
-                                            />
-                                        )}
-                                        disabled={watch("otType") !== 1 && watch("otType") !== 2}
-                                    />
-                                )
-                            }
+
+                            {(otTypeVal === 1 || otTypeVal === 2) && (
+                                <Controller
+                                    name="otAmount"
+                                    control={control}
+                                    rules={{
+                                        required: "OT Amount is required",
+                                    }}
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            label="OT Amount"
+                                            type="text"
+                                            error={errors.otAmount}
+                                            onChange={(e) => {
+                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                field.onChange(numericValue);
+                                            }}
+                                        />
+                                    )}
+                                />
+                            )}
                         </div>
                     </Components.DialogContent>
 
                     <Components.DialogActions>
                         <div className='flex justify-end'>
-                            <Button type={`submit`} text={overTimeId ? "Update" : "Submit"} isLoading={loading} />
+                            <Button
+                                type="submit"
+                                text={overTimeId ? "Update" : "Submit"}
+                                isLoading={loading}
+                            />
                         </div>
                     </Components.DialogActions>
                 </form>
             </BootstrapDialog>
+
+            {/* ✅ Confirm dialog for Update */}
+            <AlertDialog
+                open={dialog.open}
+                title={dialog.title}
+                message={dialog.message}
+                actionButtonText={dialog.actionButtonText}
+                handleAction={handleConfirmUpdate}
+                handleClose={handleCloseDialog}
+                loading={loading}
+            />
         </React.Fragment>
     );
 }
@@ -322,4 +366,4 @@ const mapDispatchToProps = {
     setAlert,
 };
 
-export default connect(null, mapDispatchToProps)(OvertimeRulesModel)
+export default connect(null, mapDispatchToProps)(OvertimeRulesModel);

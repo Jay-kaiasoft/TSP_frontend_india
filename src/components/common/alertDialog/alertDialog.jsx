@@ -45,9 +45,13 @@ export default function AlertDialog({ open, handleClose, title, message, handleA
                     <CustomIcons iconName={'fa-solid fa-xmark'} css='cursor-pointer text-black w-5 h-5' />
                 </Components.IconButton>
                 <Components.DialogContent dividers style={{ color: theme.palette.primary.text.main, }}>
-                    <Components.Typography gutterBottom>
+                    <Components.Typography
+                        gutterBottom
+                        sx={{ whiteSpace: "pre-line" }}
+                    >
                         {message}
                     </Components.Typography>
+
                 </Components.DialogContent>
                 <Components.DialogActions>
                     <div className='flex justify-between items-center gap-4 w-full'>

@@ -396,7 +396,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                     moduleName="Salary Statement"
                     actionId={1}
                     component={
-                        <Button type={`button`} text={'Generate & Save Salary'} disabled={!watch("startDate") && !watch("endDate") && !selectedYear} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css="h-5 w-5" />} />
+                        <Button type={`button`} text={'Generate & Save Salary'} disabled={row?.length === 0} onClick={() => handleOpenSalaryDialog()} startIcon={<CustomIcons iconName="fa-solid fa-file" css={`h-5 w-5 ${row?.length === 0 ? "cursor-not-allowed" : "cursor-pointer"}`} />} />
                     }
                 />
             </div>

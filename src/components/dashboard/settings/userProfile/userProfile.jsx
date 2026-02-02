@@ -408,7 +408,7 @@ const UserProfile = ({ setAlert, handleSetTitle, handleSetUserDetails, userDetai
 
                   {/* Info Text */}
                   <div className="py-3">
-                    <p className="text-gray-600">Allowed JPG or PNG.</p>
+                    <p className="text-gray-600">Allowed JPG, PNG or JPEG.</p>
                   </div>
                 </div>
               </div>
@@ -441,16 +441,16 @@ const UserProfile = ({ setAlert, handleSetTitle, handleSetUserDetails, userDetai
                   <div>
                     <Controller
                       name="middleName"
-                      rules={{
-                        required: "Middle name is required",
-                      }}
+                      // rules={{
+                      //   required: "Middle name is required",
+                      // }}
                       control={control}
                       render={({ field }) => (
                         <Input
                           {...field}
                           label="Middle Name"
                           type={`text`}
-                          error={errors.middleName}
+                          // error={errors.middleName}
                           onChange={(e) => {
                             field.onChange(e);
                           }}
@@ -608,15 +608,15 @@ const UserProfile = ({ setAlert, handleSetTitle, handleSetUserDetails, userDetai
                     <Controller
                       name="zipCode"
                       control={control}
-                      rules={{
-                        required: "Zip code is required",
-                      }}
+                      // rules={{
+                      //   required: "Zip code is required",
+                      // }}
                       render={({ field }) => (
                         <Input
                           {...field}
                           label="Zip Code"
                           type={`text`}
-                          error={errors.state}
+                          // error={errors.zipCode}
                           onChange={(e) => {
                             field.onChange(e);
                           }}

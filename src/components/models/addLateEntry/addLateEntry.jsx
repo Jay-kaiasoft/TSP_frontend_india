@@ -7,9 +7,14 @@ import Input from '../../common/input/input';
 import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
-import { createAttendancePenaltyRule, getAttendancePenaltyRuleById, updateAttendancePenaltyRule } from '../../../service/attendancePenaltyRules/attendancePenaltyRuleService';
+import {
+    createAttendancePenaltyRule,
+    getAttendancePenaltyRuleById,
+    updateAttendancePenaltyRule
+} from '../../../service/attendancePenaltyRules/attendancePenaltyRuleService';
 import Select from '../../common/select/select';
 import TimeSelector from '../../common/timeSelector/timeSelector';
+import AlertDialog from '../../common/alertDialog/alertDialog';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -35,10 +40,19 @@ const attendancePenaltyRuleTypes = [
 ];
 
 function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenaltyRule }) {
-    const theme = useTheme()
+    const theme = useTheme();
 
     const [loading, setLoading] = useState(false);
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+    // ✅ Confirm dialog state (for update)
+    const [pendingData, setPendingData] = useState(null);
+    const [dialog, setDialog] = useState({
+        open: false,
+        title: '',
+        message: '',
+        actionButtonText: ''
+    });
 
     const {
         handleSubmit,
@@ -59,8 +73,29 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
         },
     });
 
+    const handleOpenDialog = () => {
+        setDialog({
+            open: true,
+            title: 'Update Rule Warning',
+            message: 'Updating this rule will affect salary calculations.\n Are you sure you want to proceed?',
+            actionButtonText: 'Yes'
+        });
+    };
+
+    const handleCloseDialog = () => {
+        setDialog({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: ''
+        });
+        setPendingData(null);
+        setLoading(false);
+    };
+
     const onClose = () => {
         setLoading(false);
+        setPendingData(null);
         reset({
             ruleName: "",
             amount: "",
@@ -70,85 +105,81 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
             minutes: 0,
             totalMinutes: 0,
         });
+        handleCloseDialog();
         handleClose();
     };
 
     const submit = async (data) => {
         const newData = {
             ...data,
-
             companyId: userInfo?.companyId,
             createdBy: userInfo?.employeeId,
             deductionType: attendancePenaltyRuleTypes.find(type => type.id === data.deductionType)?.title || "",
-            amount: data.deductionType === 1 ? data.amount : null,
+            amount: parseInt(data.deductionType, 10) === 1 ? data.amount : null,
             isEarlyExit: false,
-            minutes: parseInt(data.totalMinutes) || 0,
-        }
-        if (id) {
-            setLoading(true)
-            const response = await updateAttendancePenaltyRule(id, newData);
-            if (response?.data?.status === 200) {
-                // setAlert({ open: true, message: response.data.message, type: "success" })
-                handleAttendancePenaltyRule()
-                onClose();
-            } else {
-                setAlert({ open: true, message: response.data.message, type: 'error' });
-                setLoading(false);
-            }
+            minutes: parseInt(data.totalMinutes, 10) || 0,
+        };
 
-        } else {
-            setLoading(true)
+        // ✅ CREATE -> direct call
+        if (!id) {
+            setLoading(true);
             const response = await createAttendancePenaltyRule(newData);
             if (response?.data?.status === 201) {
-                handleAttendancePenaltyRule()
+                handleAttendancePenaltyRule();
                 onClose();
             } else {
-                setAlert({ open: true, message: response.data.message, type: 'error' });
+                setAlert({ open: true, message: response?.data?.message || "Failed to create rule", type: 'error' });
                 setLoading(false);
             }
+            return;
         }
-    }
 
-    const handleGetAttendancePenaltyRuleById = async () => {
-        if (!id && !open) return;
+        // ✅ UPDATE -> open confirm dialog first
+        setPendingData(newData);
+        handleOpenDialog();
+    };
 
-        const response = await getAttendancePenaltyRuleById(id);
-        if (response.data.status === 200) {
-            const totalMinutes = parseInt(response?.data?.result?.minutes || 0, 10);
-            const hrs = Math.floor(totalMinutes / 60);
-            const mins = totalMinutes % 60;
+    // ✅ Called when user clicks YES in AlertDialog
+    const handleConfirmUpdate = async () => {
+        if (!id || !pendingData) return;
 
-            reset({
-                id: response?.data?.result?.id || "",
-                ruleName: response?.data?.result?.ruleName || "",
-                amount: response?.data?.result?.amount || "",
-                deductionType: attendancePenaltyRuleTypes.find(type => type.title === response?.data?.result?.deductionType)?.id || 1,
-                count: response?.data?.result?.count || "",
-                totalMinutes: totalMinutes,
-                hours: hrs,
-                minutes: mins,
-            });
+        setLoading(true);
+        const response = await updateAttendancePenaltyRule(id, pendingData);
+
+        if (response?.data?.status === 200) {
+            handleCloseDialog();
+            handleAttendancePenaltyRule();
+            onClose();
         } else {
-            setAlert({ message: response.data.message, type: 'error' });
+            setAlert({ open: true, message: response?.data?.message || "Failed to update rule", type: 'error' });
+            setLoading(false);
         }
     };
 
-    // useEffect(() => {
-    //     if (watch("startTime") && watch("endTime")) {
-    //         const start = new Date(watch("startTime"));
-    //         const end = new Date(watch("endTime"));
-    //         let diffInMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+    const handleGetAttendancePenaltyRuleById = async () => {
+        if (id !== null && open) {
+            const response = await getAttendancePenaltyRuleById(id);
+            if (response?.data?.status === 200) {
+                const totalMinutes = parseInt(response?.data?.result?.minutes || 0, 10);
+                const hrs = Math.floor(totalMinutes / 60);
+                const mins = totalMinutes % 60;
 
-    //         // If endTime is before startTime, assume it's the next day
-    //         if (diffInMinutes < 0) {
-    //             diffInMinutes += 24 * 60;
-    //         }
-    //         setValue("minutes", diffInMinutes.toString());
-    //     } else {
-    //         setValue("minutes", "");
-    //     }
-    // }, [watch("startTime"), watch("endTime")]);
+                reset({
+                    id: response?.data?.result?.id || "",
+                    ruleName: response?.data?.result?.ruleName || "",
+                    amount: response?.data?.result?.amount || "",
+                    deductionType: attendancePenaltyRuleTypes.find(type => type.title === response?.data?.result?.deductionType)?.id || 1,
+                    count: response?.data?.result?.count || "",
+                    totalMinutes: totalMinutes,
+                    hours: hrs,
+                    minutes: mins,
+                });
+            } else {
+                setAlert({ open: true, message: response?.data?.message || "Failed to fetch rule", type: 'error' });
+            }
+        }
 
+    };
 
     useEffect(() => {
         const hrs = watch("hours") || 0;
@@ -156,12 +187,12 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
 
         const totalMins = hrs * 60 + mins;
         setValue("totalMinutes", totalMins.toString());
-    }, [watch("hours"), watch("minutes")]);
+    }, [watch("hours"), watch("minutes"), setValue, watch]);
 
     useEffect(() => {
         handleGetAttendancePenaltyRuleById();
-    }, [id])
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open]);
 
     return (
         <React.Fragment>
@@ -194,21 +225,18 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                             <Controller
                                 name="ruleName"
                                 control={control}
-                                rules={{
-                                    required: "Rule name is required",
-                                }}
+                                rules={{ required: "Rule name is required" }}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
                                         label="Rule Name"
-                                        type={`text`}
+                                        type="text"
                                         error={errors.ruleName}
-                                        onChange={(e) => {
-                                            field.onChange(e);
-                                        }}
+                                        onChange={(e) => field.onChange(e)}
                                     />
                                 )}
                             />
+
                             <Controller
                                 name="deductionType"
                                 control={control}
@@ -219,55 +247,35 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                                         error={!!errors.deductionType}
                                         label="Deduction Type"
                                         placeholder="Select type"
-                                        value={parseInt(watch("deductionType")) || null}
-                                        onChange={(_, newValue) => {
-                                            field.onChange(newValue?.id || null);
-                                        }}
+                                        value={parseInt(watch("deductionType"), 10) || null}
+                                        onChange={(_, newValue) => field.onChange(newValue?.id || null)}
                                     />
                                 )}
                             />
-                            {
-                                watch("deductionType") === 1 && (
-                                    <Controller
-                                        name="amount"
-                                        control={control}
-                                        rules={{
-                                            required: watch("deductionType") === 1 ? "Deduction Amount is required" : false,
-                                        }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="Deduction Amount"
-                                                type={`text`}
-                                                error={errors.amount}
-                                                onChange={(e) => {
-                                                    const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(numericValue);
-                                                }}
-                                            />
-                                        )}
-                                        disabled={watch("deductionType") !== 1}
-                                    />
-                                )
-                            }
-                            {/* <InputTimePicker
-                                label="Start Time"
-                                name="startTime"
-                                control={control}
-                                rules={{
-                                    required: "Start time is required",
-                                }}
-                                maxTime={watch("endTime")}
-                            />
-                            <InputTimePicker
-                                label="End Time"
-                                name="endTime"
-                                control={control}
-                                rules={{
-                                    required: "End time is required",
-                                }}
-                                minTime={watch("startTime")}
-                            /> */}
+
+                            {parseInt(watch("deductionType"), 10) === 1 && (
+                                <Controller
+                                    name="amount"
+                                    control={control}
+                                    rules={{
+                                        required: parseInt(watch("deductionType"), 10) === 1 ? "Deduction Amount is required" : false,
+                                    }}
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            label="Deduction Amount"
+                                            type="text"
+                                            error={errors.amount}
+                                            onChange={(e) => {
+                                                const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                field.onChange(numericValue);
+                                            }}
+                                        />
+                                    )}
+                                    disabled={parseInt(watch("deductionType"), 10) !== 1}
+                                />
+                            )}
+
                             <div>
                                 <Controller
                                     name="hours"
@@ -288,13 +296,15 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                                     )}
                                 />
                             </div>
+
                             <Input
                                 label="Total Minutes"
-                                type={`text`}
+                                type="text"
                                 value={watch("totalMinutes") || 0}
                                 InputLabelProps={{ shrink: true }}
-                                disabled={true}
+                                disabled
                             />
+
                             <Controller
                                 name="count"
                                 control={control}
@@ -303,13 +313,15 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
                                         <Input
                                             {...field}
                                             label="Minimum Occurrences(Exclusive)"
-                                            type={`text`}
+                                            type="text"
                                             onChange={(e) => {
                                                 const numericValue = e.target.value.replace(/[^0-9]/g, '');
                                                 field.onChange(numericValue);
                                             }}
                                         />
-                                        <span className='text-xs text-gray-500 ml-2'>Fine will be pardoned upto {watch("count") || 0} times</span>
+                                        <span className='text-xs text-gray-500 ml-2'>
+                                            Fine will be pardoned upto {watch("count") || 0} times
+                                        </span>
                                     </div>
                                 )}
                             />
@@ -318,11 +330,22 @@ function AddLateEntry({ setAlert, open, handleClose, id, handleAttendancePenalty
 
                     <Components.DialogActions>
                         <div className='flex justify-end'>
-                            <Button type={`submit`} text={id ? "Update" : "Submit"} isLoading={loading} />
+                            <Button type="submit" text={id ? "Update" : "Submit"} isLoading={loading} />
                         </div>
                     </Components.DialogActions>
                 </form>
             </BootstrapDialog>
+
+            {/* ✅ Confirm Dialog for Update */}
+            <AlertDialog
+                open={dialog.open}
+                title={dialog.title}
+                message={dialog.message}
+                actionButtonText={dialog.actionButtonText}
+                handleAction={handleConfirmUpdate}
+                handleClose={handleCloseDialog}
+                loading={loading}
+            />
         </React.Fragment>
     );
 }
@@ -331,4 +354,4 @@ const mapDispatchToProps = {
     setAlert,
 };
 
-export default connect(null, mapDispatchToProps)(AddLateEntry)
+export default connect(null, mapDispatchToProps)(AddLateEntry);

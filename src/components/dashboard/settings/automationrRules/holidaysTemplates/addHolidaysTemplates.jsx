@@ -10,7 +10,11 @@ import DatePickerComponent from '../../../../common/datePickerComponent/datePick
 import Components from '../../../../muiComponents/components';
 import Button from '../../../../common/buttons/button';
 import AlertDialog from '../../../../common/alertDialog/alertDialog';
-import { createHolidaysTemplate, getHolidaysTemplate, updateHolidaysTemplate } from '../../../../../service/holidaysTemplates/holidaysTemplatesService';
+import {
+    createHolidaysTemplate,
+    getHolidaysTemplate,
+    updateHolidaysTemplate
+} from '../../../../../service/holidaysTemplates/holidaysTemplatesService';
 import { deleteHolidaysTemplateDetails } from '../../../../../service/holidaysTemplates/holidaysTemplateDetailsService';
 
 function AddHolidaysTemplates({ setAlert }) {
@@ -18,34 +22,58 @@ function AddHolidaysTemplates({ setAlert }) {
     const theme = useTheme();
     const { id } = useParams();
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+    // ✅ Dialog supports BOTH delete + update confirmation
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [loading, setLoading] = useState(false);
+
+    // ✅ delete state
     const [selectedId, setSelectedId] = useState(null);
     const [selectedIndex, setSelectedIndex] = useState(null);
 
-    const handleOpenDeleteHolidaysDialog = (index, id) => {
+    // ✅ update confirm state (same pattern as previous)
+    const [pendingTemplateData, setPendingTemplateData] = useState(null);
+    const [dialogMode, setDialogMode] = useState(null); // "delete" | "update"
+
+    const handleOpenDeleteHolidaysDialog = (index, holidayId) => {
+        setDialogMode("delete");
         setSelectedIndex(index);
-        if (id) {
-            setSelectedId(id);
-        }
+        if (holidayId) setSelectedId(holidayId);
+
         setDialog({
             open: true,
             title: 'Delete Holiday',
-            message: 'Are you sure! Do you want to delete this holiday?',
+            message: 'Are you sure you want to delete this holiday?',
             actionButtonText: 'Delete'
-        })
-    }
+        });
+    };
+
+    const handleOpenUpdateDialog = (templateData) => {
+        setDialogMode("update");
+        setPendingTemplateData(templateData);
+
+        setDialog({
+            open: true,
+            title: 'Update Rule Warning',
+            message: 'Updating this rule will affect salary calculations. Are you sure you want to proceed?',
+            actionButtonText: 'Yes'
+        });
+    };
 
     const handleCloseDialog = () => {
-        setSelectedId(null)
-        setLoading(false)
+        setSelectedId(null);
+        setSelectedIndex(null);
+        setPendingTemplateData(null);
+        setDialogMode(null);
+        setLoading(false);
+
         setDialog({
             open: false,
             title: '',
             message: '',
             actionButtonText: ''
-        })
-    }
+        });
+    };
 
     const {
         control,
@@ -56,8 +84,7 @@ function AddHolidaysTemplates({ setAlert }) {
         defaultValues: {
             id: "",
             name: "",
-            holidayTemplateDetailsList: [
-            ]
+            holidayTemplateDetailsList: []
         },
     });
 
@@ -68,6 +95,7 @@ function AddHolidaysTemplates({ setAlert }) {
 
     const handleDeleteHoliday = async () => {
         remove(selectedIndex);
+
         if (selectedId !== null) {
             const res = await deleteHolidaysTemplateDetails(selectedId);
             if (res?.data?.status === 200) {
@@ -76,6 +104,30 @@ function AddHolidaysTemplates({ setAlert }) {
                 setAlert({ open: true, type: 'error', message: 'Failed to delete holiday' });
             }
         }
+
+        handleCloseDialog();
+    };
+
+    // ✅ This runs when user clicks YES in update dialog
+    const handleConfirmUpdateTemplate = async () => {
+        if (!id || !pendingTemplateData) return;
+
+        setLoading(true);
+        const res = await updateHolidaysTemplate(id, pendingTemplateData);
+
+        if (res?.data?.status === 200) {
+            handleCloseDialog();
+            navigate("/dashboard/automationrules/holidays/templates");
+        } else {
+            setLoading(false);
+            setAlert({ open: true, type: 'error', message: 'Failed to update holiday template' });
+        }
+    };
+
+    // ✅ Single handleAction for AlertDialog (decides what to do)
+    const handleDialogAction = async () => {
+        if (dialogMode === "delete") return handleDeleteHoliday();
+        if (dialogMode === "update") return handleConfirmUpdateTemplate();
         handleCloseDialog();
     };
 
@@ -92,22 +144,21 @@ function AddHolidaysTemplates({ setAlert }) {
                 holidayTemplateId: holiday.holidayTemplateId || null
             })),
         };
+
+        // ✅ UPDATE -> open dialog first
         if (id) {
-            const res = await updateHolidaysTemplate(id, templateData);
-            if (res?.data?.status === 200) {
-                navigate("/dashboard/automationrules/holidays/templates");
-            } else {
-                setAlert({ open: true, type: 'error', message: 'Failed to update holiday template' });
-            }
-        } else {
-            const res = await createHolidaysTemplate(templateData);
-            if (res?.data?.status === 201) {
-                navigate("/dashboard/automationrules/holidays/templates");
-            } else {
-                setAlert({ open: true, type: 'error', message: 'Failed to create holiday template' });
-            }
+            handleOpenUpdateDialog(templateData);
+            return;
         }
-    }
+
+        // ✅ CREATE -> direct submit
+        const res = await createHolidaysTemplate(templateData);
+        if (res?.data?.status === 201) {
+            navigate("/dashboard/automationrules/holidays/templates");
+        } else {
+            setAlert({ open: true, type: 'error', message: 'Failed to create holiday template' });
+        }
+    };
 
     const handleGetHolidaysTemplateById = async () => {
         if (id) {
@@ -116,20 +167,24 @@ function AddHolidaysTemplates({ setAlert }) {
                 const templateData = res?.data?.result;
                 setValue("id", templateData.id);
                 setValue("name", templateData.name);
+
                 const formattedHolidays = templateData.holidayTemplateDetailsList?.map((holiday) => ({
                     holidayId: holiday.id,
                     name: holiday.name,
                     date: holiday.date,
                 }));
+
                 setValue("holidayTemplateDetailsList", formattedHolidays);
             }
         } else {
             setValue("holidayTemplateDetailsList", [{ id: "", name: "", date: null }]);
         }
-    }
+    };
+
     useEffect(() => {
         handleGetHolidaysTemplateById();
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div className="px-4 lg:px-0">
@@ -137,10 +192,7 @@ function AddHolidaysTemplates({ setAlert }) {
                 <NavLink to={"/dashboard/automationrules/holidays/templates"}>
                     <div className="flex justify-start items-center gap-3">
                         <div style={{ color: theme.palette.primary.main }}>
-                            <CustomIcons
-                                iconName={"fa-solid fa-arrow-left"}
-                                css="cursor-pointer h-4 w-4"
-                            />
+                            <CustomIcons iconName={"fa-solid fa-arrow-left"} css="cursor-pointer h-4 w-4" />
                         </div>
                         <p className="text-md capitalize">Back to templates</p>
                     </div>
@@ -150,30 +202,21 @@ function AddHolidaysTemplates({ setAlert }) {
             <div className='border rounded-lg bg-white w-screen lg:w-full p-4'>
                 <div className='grow mb-4'>
                     <h2 className='text-lg font-semibold'>Holidays Templates</h2>
-                    <p className='text-gray-600'>
-                        Create templates to auto-assign paid leave on public holidays.
-                    </p>
+                    <p className='text-gray-600'>Create templates to auto-assign paid leave on public holidays.</p>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    {/* Template Name */}
                     <div className='mb-4 w-60'>
                         <Controller
                             name="name"
                             control={control}
                             rules={{ required: "Template name is required" }}
                             render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    label="Template Name"
-                                    type="text"
-                                    error={errors.name}
-                                />
+                                <Input {...field} label="Template Name" type="text" error={errors.name} />
                             )}
                         />
                     </div>
 
-                    {/* List of Holidays */}
                     <div className='border-t border-gray-200'>
                         <div className='p-4 border-b border-gray-200 w-[35rem]'>
                             <div className='mb-3 flex justify-start items-center gap-3'>
@@ -193,7 +236,7 @@ function AddHolidaysTemplates({ setAlert }) {
                             </div>
 
                             {fields?.map((item, index) => (
-                                <div key={item.index} className='flex justify-start items-center gap-3 mb-3'>
+                                <div key={item.id || index} className='flex justify-start items-center gap-3 mb-3'>
                                     <div>
                                         <Controller
                                             name={`holidayTemplateDetailsList.${index}.name`}
@@ -219,19 +262,17 @@ function AddHolidaysTemplates({ setAlert }) {
                                             minDate={null}
                                             maxDate={new Date(new Date().getFullYear(), 11, 31)}
                                             required={true}
-                                            placeholder="DD/MM/YYYY"   // ✅ add this
+                                            placeholder="DD/MM/YYYY"
                                         />
-
                                     </div>
-                                    {
-                                        fields?.length !== 1 && (
-                                            <div>
-                                                <Components.IconButton onClick={() => handleOpenDeleteHolidaysDialog(index, item.holidayId)}>
-                                                    <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-red-600 h-4 w-4' />
-                                                </Components.IconButton>
-                                            </div>
-                                        )
-                                    }
+
+                                    {fields?.length !== 1 && (
+                                        <div>
+                                            <Components.IconButton onClick={() => handleOpenDeleteHolidaysDialog(index, item.holidayId)}>
+                                                <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-red-600 h-4 w-4' />
+                                            </Components.IconButton>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -252,9 +293,19 @@ function AddHolidaysTemplates({ setAlert }) {
                     </div>
                 </form>
             </div>
-            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteHoliday} handleClose={handleCloseDialog} loading={loading} />
+
+            {/* ✅ Single dialog used for BOTH delete & update */}
+            <AlertDialog
+                open={dialog.open}
+                title={dialog.title}
+                message={dialog.message}
+                actionButtonText={dialog.actionButtonText}
+                handleAction={handleDialogAction}
+                handleClose={handleCloseDialog}
+                loading={loading}
+            />
         </div>
-    )
+    );
 }
 
 const mapDispatchToProps = {

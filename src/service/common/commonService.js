@@ -132,30 +132,57 @@ export const uploadFiles = async (data) => {
 };
 
 
+// export const handleConvertUTCDateToLocalDate = (utcDateString) => {
+//     if (!utcDateString) return null;
+
+//     try {
+//         // Parse the UTC date string
+//         const [datePart, timePart] = utcDateString.split(', ');
+//         const [month, day, year] = datePart.split('/');
+//         const [time, period] = timePart.split(' ');
+//         const [hours, minutes, seconds] = time.split(':');
+
+//         // Convert to 24-hour format
+//         let hours24 = parseInt(hours, 10);
+//         if (period === 'PM' && hours24 !== 12) hours24 += 12;
+//         if (period === 'AM' && hours24 === 12) hours24 = 0;
+
+//         // Create a Date object in UTC and convert to local time
+//         return new Date(Date.UTC(
+//             parseInt(year, 10),
+//             parseInt(month, 10) - 1,
+//             parseInt(day, 10),
+//             hours24,
+//             parseInt(minutes, 10),
+//             parseInt(seconds, 10)
+//         ));
+//     } catch (error) {
+//         console.error("Conversion error:", error);
+//         return null;
+//     }
+// };
+
 export const handleConvertUTCDateToLocalDate = (utcDateString) => {
     if (!utcDateString) return null;
 
     try {
-        // Parse the UTC date string
-        const [datePart, timePart] = utcDateString.split(', ');
-        const [month, day, year] = datePart.split('/');
-        const [time, period] = timePart.split(' ');
-        const [hours, minutes, seconds] = time.split(':');
+        // "29/01/2026, 05:28:39 PM"  =>  DD/MM/YYYY, hh:mm:ss AM/PM
+        const [datePart, timePartRaw] = utcDateString.split(",").map(s => s.trim());
+        if (!datePart || !timePartRaw) return null;
 
-        // Convert to 24-hour format
-        let hours24 = parseInt(hours, 10);
-        if (period === 'PM' && hours24 !== 12) hours24 += 12;
-        if (period === 'AM' && hours24 === 12) hours24 = 0;
+        const [dd, mm, yyyy] = datePart.split("/").map(Number);
 
-        // Create a Date object in UTC and convert to local time
-        return new Date(Date.UTC(
-            parseInt(year, 10),
-            parseInt(month, 10) - 1,
-            parseInt(day, 10),
-            hours24,
-            parseInt(minutes, 10),
-            parseInt(seconds, 10)
-        ));
+        const [timePart, ampmRaw] = timePartRaw.split(" ");
+        const [hhRaw, minRaw, secRaw] = timePart.split(":").map(Number);
+
+        const ampm = (ampmRaw || "").toUpperCase();
+        let hh = hhRaw;
+
+        if (ampm === "PM" && hh < 12) hh += 12;
+        if (ampm === "AM" && hh === 12) hh = 0;
+
+        // Create UTC time, then JS Date will show it in local timezone automatically
+        return new Date(Date.UTC(yyyy, mm - 1, dd, hh, minRaw, secRaw));
     } catch (error) {
         console.error("Conversion error:", error);
         return null;

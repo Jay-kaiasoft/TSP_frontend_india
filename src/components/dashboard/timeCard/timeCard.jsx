@@ -128,7 +128,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${month}/${day}/${year}, ${hours}:${minutes}:${seconds}`;
+        return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
     }
 
     const handleGetAllUsers = async () => {
@@ -242,9 +242,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    useEffect(() => {
-        handleGetAllEntriesByUserId();
-    }, [watch("startDate"), watch("endDate"), watch("selectedUserId"), watch("locationIds"), watch("selectedDepartmentId")]);
+    // useEffect(() => {
+    //     handleGetAllEntriesByUserId();
+    // }, [watch("startDate"), watch("endDate"), watch("selectedUserId"), watch("locationIds"), watch("selectedDepartmentId")]);
 
     const formatDuration = (timeIn, timeOut) => {
         if (!timeOut) return;
@@ -265,21 +265,40 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         return result.join(" ");
     };
 
-    const getTotalDurationInMs = (data) => {
-        if (data?.length > 0) {
-            return data?.reduce((total, row) => {
-                if (row.timeIn && row.timeOut) {
-                    const diff = new Date(row.timeOut) - new Date(row.timeIn);
-                    if (diff > 0) {
-                        return total + diff;
-                    }
-                }
-                return total;
-            }, 0);
-        } else {
-            return 0
-        }
+    const parseDDMMYYYYTime = (s) => {
+        if (!s) return null;
+
+        // "30/01/2026, 10:02:52 PM"
+        const [datePart, timePartRaw] = s.split(",").map(t => t.trim());
+        if (!datePart || !timePartRaw) return null;
+
+        const [dd, mm, yyyy] = datePart.split("/").map(Number);
+
+        const [timePart, ampm] = timePartRaw.split(" ");
+        let [hh, min, ss] = timePart.split(":").map(Number);
+
+        if (ampm === "PM" && hh < 12) hh += 12;
+        if (ampm === "AM" && hh === 12) hh = 0;
+
+        return new Date(yyyy, mm - 1, dd, hh, min, ss);
     };
+
+    const getTotalDurationInMs = (rows = []) => {
+        return rows.reduce((sum, r) => {
+            const start = parseDDMMYYYYTime(r?.timeIn);
+            const end = parseDDMMYYYYTime(r?.timeOut);
+
+            if (!start || !end) return sum;
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return sum;
+
+            const diff = end - start;
+            if (diff <= 0) return sum;
+
+            return sum + diff;
+        }, 0);
+    };
+
+
 
     const formatHoursToHrMin = (hours) => {
         const hrs = Math.floor(hours);
@@ -306,18 +325,20 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     };
 
-    const formatTotalDuration = (totalMs) => {
-        const minutes = Math.floor((totalMs / (1000 * 60)) % 60);
-        const hours = Math.floor((totalMs / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(totalMs / (1000 * 60 * 60 * 24));
+    const formatTotalDuration = (ms) => {
+        if (ms == null || Number.isNaN(ms)) return "0 sec"; // handles null/undefined/NaN
+        if (ms <= 0) return "0 sec";                         // handles 0 or negative
 
-        const result = [];
-        if (days > 0) result.push(`${days} day${days > 1 ? "s" : ""}`);
-        if (hours > 0) result.push(`${hours} hr${hours > 1 ? "s" : ""}`);
-        if (minutes > 0) result.push(`${minutes} min${minutes > 1 ? "s" : ""}`);
+        const totalSeconds = Math.floor(ms / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
 
-        return result.join(" ");
+        if (hours > 0) return `${hours} hr ${minutes} min`;
+        if (minutes > 0) return `${minutes} min ${seconds} sec`;
+        return `${seconds} sec`;
     };
+
 
     const columns = [
         {
@@ -551,7 +572,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     return (
         <>
             <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
-                <div className='grid grid-col-12 md:grid-cols-4 gap-3 items-center'>
+                <div className='grid grid-col-12 md:grid-cols-5 gap-3 items-center'>
                     <div className='mb-4 w-full md:mb-0'>
                         <DatePickerComponent setValue={setValue} control={control} name='startDate' label={`Start Date`} minDate={null} maxDate={watch("endDate")} />
                     </div>
@@ -601,6 +622,10 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             )}
                         />
                     </div>
+
+                    <div className='w-32'>
+                        <Button type={`button`} text={'Filter'} onClick={() => handleGetAllEntriesByUserId()} startIcon={<CustomIcons iconName="fa-solid fa-filter" css="h-5 w-5" />} />
+                    </div>
                 </div>
 
                 <div className='my-4'>
@@ -617,21 +642,14 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Total Hours :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{formatTotalDuration(getTotalDurationInMs(rows))}</div>
+                            <div className="justify-start text-xs font-medium uppercase leading-normal tracking-tight">{formatTotalDuration(getTotalDurationInMs(rows))}</div>
                         </div>
                     </div>
 
-                    {/* <div className="md:inline-flex flex-col justify-center items-start gap-3">
-                        <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Regular :</div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{getTotalRegular(rows)} HRS</div>
-                        </div>
-                    </div> */}
-
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
-                            <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Total OT : </div>
-                            <div className="justify-start text-xs font-medium  uppercase leading-normal tracking-tight">{formatHoursToHrMin(getTotalOT(rows))}</div>
+                            <div className="justify-start text-xs font-bold uppercase leading-normal tracking-tight">Total OT : </div>
+                            <div className="justify-start text-xs font-medium uppercase leading-normal tracking-tight">{formatHoursToHrMin(getTotalOT(rows))}</div>
                         </div>
                     </div>
 
