@@ -52,7 +52,6 @@ const parseDDMMYYYY = (s) => {
     return d;
 };
 
-
 const TimeCard = ({ handleSetTitle, setAlert }) => {
     dayjs.extend(utc);
     dayjs.extend(timezone);
@@ -299,7 +298,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     };
 
 
-
     const formatHoursToHrMin = (hours) => {
         const hrs = Math.floor(hours);
         const mins = Math.floor((hours - hrs) * 60);
@@ -531,26 +529,51 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         setLoadingPdf(true);
 
         setTimeout(async () => {
-            const element = document.getElementById("table-container");
-            if (!element) return;
-
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                useCORS: true,
-            });
-
-            const imgData = canvas.toDataURL("image/png");
             const pdf = new jsPDF("p", "mm", "a4");
+            const pages = document.querySelectorAll(".pdf-page");
 
-            const imgWidth = 190;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            if (!pages.length) {
+                setShowPdfContent(false);
+                setLoadingPdf(false);
+                return;
+            }
 
-            pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-            pdf.save("report.pdf");
+            for (let i = 0; i < pages.length; i++) {
+                const page = pages[i];
+
+                const canvas = await html2canvas(page, {
+                    scale: 1.2,                // ✅ reduced
+                    useCORS: true,
+                    backgroundColor: "#ffffff",
+                });
+
+                // ✅ JPEG instead of PNG
+                const imgData = canvas.toDataURL("image/jpeg", 0.75);
+
+                const imgWidth = 190;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                if (i > 0) pdf.addPage();
+
+                pdf.addImage(
+                    imgData,
+                    "JPEG",
+                    10,
+                    10,
+                    imgWidth,
+                    imgHeight,
+                    undefined,
+                    "FAST"        // ✅ jsPDF compression
+                );
+            }
+
+            pdf.save(
+                `Employee_Attendance_Report_${dayjs(watch("startDate"), "DD/MM/YYYY").format("DD-MM-YYYY")}_To_${dayjs(watch("endDate"), "DD/MM/YYYY").format("DD-MM-YYYY")}.pdf`
+            );
 
             setShowPdfContent(false);
             setLoadingPdf(false);
-        }, 500); // allow time to render
+        }, 300);
     };
 
     const actionButtons = () => {
