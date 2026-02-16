@@ -28,6 +28,22 @@ import SelectMultiple from '../../common/select/selectMultiple';
 import { getAllDepartment } from '../../../service/department/departmentService';
 import { AddClockInOut } from '../../models/clockInOut/addClockInOut';
 
+
+const filterOptions = [
+    { id: 1, title: 'January', value: 0 },
+    { id: 2, title: 'February', value: 1 },
+    { id: 3, title: 'March', value: 2 },
+    { id: 4, title: 'April', value: 3 },
+    { id: 5, title: 'May', value: 4 },
+    { id: 6, title: 'June', value: 5 },
+    { id: 7, title: 'July', value: 6 },
+    { id: 8, title: 'August', value: 7 },
+    { id: 9, title: 'September', value: 8 },
+    { id: 10, title: 'October', value: 9 },
+    { id: 11, title: 'November', value: 10 },
+    { id: 12, title: 'December', value: 11 }
+];
+
 const tabData = [
     {
         label: 'Timecard',
@@ -70,6 +86,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const [department, setDepartment] = useState([]);
     const [openInOutModel, setOpenInOutModel] = useState(false);
     const [clockInOutId, setClockInOutId] = useState(null);
+    const [filter, setFilter] = useState(null);
 
     const {
         control,
@@ -209,7 +226,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     };
 
-
     const handleGetCompanyInfo = async () => {
         if (userInfo?.companyId) {
             const response = await getCompanyDetails(userInfo?.companyId)
@@ -232,14 +248,50 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     }
 
+    const setDates = () => {
+        const selectedMonth = filter?.value;
+
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const year = today.getFullYear();
+
+        const start = new Date(year, selectedMonth, 1);
+
+        let end;
+        if (selectedMonth === currentMonth) {
+            end = today;
+        } else {
+            end = new Date(year, selectedMonth + 1, 0);
+        }
+
+        const formatDate = (date) => {
+            return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+                .toString()
+                .padStart(2, "0")}/${date.getFullYear()}`;
+        };
+
+        setValue('startDate', formatDate(start));
+        setValue('endDate', formatDate(end));
+    };
+
+
     useEffect(() => {
         handleSetTitle("Time Card")
+        const today = new Date();
+        const lastMonth = today.getMonth();
+        const defaultFilter = filterOptions?.find(option => option.value === lastMonth);
+        setFilter(defaultFilter);
         handleGetCompanyInfo()
         handleGetAllEntriesByUserId()
         handleGetAllUsers()
         handleGetAllDepartment()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
+
+    useEffect(() => {
+        setDates();
+    }, [filter]);
+
 
     // useEffect(() => {
     //     handleGetAllEntriesByUserId();
@@ -595,7 +647,19 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     return (
         <>
             <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
-                <div className='grid grid-col-12 md:grid-cols-5 gap-3 items-center'>
+                <div className='grid grid-col-12 md:grid-cols-6 gap-3 items-center'>
+                    <div>
+                        <Select
+                            options={filterOptions}
+                            label={"Filter by Duration"}
+                            placeholder="Select Duration"
+                            value={filter?.id}
+                            onChange={(_, newValue) => {
+                                setFilter(newValue?.value ? newValue : filterOptions[0]);
+                            }}
+                        />
+                    </div>
+
                     <div className='mb-4 w-full md:mb-0'>
                         <DatePickerComponent setValue={setValue} control={control} name='startDate' label={`Start Date`} minDate={null} maxDate={watch("endDate")} />
                     </div>

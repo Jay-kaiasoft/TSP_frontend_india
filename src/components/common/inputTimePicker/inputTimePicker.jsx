@@ -4,7 +4,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { useTheme } from '@mui/material';
 
-const InputTimePicker = ({ name, control, label, rules, disabled, minTime,maxTime  }) => {
+const InputTimePicker = ({ name, control, label, rules, disabled, minTime, maxTime }) => {
   const theme = useTheme();
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -19,10 +19,11 @@ const InputTimePicker = ({ name, control, label, rules, disabled, minTime,maxTim
             disabled={disabled}
             minTime={minTime}
             maxTime={maxTime}
+            closeOnSelect={false}   // 👈 ADD THIS
             slotProps={{
               textField: {
                 error: !!error,
-                InputLabelProps: { shrink: true },                
+                InputLabelProps: { shrink: true },
               },
             }}
             sx={{
