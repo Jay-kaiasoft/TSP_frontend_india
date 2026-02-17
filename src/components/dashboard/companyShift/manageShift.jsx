@@ -59,13 +59,14 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
         const payload = {
             ...data,
             companyId: userInfo?.companyId,
-            totalHours: parseInt(data.totalHours) || 0,
+            totalHours: parseFloat(data.totalHours) || 0,
             startTime: data.startTime
                 ? new Date(data.startTime).toISOString()
                 : null,
             endTime: data.endTime
                 ? new Date(data.endTime).toISOString()
                 : null,
+            autoTimeInAfterHours: data.autoTimeInAfterHours ? parseFloat(data.autoTimeInAfterHours) : null
         };
 
         setLoading(true)
@@ -168,7 +169,8 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                     setValue("endTime", dayjs(result?.endTime))
                 }
                 setValue("hours", result?.hours);
-                setValue("totalHours", result?.totalHours || 0);
+                setValue("totalHours", parseFloat(result?.totalHours) || 0);
+                setValue("autoTimeInAfterHours", parseFloat(result?.autoTimeInAfterHours) || null);
             }
         }
     }
@@ -203,7 +205,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
             const minutes = diff % 60;
 
             const total = `${hours}.${minutes.toString().padStart(2, '0')}`;
-            setValue("totalHours", isNaN(total) ? 0.00 : total);
+            setValue("totalHours", isNaN(total) ? 0.00 : parseFloat(total));
         }
         else {
             if (!watch("hours")) {
@@ -253,7 +255,22 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
             renderCell: (params) => {
                 return (
                     <div>
-                        {parseInt(params.row.totalHours)}
+                        {parseFloat(params.row.totalHours)}
+                    </div>
+                );
+            },
+        },
+        {
+            field: 'autoTimeInAfterHours',
+            headerName: 'Auto Time In After Hours',
+            headerClassName: 'uppercase',
+            flex: 1,
+            minWidth: 120,
+            sortable: false,
+            renderCell: (params) => {
+                return (
+                    <div>
+                        {params.row.autoTimeInAfterHours ? parseFloat(params.row.autoTimeInAfterHours) : "-"}
                     </div>
                 );
             },
@@ -324,7 +341,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                         <div className='p-4'>
                             <form noValidate onSubmit={handleSubmit(submit)}>
                                 <div className='md:flex justify-start items-center gap-4'>
-                                    <div className='grid md:grid-cols-6 gap-3 w-full'>
+                                    <div className='grid md:grid-cols-7 gap-3 w-full'>
                                         <div>
                                             <Controller
                                                 name="shiftName"
@@ -393,9 +410,24 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                                                         error={errors.hours}
                                                         value={field.value}
                                                         onChange={(e) => {
-                                                            const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                            field.onChange(numericValue);
-                                                            setValue("totalHours", numericValue);
+                                                            let value = e.target.value;
+
+                                                            // Allow only numbers and one decimal point
+                                                            value = value.replace(/[^0-9.]/g, '');
+
+                                                            // Prevent multiple dots
+                                                            const parts = value.split('.');
+                                                            if (parts.length > 2) {
+                                                                value = parts[0] + '.' + parts[1];
+                                                            }
+
+                                                            // Limit to 2 decimal places
+                                                            if (parts[1]?.length > 2) {
+                                                                value = parts[0] + '.' + parts[1].slice(0, 2);
+                                                            }
+
+                                                            field.onChange(value);
+                                                            setValue("totalHours", value);
                                                         }}
                                                         disabled={watch("shiftTypeId") !== 1}
                                                     />
@@ -439,6 +471,40 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                                                         label="Total hours"
                                                         type={`text`}
                                                         disabled={true}
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Controller
+                                                name="autoTimeInAfterHours"
+                                                control={control}
+                                                render={({ field }) => (
+                                                    <Input
+                                                        {...field}
+                                                        label="Auto Time In After Hours"
+                                                        type={`text`}
+                                                        onChange={(e) => {
+                                                            let value = e.target.value;
+
+                                                            // Allow only numbers and one decimal point
+                                                            value = value.replace(/[^0-9.]/g, '');
+
+                                                            // Prevent multiple dots
+                                                            const parts = value.split('.');
+                                                            if (parts.length > 2) {
+                                                                value = parts[0] + '.' + parts[1];
+                                                            }
+
+                                                            // Limit to 2 decimal places
+                                                            if (parts[1]?.length > 2) {
+                                                                value = parts[0] + '.' + parts[1].slice(0, 2);
+                                                            }
+
+                                                            field.onChange(value);
+                                                            setValue("autoTimeInAfterHours", value);
+                                                        }}
                                                     />
                                                 )}
                                             />

@@ -250,7 +250,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     const setDates = () => {
         const selectedMonth = filter?.value;
-
+        if (selectedMonth === null) {
+            // setValue('startDate', null);
+            // setValue('endDate', null);
+            return;
+        }
         const today = new Date();
         const currentMonth = today.getMonth();
         const year = today.getFullYear();
@@ -652,10 +656,10 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                         <Select
                             options={filterOptions}
                             label={"Filter by Duration"}
-                            placeholder="Select Duration"
+                            placeholder="Select duration"
                             value={filter?.id}
                             onChange={(_, newValue) => {
-                                setFilter(newValue?.value ? newValue : filterOptions[0]);
+                                setFilter(newValue?.value ? newValue : null);
                             }}
                         />
                     </div>
