@@ -87,3 +87,21 @@ export const getLastCompanyDetails = async () => {
         console.log(error)
     }
 }
+
+export const getAutoTimeInAfterHours = async (id) => {
+    try {
+        const response = axiosInterceptor().get(`${companyDetailsURL}/getAutoTimeInAfterHours/${id}`)
+        return response
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateAutoTimeInAfterHours = async (id, data) => {
+    try {
+        const response = axiosInterceptor().post(`${companyDetailsURL}/updateAutoTimeInAfterHours/${id}`, data)
+        return response
+    } catch (error) {
+        console.log(error)
+    }
+}

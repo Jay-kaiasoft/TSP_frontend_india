@@ -1,29 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import AlertDialog from '../../common/alertDialog/alertDialog';
-import { Controller, useForm } from 'react-hook-form';
-import { createShift, deleteShift, getAllShifts, getShift, updateShift } from '../../../service/companyShift/companyShiftService';
+import { deleteShift, getAllShifts, } from '../../../service/companyShift/companyShiftService';
 import PermissionWrapper from '../../common/permissionWrapper/PermissionWrapper';
 import Components from '../../muiComponents/components';
 import CustomIcons from '../../common/icons/CustomIcons';
 import DataTable from '../../common/table/table';
-import Select from '../../common/select/select';
-import Input from '../../common/input/input';
-import InputTimePicker from '../../common/inputTimePicker/inputTimePicker';
 import Button from '../../common/buttons/button';
 import dayjs from 'dayjs';
 import { connect } from 'react-redux';
 import { setAlert, handleSetTitle } from '../../../redux/commonReducers/commonReducers';
-
-const type = [
-    {
-        id: 1,
-        title: "Hourly",
-    },
-    {
-        id: 2,
-        title: "Time Based",
-    }
-]
+import AddShiftModel from '../../models/shift/addShiftModel';
 
 const ManageShift = ({ setAlert, handleSetTitle }) => {
     const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
@@ -34,82 +20,13 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
     const [loading, setLoading] = useState(false)
     const userInfo = JSON.parse(localStorage.getItem("userInfo"))
 
-    const {
-        handleSubmit,
-        control,
-        reset,
-        watch,
-        setValue,
-        formState: { errors },
-    } = useForm({
-        defaultValues: {
-            id: "",
-            companyId: "",
-            shiftName: "",
-            shiftType: "",
-            shiftTypeId: "",
-            startTime: null,
-            endTime: null,
-            hours: "",
-            totalHours: 0,
-        },
-    });
-
-    const submit = async (data) => {
-        const payload = {
-            ...data,
-            companyId: userInfo?.companyId,
-            totalHours: parseFloat(data.totalHours) || 0,
-            startTime: data.startTime
-                ? new Date(data.startTime).toISOString()
-                : null,
-            endTime: data.endTime
-                ? new Date(data.endTime).toISOString()
-                : null,
-            autoTimeInAfterHours: data.autoTimeInAfterHours ? parseFloat(data.autoTimeInAfterHours) : null
-        };
-
-        setLoading(true)
-        if (shiftId) {
-            const response = await updateShift(shiftId, payload)
-            if (response.data.status === 200) {
-                handleGetAllShifts()
-                reset()
-                setOpen(false)
-                setLoading(false)
-            } else {
-                setLoading(false)
-                setAlert({
-                    open: true,
-                    message: response.data.message,
-                    type: "error",
-                })
-            }
-        } else {
-            const response = await createShift(payload)
-            if (response.data.status === 201) {
-                handleGetAllShifts()
-                reset()
-                setOpen(false)
-            } else {
-                setAlert({
-                    open: true,
-                    message: response.data.message,
-                    type: "error",
-                })
-            }
-        }
-    }
-
-    const hanndleClose = () => {
+    const hanndleCloseShiftModel = () => {
         setOpen(false)
-        reset()
         setShiftId(null)
     }
 
-    const handleAddShift = () => {
-        setShiftId(null)
-        reset()
+    const handleAddShift = (id = null) => {
+        setShiftId(id)
         setOpen(true)
     }
 
@@ -154,65 +71,10 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
         }
     }
 
-    const handleGetShift = async () => {
-        if (shiftId) {
-            const response = await getShift(shiftId)
-            if (response.data.status === 200) {
-                const result = response.data.result;
-                setValue("shiftName", result?.shiftName);
-                setValue("shiftType", result?.shiftType);
-                setValue("shiftTypeId", type.find(item => item.title === result?.shiftType)?.id);
-                if (result?.startTime) {
-                    setValue("startTime", dayjs(result?.startTime))
-                }
-                if (result?.endTime) {
-                    setValue("endTime", dayjs(result?.endTime))
-                }
-                setValue("hours", result?.hours);
-                setValue("totalHours", parseFloat(result?.totalHours) || 0);
-                setValue("autoTimeInAfterHours", parseFloat(result?.autoTimeInAfterHours) || null);
-            }
-        }
-    }
-
-    const handleSelectShift = (id) => {
-        reset()
-        setShiftId(id)
-        setOpen(true)
-    }
-
     useEffect(() => {
         handleGetAllShifts()
         handleSetTitle("Manage Shifts")
     }, [])
-
-    useEffect(() => {
-        handleGetShift()
-    }, [shiftId])
-
-    useEffect(() => {
-        if (watch("startTime") && watch("endTime")) {
-            const start = dayjs(watch("startTime"));
-            const end = dayjs(watch("endTime"));
-
-            let diff = end.diff(start, "minute");
-
-            if (diff < 0) {
-                diff += 24 * 60;
-            }
-
-            const hours = Math.floor(diff / 60);
-            const minutes = diff % 60;
-
-            const total = `${hours}.${minutes.toString().padStart(2, '0')}`;
-            setValue("totalHours", isNaN(total) ? 0.00 : parseFloat(total));
-        }
-        else {
-            if (!watch("hours")) {
-                setValue("totalHours", 0);
-            }
-        }
-    }, [watch("startTime"), watch("endTime")]);
 
     const columns = [
         {
@@ -259,22 +121,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                     </div>
                 );
             },
-        },
-        {
-            field: 'autoTimeInAfterHours',
-            headerName: 'Auto Time In After Hours',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 120,
-            sortable: false,
-            renderCell: (params) => {
-                return (
-                    <div>
-                        {params.row.autoTimeInAfterHours ? parseFloat(params.row.autoTimeInAfterHours) : "-"}
-                    </div>
-                );
-            },
-        },
+        },       
         {
             field: 'action',
             headerName: 'action',
@@ -289,7 +136,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
                             actionId={2}
                             component={
                                 <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
-                                    <Components.IconButton onClick={() => handleSelectShift(params.row.id)}>
+                                    <Components.IconButton onClick={() => handleAddShift(params.row.id)}>
                                         <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
                                     </Components.IconButton>
                                 </div>
@@ -335,201 +182,11 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
 
     return (
         <div className='px-4 lg:px-0'>
-            <div className={`border rounded-lg bg-white w-full lg:w-full mb-5 transform transition-all duration-500 ease-in-out ${open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-5 pointer-events-none'}`}>
-                {
-                    open && (
-                        <div className='p-4'>
-                            <form noValidate onSubmit={handleSubmit(submit)}>
-                                <div className='md:flex justify-start items-center gap-4'>
-                                    <div className='grid md:grid-cols-7 gap-3 w-full'>
-                                        <div>
-                                            <Controller
-                                                name="shiftName"
-                                                control={control}
-                                                rules={{
-                                                    required: "Shift name is required",
-                                                }}
-                                                render={({ field }) => (
-                                                    <Input
-                                                        {...field}
-                                                        label="Shift name"
-                                                        type={`text`}
-                                                        error={errors.shiftName}
-                                                        onChange={(e) => {
-                                                            field.onChange(e);
-                                                        }}
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Controller
-                                                name="shiftTypeId"
-                                                control={control}
-                                                rules={{ required: "Shift Type is required" }}
-                                                render={({ field }) => (
-                                                    <Select
-                                                        options={type}
-                                                        error={!!errors.shiftTypeId}
-                                                        label="Shift Type"
-                                                        placeholder="Select type"
-                                                        value={parseInt(watch("shiftTypeId")) || null}
-                                                        onChange={(_, newValue) => {
-                                                            field.onChange(newValue?.id || null);
-                                                            setValue("shiftType", newValue?.title || null);
-                                                            setValue("shiftTypeId", newValue?.id || null);
-                                                            if (newValue?.title === "Hourly") {
-                                                                setValue("startTime", null);
-                                                                setValue("endTime", null);
-                                                            } else if (newValue?.title === "Time Based") {
-                                                                setValue("hours", 0);
-                                                            } else {
-                                                                setValue("hours", 0);
-                                                                setValue("startTime", null);
-                                                                setValue("endTime", null);
-                                                            }
-                                                        }}
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Controller
-                                                name="hours"
-                                                control={control}
-                                                rules={{
-                                                    required: watch("shiftTypeId") === 1 ? "Hours is required" : null,
-                                                }}
-                                                render={({ field }) => (
-                                                    <Input
-                                                        {...field}
-                                                        label="Shift Hours"
-                                                        type="text"
-                                                        error={errors.hours}
-                                                        value={field.value}
-                                                        onChange={(e) => {
-                                                            let value = e.target.value;
-
-                                                            // Allow only numbers and one decimal point
-                                                            value = value.replace(/[^0-9.]/g, '');
-
-                                                            // Prevent multiple dots
-                                                            const parts = value.split('.');
-                                                            if (parts.length > 2) {
-                                                                value = parts[0] + '.' + parts[1];
-                                                            }
-
-                                                            // Limit to 2 decimal places
-                                                            if (parts[1]?.length > 2) {
-                                                                value = parts[0] + '.' + parts[1].slice(0, 2);
-                                                            }
-
-                                                            field.onChange(value);
-                                                            setValue("totalHours", value);
-                                                        }}
-                                                        disabled={watch("shiftTypeId") !== 1}
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <InputTimePicker
-                                                label="Start Time"
-                                                name="startTime"
-                                                control={control}
-                                                disabled={watch("shiftTypeId") !== 2 ? true : false}
-                                                rules={{
-                                                    required: watch("shiftTypeId") === 2 ? "Start time is required" : null,
-                                                }}
-                                                maxTime={watch("endTime")}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <InputTimePicker
-                                                label="End Time"
-                                                name="endTime"
-                                                control={control}
-                                                disabled={watch("shiftTypeId") !== 2 ? true : false}
-                                                rules={{
-                                                    required: watch("shiftTypeId") === 2 ? "End time is required" : null,
-                                                }}
-                                                minTime={watch("startTime")}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Controller
-                                                name="totalHours"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <Input
-                                                        {...field}
-                                                        label="Total hours"
-                                                        type={`text`}
-                                                        disabled={true}
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Controller
-                                                name="autoTimeInAfterHours"
-                                                control={control}
-                                                render={({ field }) => (
-                                                    <Input
-                                                        {...field}
-                                                        label="Auto Time In After Hours"
-                                                        type={`text`}
-                                                        onChange={(e) => {
-                                                            let value = e.target.value;
-
-                                                            // Allow only numbers and one decimal point
-                                                            value = value.replace(/[^0-9.]/g, '');
-
-                                                            // Prevent multiple dots
-                                                            const parts = value.split('.');
-                                                            if (parts.length > 2) {
-                                                                value = parts[0] + '.' + parts[1];
-                                                            }
-
-                                                            // Limit to 2 decimal places
-                                                            if (parts[1]?.length > 2) {
-                                                                value = parts[0] + '.' + parts[1].slice(0, 2);
-                                                            }
-
-                                                            field.onChange(value);
-                                                            setValue("autoTimeInAfterHours", value);
-                                                        }}
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className='mt-3 md:mt-0 flex justify-start items-center gap-4'>
-                                        <div>
-                                            <Button useFor={"disabled"} type={'button'} text={"Cancel"} onClick={hanndleClose} />
-                                        </div>
-
-                                        <div>
-                                            <Button type={'submit'} text={shiftId ? "Update" : "Add"} />
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    )
-                }
-            </div>
             <div className='border rounded-lg bg-white w-full lg:w-full '>
                 <DataTable columns={columns} rows={shifts} getRowId={getRowId} showButtons={true} buttons={actionButtons} />
             </div>
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteShift} handleClose={handleCloseDialog} loading={loading} />
+            <AddShiftModel open={open} handleClose={hanndleCloseShiftModel} handleGetAllShifts={handleGetAllShifts} shiftId={shiftId} />
         </div>
     )
 }
