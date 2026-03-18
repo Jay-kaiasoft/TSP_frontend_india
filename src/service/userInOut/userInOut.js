@@ -116,3 +116,12 @@ export const addUserTimeInPhone = async (params) => {
         console.log(error)
     }
 }
+
+export const deleteUserInOut = async (id) => {
+    try {
+        const response = axiosInterceptor().delete(`${userInOutURL}/delete/${id}`)
+        return response
+    } catch (error) {
+        console.log(error)
+    }
+}

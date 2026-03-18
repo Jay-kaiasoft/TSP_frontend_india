@@ -55,6 +55,7 @@ const PFReport = () => {
 
     useEffect(() => {
         handleGetCompanyInfo();
+        document.title = "PF Report - Calculate Salary";
     }, []);
 
     useEffect(() => {
@@ -95,26 +96,26 @@ const PFReport = () => {
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
         },
-        {
-            field: 'totalDays',
-            headerName: 'Total Days',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 300,
-            align: "right",
-            sortable: false,
-            headerAlign: "right",
-        },
-        {
-            field: 'daysWorked',
-            headerName: 'Working Days',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 300,
-            align: "right",
-            sortable: false,
-            headerAlign: "right",
-        },
+        // {
+        //     field: 'totalDays',
+        //     headerName: 'Total Days',
+        //     headerClassName: 'uppercase',
+        //     flex: 1,
+        //     maxWidth: 300,
+        //     align: "right",
+        //     sortable: false,
+        //     headerAlign: "right",
+        // },
+        // {
+        //     field: 'daysWorked',
+        //     headerName: 'Working Days',
+        //     headerClassName: 'uppercase',
+        //     flex: 1,
+        //     maxWidth: 300,
+        //     align: "right",
+        //     sortable: false,
+        //     headerAlign: "right",
+        // },
         {
             field: 'employee_pf_amount',
             headerName: 'Employee PF',

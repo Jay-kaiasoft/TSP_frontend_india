@@ -1,10 +1,14 @@
 import CustomIcons from '../../../common/icons/CustomIcons'
 import { useTheme } from '@mui/material';
+import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const AutomationRules = () => {
     const theme = useTheme();
 
+    useEffect(() => {
+        document.title = "Automation Rules - Calculate Salary";
+    }, [])
     return (
         <>
             <div className='px-4 lg:px-0'>

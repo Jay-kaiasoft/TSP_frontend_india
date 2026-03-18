@@ -68,6 +68,7 @@ const DashboardComponent = ({ handleSetTitle, handleSetTimeIn, timeIn }) => {
   };
 
   useEffect(() => {
+    document.title = "Dashboard - Calculate Salary";
     handleSetTitle("Dashboard");
     handleGetDashboardData();
     // No need to call getUserLastInOut here manually, the Provider handles hydration

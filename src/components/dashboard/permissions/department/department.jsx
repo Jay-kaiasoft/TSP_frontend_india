@@ -137,6 +137,7 @@ const Department = ({ setAlert, handleSetTitle }) => {
 
     useEffect(() => {
         handleSetTitle('Manage Departments')
+        document.title = "Manage Departments - Calculate Salary";
         handleGetAllDepartment()
     }, [])
 

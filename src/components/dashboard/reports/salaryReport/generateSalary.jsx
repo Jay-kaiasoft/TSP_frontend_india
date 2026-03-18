@@ -256,6 +256,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
 
     useEffect(() => {
         handleSetTitle("Generate Salary");
+        document.title = "Generate Salary - Calculate Salary";
         const today = new Date();
         const lastMonth = today.getMonth();
         const defaultFilter = filterOptions.find(option => option.value === (lastMonth === 0 ? 12 : lastMonth));

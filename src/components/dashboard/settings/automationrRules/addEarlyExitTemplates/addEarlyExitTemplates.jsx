@@ -73,6 +73,7 @@ const AddEarlyExitTemplates = () => {
     }
 
     useEffect(() => {
+        document.title = "Manage Early-Exit Rules - Calculate Salary";
         handleAttendancePenaltyRule();
     }, []);
 

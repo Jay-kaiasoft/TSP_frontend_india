@@ -74,6 +74,7 @@ const ManageShift = ({ setAlert, handleSetTitle }) => {
     useEffect(() => {
         handleGetAllShifts()
         handleSetTitle("Manage Shifts")
+        document.title = "Manage Shifts - Calculate Salary";
     }, [])
 
     const columns = [

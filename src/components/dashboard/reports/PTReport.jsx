@@ -55,6 +55,7 @@ const PTReport = () => {
 
     useEffect(() => {
         handleGetCompanyInfo();
+        document.title = "PT Report - Calculate Salary";
     }, []);
 
     useEffect(() => {

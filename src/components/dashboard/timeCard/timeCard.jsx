@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/plugin/timezone'; // import the timezone data
 
-import { getAllEntriesByUserId } from '../../../service/userInOut/userInOut';
+import { deleteUserInOut, getAllEntriesByUserId } from '../../../service/userInOut/userInOut';
 import { handleConvertUTCDateToLocalDate, handleFormateUTCDateToLocalDate } from '../../../service/common/commonService';
 import { getAllEmployeeListByCompanyId } from '../../../service/companyEmployee/companyEmployeeService';
 import { connect } from 'react-redux';
@@ -27,6 +27,7 @@ import Select from '../../common/select/select';
 import SelectMultiple from '../../common/select/selectMultiple';
 import { getAllDepartment } from '../../../service/department/departmentService';
 import { AddClockInOut } from '../../models/clockInOut/addClockInOut';
+import AlertDialog from '../../common/alertDialog/alertDialog';
 
 
 const filterOptions = [
@@ -87,6 +88,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const [openInOutModel, setOpenInOutModel] = useState(false);
     const [clockInOutId, setClockInOutId] = useState(null);
     const [filter, setFilter] = useState(null);
+    const [dialog, setDialog] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [timeInOutId, setTimeInOutId] = useState(null)
+    const [loading, setLoading] = useState(false);
 
     const {
         control,
@@ -280,6 +284,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
 
     useEffect(() => {
+        document.title = "Time Card - Calculate Salary";
         handleSetTitle("Time Card")
         const today = new Date();
         const lastMonth = today.getMonth();
@@ -393,6 +398,41 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         return `${seconds} sec`;
     };
 
+
+    const handleCloseDialog = () => {
+        setDialog({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: ''
+        })
+        setLoading(false)
+        setTimeInOutId(null)
+    }
+
+    const handleOpenDeleteDialog = (id) => {
+        setTimeInOutId(id)
+        setDialog({
+            open: true,
+            title: 'Delete Time In/Out Record',
+            message: 'Are you sure! Do you want to delete this record?',
+            actionButtonText: 'Delete'
+        })
+    }
+
+    const handleDeleteUserInOut = async () => {
+        setLoading(true)
+        const res = await deleteUserInOut(timeInOutId)
+        if (res.data.status !== 200) {
+            setAlert({ open: true, message: res?.data?.message, type: "error" })
+            setLoading(false)
+        } else {
+            setLoading(false)
+            setTimeInOutId(null)
+            handleGetAllEntriesByUserId()
+            handleCloseDialog()
+        }
+    }
 
     const columns = [
         {
@@ -557,15 +597,26 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             renderCell: (params) => {
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
-
                         <PermissionWrapper
-                            functionalityName="UserClock"
-                            moduleName="UserClock"
+                            functionalityName="Time Card"
+                            moduleName="Clock-In-Out"
                             actionId={2}
                             component={
                                 <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                                     <Components.IconButton onClick={() => handleOpenInOutModal(params.row.id)}>
                                         <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
+                                    </Components.IconButton>
+                                </div>
+                            }
+                        />
+                        <PermissionWrapper
+                            functionalityName="Time Card"
+                            moduleName="Clock-In-Out"
+                            actionId={3}
+                            component={
+                                <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
+                                    <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
+                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
                                     </Components.IconButton>
                                 </div>
                             }
@@ -752,6 +803,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 </div>
             )}
             <AddClockInOut open={openInOutModel} handleClose={handleCloseInOutModal} employeeList={users} getRecords={handleGetAllEntriesByUserId} id={clockInOutId} />
+            <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteUserInOut} handleClose={handleCloseDialog} loading={loading}/>
+
         </>
     )
 }

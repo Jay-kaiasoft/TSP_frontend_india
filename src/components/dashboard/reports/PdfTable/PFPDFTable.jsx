@@ -59,8 +59,8 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                             <th className="border border-gray-300 py-3 px-4 text-left text-sm font-bold text-gray-700 capitalize align-middle">Employee Name</th>
                             <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Basic Salary(Monthly)</th>
                             <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Total Basic Salary</th>
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Total Days</th>
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Working Days</th>
+                            {/* <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Total Days</th> */}
+                            {/* <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Working Days</th> */}
                             <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Employee PF</th>
                             <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Employer PF</th>
                             <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Total PF</th>
@@ -73,8 +73,8 @@ const PFPDFTable = ({ data, companyInfo, filter }) => {
                                 <td className="border border-gray-300 text-left text-sm py-4 px-4 align-middle">{item?.userName}</td>
                                 <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{item?.basic_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{item?.total_basic_salary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-                                <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">{item?.totalDays}</td>
-                                <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">{item?.daysWorked}</td>
+                                {/* <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">{item?.totalDays}</td> */}
+                                {/* <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">{item?.daysWorked}</td> */}
                                 <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{item?.employee_pf_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{item?.employer_pf_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                 <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{item?.total_amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>

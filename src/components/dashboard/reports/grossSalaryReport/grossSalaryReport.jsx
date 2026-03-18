@@ -47,6 +47,7 @@ const GrossSalaryReport = () => {
     }
 
     useEffect(() => {
+        document.title = "Gross Salary Report - Calculate Salary";
         handleFetchData()
     }, [])
 
@@ -97,7 +98,7 @@ const GrossSalaryReport = () => {
             flex: 1,
             maxWidth: 300,
             align: "right",
-            headerAlign: "right",        
+            headerAlign: "right",
             sortable: false,
             renderCell: (params) =>
                 params.row.isTotalRow

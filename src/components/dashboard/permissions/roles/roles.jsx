@@ -154,6 +154,7 @@ const Roles = ({ handleSetTitle }) => {
 
   useState(() => {
     handleSetTitle("Role")
+    document.title = "Manage Roles - Calculate Salary";
     handleGetAllUserRoles()
   }, [])
 

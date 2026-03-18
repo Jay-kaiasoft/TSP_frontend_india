@@ -117,15 +117,15 @@ const ManageEmployees = ({ handleSetTitle, setAlert }) => {
             minWidth: 90
         },
         {
-            field: 'country',
-            headerName: 'Country',
+            field: 'shiftType',
+            headerName: 'Shift Type',
             headerClassName: 'uppercase',
             flex: 1,
             minWidth: 90,
             renderCell: (params) => {
                 return (
                     <p className='text-sm my-4'>
-                        {params?.row?.country || "-"}
+                        {params?.row?.companyShiftDto?.shiftType || "-"}
                     </p>
                 )
             }
@@ -144,7 +144,7 @@ const ManageEmployees = ({ handleSetTitle, setAlert }) => {
                 )
             }
         },
-       
+
         {
             field: 'action',
             headerName: 'Action',
@@ -203,6 +203,7 @@ const ManageEmployees = ({ handleSetTitle, setAlert }) => {
     }
 
     useEffect(() => {
+        document.title = "Manage Employee - Calculate Salary";
         handleSetTitle("Manage Employees")
         handleGetAllEmployees()
     }, [])

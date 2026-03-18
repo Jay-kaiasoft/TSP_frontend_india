@@ -73,6 +73,7 @@ const AddLateEntryTemplates = () => {
     }
 
     useEffect(() => {
+        document.title = "Manage Late-Entry Rules - Calculate Salary";
         handleAttendancePenaltyRule();
     }, []);
 

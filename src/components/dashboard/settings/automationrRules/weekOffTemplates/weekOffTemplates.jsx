@@ -118,6 +118,7 @@ const WeekOffTemplates = () => {
     }
 
     useEffect(() => {
+        document.title = "Manage Weekly-off Templates - Calculate Salary";
         handleGetAllWeekOffTemplate()
     }, [])
 

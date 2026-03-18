@@ -651,6 +651,7 @@ const CompanyDetails = ({ setAlert, handleSetTitle, handleSetCompanyLogo }) => {
     }, [filterValue])
 
     useEffect(() => {
+        document.title = "Manage Company - Calculate Salary";
         setSelectedCompanyDetails(null)
         handleSetTitle("Manage Company")
         handleGetCurrentLocation()

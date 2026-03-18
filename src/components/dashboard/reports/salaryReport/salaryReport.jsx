@@ -151,6 +151,7 @@ const SalaryReport = ({ handleSetTitle }) => {
 
     useEffect(() => {
         handleSetTitle("Salary Report");
+        document.title = "Salary Report - Calculate Salary";
         const today = new Date();
         const lastMonth = today.getMonth();
         const defaultFilter = filterOptions.find(option => option.value === (lastMonth === 0 ? 12 : lastMonth));

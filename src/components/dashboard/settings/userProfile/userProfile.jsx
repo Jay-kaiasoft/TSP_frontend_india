@@ -336,6 +336,7 @@ const UserProfile = ({ setAlert, handleSetTitle, handleSetUserDetails, userDetai
 
   useEffect(() => {
     handleSetTitle("Profile")
+    document.title = "Profile - Calculate Salary";
     handleGetUser()
     handleGetAllCountrys()
   }, [])

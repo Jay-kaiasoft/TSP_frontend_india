@@ -181,6 +181,7 @@ const HolidaysTemplates = () => {
     }
 
     useEffect(() => {
+        document.title = "Manage Holidays Templates - Calculate Salary";
         handleGetHolidaysTemplates();
     }, [])
 

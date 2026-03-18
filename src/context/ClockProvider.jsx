@@ -128,6 +128,8 @@ export const ClockProvider = ({ children, onStatusChange }) => {
             setIsRunning(true);
 
             localStorage.setItem("timeIn", "true");
+            localStorage.setItem("timeInId", response.data.result.id);
+
             onStatusChange?.(true);
         }
     };
@@ -135,10 +137,10 @@ export const ClockProvider = ({ children, onStatusChange }) => {
     const clockOut = async () => {
         if (!isRunning) return;
 
-        const userInfo = userInfoRef.current || JSON.parse(localStorage.getItem("userInfo") || "null");
-        if (!userInfo?.employeeId) return;
+        const id = localStorage.getItem("timeInId");
+        if (!id) return;
 
-        const response = await updateUserTimeIn(userInfo.employeeId);
+        const response = await updateUserTimeIn(parseInt(id));
 
         if (response?.data?.status === 200) {
             setIsRunning(false);
@@ -146,6 +148,7 @@ export const ClockProvider = ({ children, onStatusChange }) => {
             setElapsedSec(0);
 
             localStorage.removeItem("timeIn");
+            localStorage.removeItem("timeInId");
             onStatusChange?.(false);
         }
     };

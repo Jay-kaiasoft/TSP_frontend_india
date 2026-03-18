@@ -241,6 +241,7 @@ const AddRoles = ({ setAlert, handleSetTitle }) => {
 
     useEffect(() => {
         handleSetTitle("Manage Roles");
+        document.title = "Add Role - Calculate Salary";
         handleGetAllActions();
         handleGetAllActionsByRole();
     }, []);

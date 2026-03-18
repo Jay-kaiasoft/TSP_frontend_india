@@ -71,6 +71,7 @@ const OvertimeRules = () => {
     }
 
     useEffect(() => {
+        document.title = "Manage Overtime Rules - Calculate Salary";
         handleGetAllOvertimeRules();
     }, []);
 
