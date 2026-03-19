@@ -51,6 +51,15 @@ export const getAllEntriesByUserId = async (params) => {
     }
 }
 
+export const getAllRecordsGroupByUser = async (params) => {
+    try {
+        const response = axiosInterceptor().get(`${userInOutURL}/getAllRecordsGroupByUser?${params}`)
+        return response
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 export const getUserInOutRecord = async (id) => {
     try {
         const response = axiosInterceptor().get(`${userInOutURL}/get/${id}`)

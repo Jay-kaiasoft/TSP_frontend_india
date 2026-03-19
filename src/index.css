@@ -17,7 +17,7 @@ code {
 
 
 .MuiTabs-indicator {
-  display: contents;  
+  display: contents;
 }
 
 /* width */
@@ -43,15 +43,20 @@ code {
 
 @media print {
   body {
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
+
   table {
-      width: 100% !important;
+    width: 100% !important;
   }
-  th, td {
-      white-space: nowrap; /* Prevent text wrapping */
-      font-size: 10px; /* Reduce font size */
+
+  th,
+  td {
+    white-space: nowrap;
+    /* Prevent text wrapping */
+    font-size: 10px;
+    /* Reduce font size */
   }
 }
 
@@ -65,3 +70,9 @@ code {
     break-inside: avoid;
   }
 } */
+
+
+.total-row {
+  background-color: #f5f5f5 !important;
+  font-weight: bold !important;
+}

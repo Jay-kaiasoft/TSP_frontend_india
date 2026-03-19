@@ -11,7 +11,7 @@ import DataTable from '../../common/table/table';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import 'dayjs/plugin/timezone';
+import 'dayjs/plugin/timezone'; // import the timezone data
 
 import { deleteUserInOut, getAllEntriesByUserId, getAllRecordsGroupByUser } from '../../../service/userInOut/userInOut';
 import { handleConvertUTCDateToLocalDate, handleFormateUTCDateToLocalDate } from '../../../service/common/commonService';
@@ -29,6 +29,7 @@ import { getAllDepartment } from '../../../service/department/departmentService'
 import { AddClockInOut } from '../../models/clockInOut/addClockInOut';
 import AlertDialog from '../../common/alertDialog/alertDialog';
 
+
 const filterOptions = [
     { id: 1, title: 'January', value: 0 },
     { id: 2, title: 'February', value: 1 },
@@ -45,16 +46,29 @@ const filterOptions = [
 ];
 
 const tabData = [
-    { label: 'User Summary' },
-    { label: 'All Entries' },
-];
+    {
+        label: 'User Summary',
+    },
+    {
+        label: 'All Entries',
+    },
+]
 
 const parseDDMMYYYY = (s) => {
     if (!s || typeof s !== "string") return null;
+
     const [dd, mm, yyyy] = s.split("/").map((v) => parseInt(v, 10));
     if (!dd || !mm || !yyyy) return null;
+
     const d = new Date(yyyy, mm - 1, dd);
-    if (d.getFullYear() !== yyyy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null;
+
+    // validate (prevents 32/13/2026 etc)
+    if (
+        d.getFullYear() !== yyyy ||
+        d.getMonth() !== mm - 1 ||
+        d.getDate() !== dd
+    ) return null;
+
     return d;
 };
 
@@ -68,6 +82,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     const [loadingPdf, setLoadingPdf] = useState(false);
 
     const [users, setUsers] = useState([])
+
     const [rows, setRow] = useState([])
     const [companyInfo, setCompanyInfo] = useState()
 
@@ -91,15 +106,19 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 const day = "01";
                 const month = (today.getMonth() + 1).toString().padStart(2, "0");
                 const year = today.getFullYear();
+
                 return `${day}/${month}/${year}`;
             })(),
+
             endDate: (() => {
                 const today = new Date();
                 const day = today.getDate().toString().padStart(2, "0");
                 const month = (today.getMonth() + 1).toString().padStart(2, "0");
                 const year = today.getFullYear();
+
                 return `${day}/${month}/${year}`;
             })(),
+
             id: null,
             timeIn: null,
             timeOut: null,
@@ -111,37 +130,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     });
 
-    // --- Helper functions for grouped view totals ---
-    const sumTimeStrings = (items, field) => {
-        let totalMinutes = 0;
-        items.forEach(item => {
-            const timeStr = item[field];
-            if (timeStr && typeof timeStr === 'string' && timeStr.includes(':')) {
-                const [hours, minutes] = timeStr.split(':').map(Number);
-                totalMinutes += hours * 60 + minutes;
-            }
-        });
-        const hrs = Math.floor(totalMinutes / 60);
-        const mins = totalMinutes % 60;
-        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-    };
-
-    const createUserTotalRow = (user) => {
-        const entries = user.data || [];
-        return {
-            id: `total-${user.id}`,
-            userName: 'Total',
-            rowId: '',
-            timeIn: '',
-            timeOut: '',
-            regular: sumTimeStrings(entries, 'regular'),
-            ot: sumTimeStrings(entries, 'overtime'),
-            total: sumTimeStrings(entries, 'totalHours'),
-            action: '',
-        };
-    };
-
-    // --- Modal handlers ---
     const handleOpenInOutModal = (id = null) => {
         setClockInOutId(id);
         setOpenInOutModel(true);
@@ -155,8 +143,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         setSelectedTab(value);
     }
 
-    // --- Date conversion helpers ---
     function convertToDesiredFormat(date) {
+        // This function now expects a Date object, not an ISO string
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
@@ -166,19 +154,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
     }
 
-    const parseDDMMYYYYTime = (s) => {
-        if (!s) return null;
-        const [datePart, timePartRaw] = s.split(",").map(t => t.trim());
-        if (!datePart || !timePartRaw) return null;
-        const [dd, mm, yyyy] = datePart.split("/").map(Number);
-        const [timePart, ampm] = timePartRaw.split(" ");
-        let [hh, min, ss] = timePart.split(":").map(Number);
-        if (ampm === "PM" && hh < 12) hh += 12;
-        if (ampm === "AM" && hh === 12) hh = 0;
-        return new Date(yyyy, mm - 1, dd, hh, min, ss);
-    };
-
-    // --- Data fetching functions ---
     const handleGetAllUsers = async () => {
         if (((userInfo?.roleName === "Admin" || userInfo?.roleName === "Owner") && userInfo?.companyId)) {
             const response = await getAllEmployeeListByCompanyId(userInfo?.companyId)
@@ -189,6 +164,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 }
             })
             setUsers(data)
+            // setValue("selectedUserId", [parseInt(userInfo?.employeeId)])
         }
     }
 
@@ -216,12 +192,17 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
     const setDates = () => {
         const selectedMonth = filter?.value;
-        if (selectedMonth === null) return;
+        if (selectedMonth === null) {
+            // setValue('startDate', null);
+            // setValue('endDate', null);
+            return;
+        }
         const today = new Date();
         const currentMonth = today.getMonth();
         const year = today.getFullYear();
 
         const start = new Date(year, selectedMonth, 1);
+
         let end;
         if (selectedMonth === currentMonth) {
             end = today;
@@ -269,6 +250,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             params.append("departmentIds", departmentIds);
         }
 
+        // ✅ parse DD/MM/YYYY properly
         const start = parseDDMMYYYY(watch("startDate"));
         const end = parseDDMMYYYY(watch("endDate"));
 
@@ -277,12 +259,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         if (end) {
             const today = new Date();
             const endCopy = new Date(end);
+
             if (endCopy.toDateString() === today.toDateString()) {
                 params.append("endDate", convertToDesiredFormat(new Date()));
             } else {
                 endCopy.setHours(23, 59, 59, 999);
                 params.append("endDate", convertToDesiredFormat(endCopy));
             }
+        } else if (watch("endDate")) {
+            console.warn("Invalid endDate:", watch("endDate"));
+            // optional: show toast / set error
         }
 
         params.append("companyId", userInfo?.companyId);
@@ -329,6 +315,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             params.append("departmentIds", departmentIds);
         }
 
+        // ✅ parse DD/MM/YYYY properly
         const start = parseDDMMYYYY(watch("startDate"));
         const end = parseDDMMYYYY(watch("endDate"));
 
@@ -337,12 +324,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         if (end) {
             const today = new Date();
             const endCopy = new Date(end);
+
             if (endCopy.toDateString() === today.toDateString()) {
                 params.append("endDate", convertToDesiredFormat(new Date()));
             } else {
                 endCopy.setHours(23, 59, 59, 999);
                 params.append("endDate", convertToDesiredFormat(endCopy));
             }
+        } else if (watch("endDate")) {
+            console.warn("Invalid endDate:", watch("endDate"));
+            // optional: show toast / set error
         }
 
         params.append("companyId", userInfo?.companyId);
@@ -353,7 +344,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
         try {
             const res = await getAllRecordsGroupByUser(params);
-            setRow(res?.data?.result?.users || []);
+            setRow(res?.data?.result || []);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -367,20 +358,17 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     }
 
-    // --- Effects ---
     useEffect(() => {
         document.title = "Time Card - Calculate Salary";
         handleSetTitle("Time Card")
-
         const today = new Date();
         const lastMonth = today.getMonth();
         const defaultFilter = filterOptions?.find(option => option.value === lastMonth);
         setFilter(defaultFilter);
-
         handleGetCompanyInfo()
+        handleCallFilterAPI()
         handleGetAllUsers()
         handleGetAllDepartment()
-        handleCallFilterAPI()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
@@ -388,32 +376,59 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         setDates();
     }, [filter]);
 
-    // --- Duration utilities ---
+
     const formatDuration = (timeIn, timeOut) => {
         if (!timeOut) return;
+
         const diff = new Date(timeOut) - new Date(timeIn);
         if (diff <= 0) return "0 sec";
+
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
         let result = [];
+
         if (days > 0) result.push(`${days} day${days > 1 ? "s" : ""}`);
         if (hours > 0) result.push(`${hours} hr${hours > 1 ? "s" : ""}`);
         if (minutes > 0) result.push(`${minutes} min${minutes > 1 ? "s" : ""}`);
+
         return result.join(" ");
+    };
+
+    const parseDDMMYYYYTime = (s) => {
+        if (!s) return null;
+
+        // "30/01/2026, 10:02:52 PM"
+        const [datePart, timePartRaw] = s.split(",").map(t => t.trim());
+        if (!datePart || !timePartRaw) return null;
+
+        const [dd, mm, yyyy] = datePart.split("/").map(Number);
+
+        const [timePart, ampm] = timePartRaw.split(" ");
+        let [hh, min, ss] = timePart.split(":").map(Number);
+
+        if (ampm === "PM" && hh < 12) hh += 12;
+        if (ampm === "AM" && hh === 12) hh = 0;
+
+        return new Date(yyyy, mm - 1, dd, hh, min, ss);
     };
 
     const getTotalDurationInMs = (rows = []) => {
         return rows.reduce((sum, r) => {
             const start = parseDDMMYYYYTime(r?.timeIn);
             const end = parseDDMMYYYYTime(r?.timeOut);
+
             if (!start || !end) return sum;
             if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return sum;
+
             const diff = end - start;
             if (diff <= 0) return sum;
+
             return sum + diff;
         }, 0);
     };
+
 
     const formatHoursToHrMin = (hours) => {
         const hrs = Math.floor(hours);
@@ -427,9 +442,12 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 const timeIn = new Date(handleConvertUTCDateToLocalDate(row?.timeIn));
                 const timeOut = new Date(handleConvertUTCDateToLocalDate(row?.timeOut));
                 const totalHours = parseFloat(row?.companyShiftDto?.totalHours) || 0;
+
                 const workedMs = timeOut - timeIn;
-                const workedHours = workedMs / (1000 * 60 * 60);
+                const workedHours = workedMs / (1000 * 60 * 60); // Convert ms to hours
+
                 const ot = workedHours > totalHours ? workedHours - totalHours : 0;
+
                 return total + ot;
             }, 0);
         } else {
@@ -438,18 +456,20 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     };
 
     const formatTotalDuration = (ms) => {
-        if (ms == null || Number.isNaN(ms)) return "0 sec";
-        if (ms <= 0) return "0 sec";
+        if (ms == null || Number.isNaN(ms)) return "0 sec"; // handles null/undefined/NaN
+        if (ms <= 0) return "0 sec";                         // handles 0 or negative
+
         const totalSeconds = Math.floor(ms / 1000);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
+
         if (hours > 0) return `${hours} hr ${minutes} min`;
         if (minutes > 0) return `${minutes} min ${seconds} sec`;
         return `${seconds} sec`;
     };
 
-    // --- Delete dialog handlers ---
+
     const handleCloseDialog = () => {
         setDialog({
             open: false,
@@ -485,7 +505,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         }
     }
 
-    // --- Table columns ---
     const columns = [
         {
             field: 'userName',
@@ -495,6 +514,13 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             minWidth: 120,
             align: "left",
             headerAlign: "left",
+            renderCell: (params) => {
+                return (
+                    <div>
+                        {params.row?.firstName} {params.row?.lastName}
+                    </div>
+                );
+            },
         },
         {
             field: 'rowId',
@@ -505,19 +531,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                return <div>{handleFormateUTCDateToLocalDate(params.row?.createdOn)}</div>;
-            },
-        },
-        {
-            field: 'regular',
-            headerName: 'regular',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 110,
-            align: "left",
-            headerAlign: "left",
-            renderCell: (params) => {
-                return <div>{params?.row?.companyShiftDto?.totalHours ? `${params?.row?.companyShiftDto?.totalHours} h` : '0 h'}</div>;
+                return (
+                    <div>
+                        {handleFormateUTCDateToLocalDate(params.row?.createdOn)}
+                    </div>
+                );
             },
         },
         {
@@ -529,15 +547,19 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                return params.row?.timeIn ? (
-                    <div>
-                        {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true,
-                        })}
-                    </div>
-                ) : <span>-</span>;
+                return (
+                    <>
+                        <div className="flex justify-start items-center gap-3">
+                            <div className="cursor-pointer">
+                                {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true,
+                                })}
+                            </div>
+                        </div>
+                    </>
+                );
             },
         },
         {
@@ -549,34 +571,42 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                return params.row?.timeOut ? (
-                    <div>
-                        {handleConvertUTCDateToLocalDate(params.row?.timeOut)?.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true,
-                        })}
-                    </div>
-                ) : <span>-</span>;
+                return (
+                    <>
+                        {
+                            (params.row?.timeOut !== null && params.row?.timeOut !== undefined) ? (
+                                <>
+                                    <div className="flex justify-start items-center gap-3">
+                                        <div className="cursor-pointer">
+                                            {handleConvertUTCDateToLocalDate(params?.row?.timeOut)?.toLocaleTimeString([], {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true,
+                                            })}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : <span>-</span>
+                        }
+                    </>
+                );
             },
         },
         {
-            field: 'total',
-            headerName: 'Total Hours',
+            field: 'regular',
+            headerName: 'regular',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 80,
+            minWidth: 110,
             align: "left",
             headerAlign: "left",
-        },
-        {
-            field: 'breakTime',
-            headerName: 'Break Time',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 80,
-            align: "left",
-            headerAlign: "left",
+            renderCell: (params) => {
+                return (
+                    <div>
+                        {params?.row?.companyShiftDto?.totalHours ? `${params?.row?.companyShiftDto?.totalHours} h` : '0 h'}
+                    </div>
+                );
+            },
         },
         {
             field: 'ot',
@@ -586,24 +616,48 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             minWidth: 80,
             align: "left",
             headerAlign: "left",
+            renderCell: (params) => {
+                const timeIn = new Date(handleConvertUTCDateToLocalDate(params.row?.timeIn));
+                const timeOut = new Date(handleConvertUTCDateToLocalDate(params.row?.timeOut));
+                const totalHours = parseFloat(params.row?.companyShiftDto?.totalHours) || 0;
+
+                // Calculate worked hours
+                const durationMs = timeOut - timeIn;
+                const workedHours = durationMs / (1000 * 60 * 60); // in hours
+
+                // Calculate OT if workedHours > totalHours
+                let otHours = 0;
+                if (workedHours > totalHours) {
+                    otHours = workedHours - totalHours;
+                }
+
+                // Format OT hours into hr/min
+                const otWholeHours = Math.floor(otHours);
+                const otMinutes = Math.floor((otHours - otWholeHours) * 60);
+
+                const formattedOT =
+                    otWholeHours > 0 || otMinutes > 0
+                        ? `${otWholeHours > 0 ? `${otWholeHours} hrs` : ''}${otMinutes > 0 ? ` ${otMinutes} min` : ''}`.trim()
+                        : '00:00';
+
+                return <div>{formattedOT}</div>;
+            }
         },
         {
-            field: 'status',
-            headerName: 'Status',
-            headerClassName: 'uppercase',
-            flex: 1,
-            minWidth: 80,
-            align: "left",
-            headerAlign: "left",
-        },
-        {
-            field: 'workHours',
-            headerName: 'Work Hours',
+            field: 'total',
+            headerName: 'total',
             headerClassName: 'uppercase',
             flex: 1,
             minWidth: 110,
             align: "left",
-            headerAlign: "left",            
+            headerAlign: "left",
+            renderCell: (params) => {
+                return (
+                    <div>
+                        {formatDuration(handleConvertUTCDateToLocalDate(params.row?.timeIn), handleConvertUTCDateToLocalDate(params.row?.timeOut))}
+                    </div>
+                );
+            },
         },
         {
             field: 'action',
@@ -612,13 +666,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             flex: 1,
             minWidth: 80,
             renderCell: (params) => {
-                // Safely check if this is a total row (id starts with 'total-')
-                const rowId = params?.row?.id;
-                if (!rowId) return null; // no id, don't render actions
-                if (typeof rowId === 'string' && rowId.startsWith('total-')) {
-                    return null; // hide actions for total rows
-                }
-                // For all other rows (ids can be numbers or strings), show actions
                 return (
                     <div className='flex items-center gap-2 justify-start h-full'>
                         <PermissionWrapper
@@ -628,7 +675,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             component={
                                 <div className='bg-blue-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                                     <Components.IconButton onClick={() => handleOpenInOutModal(params.row.id)}>
-                                        <CustomIcons iconName='fa-solid fa-pen-to-square' css='cursor-pointer text-white h-4 w-4' />
+                                        <CustomIcons iconName={'fa-solid fa-pen-to-square'} css='cursor-pointer text-white h-4 w-4' />
                                     </Components.IconButton>
                                 </div>
                             }
@@ -640,7 +687,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             component={
                                 <div className='bg-red-600 h-8 w-8 flex justify-center items-center rounded-full text-white'>
                                     <Components.IconButton onClick={() => handleOpenDeleteDialog(params.row.id)}>
-                                        <CustomIcons iconName='fa-solid fa-trash' css='cursor-pointer text-white h-4 w-4' />
+                                        <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-white h-4 w-4' />
                                     </Components.IconButton>
                                 </div>
                             }
@@ -651,58 +698,10 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         },
     ];
 
-    // Columns for grouped view (use precomputed fields, no action column)
-    const groupedColumns = columns
-        .map(col => {
-            if (col.field === 'regular') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.regular || '00:00'}</div>,
-                };
-            }
-            if (col.field === 'breakTime') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.breakTime || '00:00'}</div>,
-                };
-            }
-            if (col.field === 'workHours') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.workHours || '00:00'}</div>,
-                };
-            }
-            if (col.field === 'ot') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.overtime || '00:00'}</div>,
-                };
-            }
-            if (col.field === 'total') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.totalHours || '00:00'}</div>,
-                };
-            }
-            if (col.field === 'status') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.status || "-"}</div>,
-                };
-            }
-
-            return col;
-        })
-    // .filter(col => col.field !== 'action');
     const getRowId = (row) => {
-        if (selectedTab === 0) {
-            return row.rowId;
-        } else {
-            return row.id;
-        }
-    };
+        return row.id;
+    }
 
-    // --- PDF generation ---
     const generatePDF = async () => {
         setShowPdfContent(true);
         setLoadingPdf(true);
@@ -719,16 +718,31 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
             for (let i = 0; i < pages.length; i++) {
                 const page = pages[i];
+
                 const canvas = await html2canvas(page, {
-                    scale: 1.2,
+                    scale: 1.2,                // ✅ reduced
                     useCORS: true,
                     backgroundColor: "#ffffff",
                 });
+
+                // ✅ JPEG instead of PNG
                 const imgData = canvas.toDataURL("image/jpeg", 0.75);
+
                 const imgWidth = 190;
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
                 if (i > 0) pdf.addPage();
-                pdf.addImage(imgData, "JPEG", 10, 10, imgWidth, imgHeight, undefined, "FAST");
+
+                pdf.addImage(
+                    imgData,
+                    "JPEG",
+                    10,
+                    10,
+                    imgWidth,
+                    imgHeight,
+                    undefined,
+                    "FAST"        // ✅ jsPDF compression
+                );
             }
 
             pdf.save(
@@ -756,7 +770,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         )
     }
 
-    // --- Render ---
     return (
         <>
             <div className='py-2 px-4 lg:p-4 border rounded-lg bg-white'>
@@ -832,33 +845,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     <Tabs tabsData={tabData} selectedTab={selectedTab} handleChange={handleChangeTab} type={'underline'} />
                 </div>
 
-                {selectedTab === 0 ? (
+                <div className='border rounded-lg bg-white lg:w-full shadow-[0px_4px_14px_0px_rgba(38,43,67,0.16)]'>
                     <div>
-                        <div className="mb-4 flex justify-end">
-                            {actionButtons()}
-                        </div>
-                        {rows?.map((user) => (
-                            <div key={user.id} className="mb-6 border p-4 rounded-lg shadow-sm">
-                                <h3 className="text-lg font-semibold mb-3 text-gray-700 capitalize text-center">{user.username}</h3>
-                                <DataTable
-                                    columns={groupedColumns}
-                                    rows={user?.data || []}
-                                    getRowId={getRowId}
-                                    height={user.data?.length > 0 ? 350 : 150}
-                                    showButtons={false}
-                                    footerRowData={user.data?.length > 0 ? createUserTotalRow(user) : null}
-                                    footerRowClassName="total-row"
-                                />
-                            </div>
-                        ))}
+                        <DataTable columns={columns} rows={rows} getRowId={getRowId} showButtons={true} buttons={actionButtons} />
                     </div>
-                ) : (
-                    <div className='border rounded-lg bg-white lg:w-full shadow-[0px_4px_14px_0px_rgba(38,43,67,0.16)]'>
-                        <div>
-                            <DataTable columns={columns} rows={rows} getRowId={getRowId} showButtons={true} buttons={actionButtons} />
-                        </div>
-                    </div>
-                )}
+                </div>
 
                 <div className="self-stretch md:inline-flex justify-start items-center gap-10 mt-5">
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
@@ -874,9 +865,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             <div className="justify-start text-xs font-medium uppercase leading-normal tracking-tight">{formatHoursToHrMin(getTotalOT(rows))}</div>
                         </div>
                     </div>
+
                 </div>
             </div>
-
             {showPdfContent && (
                 <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
                     <DetailedPDFTable data={rows} companyInfo={companyInfo} startDate={watch("startDate")} endDate={watch("endDate")} />
@@ -884,9 +875,10 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             )}
             <AddClockInOut open={openInOutModel} handleClose={handleCloseInOutModal} employeeList={users} getRecords={handleCallFilterAPI} id={clockInOutId} />
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleDeleteUserInOut} handleClose={handleCloseDialog} loading={loading} />
+
         </>
-    );
-};
+    )
+}
 
 const mapDispatchToProps = {
     handleSetTitle,
