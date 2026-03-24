@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material';
 import CustomIcons from '../icons/CustomIcons';
 import { useMemo } from 'react';
 
-const paginationModel = { page: 0, pageSize: 10 };
+const paginationModel = { page: 0, pageSize: 25 };
 
 export default function DataTable({
     checkboxSelection = false,
@@ -103,7 +103,7 @@ export default function DataTable({
                 rows={dataGridRows}
                 columns={dataGridColumns}
                 initialState={{ pagination: { paginationModel } }}
-                pageSizeOptions={[10, 25, 50]}
+                pageSizeOptions={[25, 50, 100]}
                 disableRowSelectionOnClick
                 hideFooterSelectedRowCount
                 getRowId={getRowId}

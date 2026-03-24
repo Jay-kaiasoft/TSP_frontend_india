@@ -123,7 +123,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         });
         const hrs = Math.floor(totalMinutes / 60);
         const mins = totalMinutes % 60;
-        return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        return `${hrs} hr ${mins} min`;
     };
 
     const createUserTotalRow = (user) => {
@@ -135,8 +135,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             timeIn: '',
             timeOut: '',
             regular: sumTimeStrings(entries, 'regular'),
-            ot: sumTimeStrings(entries, 'overtime'),
-            total: sumTimeStrings(entries, 'totalHours'),
+            overtime: sumTimeStrings(entries, 'overtime'),
+            totalHours: sumTimeStrings(entries, 'totalHours'),
+            workHours: sumTimeStrings(entries, 'workHours'),
             action: '',
         };
     };
@@ -360,6 +361,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     };
 
     const handleCallFilterAPI = () => {
+        if (watch("startDate") === null || watch("endDate") === null) {
+            return;
+        }
         if (selectedTab === 0) {
             handleGetAllRecordsGroupByUser()
         } else {
@@ -388,66 +392,9 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         setDates();
     }, [filter]);
 
-    // --- Duration utilities ---
-    const formatDuration = (timeIn, timeOut) => {
-        if (!timeOut) return;
-        const diff = new Date(timeOut) - new Date(timeIn);
-        if (diff <= 0) return "0 sec";
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        let result = [];
-        if (days > 0) result.push(`${days} day${days > 1 ? "s" : ""}`);
-        if (hours > 0) result.push(`${hours} hr${hours > 1 ? "s" : ""}`);
-        if (minutes > 0) result.push(`${minutes} min${minutes > 1 ? "s" : ""}`);
-        return result.join(" ");
-    };
-
-    const getTotalDurationInMs = (rows = []) => {
-        return rows.reduce((sum, r) => {
-            const start = parseDDMMYYYYTime(r?.timeIn);
-            const end = parseDDMMYYYYTime(r?.timeOut);
-            if (!start || !end) return sum;
-            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return sum;
-            const diff = end - start;
-            if (diff <= 0) return sum;
-            return sum + diff;
-        }, 0);
-    };
-
-    const formatHoursToHrMin = (hours) => {
-        const hrs = Math.floor(hours);
-        const mins = Math.floor((hours - hrs) * 60);
-        return `${hrs} hr ${mins} min`;
-    };
-
-    const getTotalOT = (data) => {
-        if (data?.length > 0) {
-            return data.reduce((total, row) => {
-                const timeIn = new Date(handleConvertUTCDateToLocalDate(row?.timeIn));
-                const timeOut = new Date(handleConvertUTCDateToLocalDate(row?.timeOut));
-                const totalHours = parseFloat(row?.companyShiftDto?.totalHours) || 0;
-                const workedMs = timeOut - timeIn;
-                const workedHours = workedMs / (1000 * 60 * 60);
-                const ot = workedHours > totalHours ? workedHours - totalHours : 0;
-                return total + ot;
-            }, 0);
-        } else {
-            return 0;
-        }
-    };
-
-    const formatTotalDuration = (ms) => {
-        if (ms == null || Number.isNaN(ms)) return "0 sec";
-        if (ms <= 0) return "0 sec";
-        const totalSeconds = Math.floor(ms / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        if (hours > 0) return `${hours} hr ${minutes} min`;
-        if (minutes > 0) return `${minutes} min ${seconds} sec`;
-        return `${seconds} sec`;
-    };
+    useEffect(() => {
+        handleCallFilterAPI()
+    }, [selectedTab])
 
     // --- Delete dialog handlers ---
     const handleCloseDialog = () => {
@@ -492,7 +439,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'Employee Name',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 120,
+            maxWidth: 170,
             align: "left",
             headerAlign: "left",
         },
@@ -501,7 +448,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'DAY',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 120,
+            maxWidth: 130,
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
@@ -510,14 +457,14 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         },
         {
             field: 'regular',
-            headerName: 'regular',
+            headerName: 'regular(HR)',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 110,
+            maxWidth: 120,
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                return <div>{params?.row?.companyShiftDto?.totalHours ? `${params?.row?.companyShiftDto?.totalHours} h` : '0 h'}</div>;
+                return <div>{params?.row?.regular}</div>;
             },
         },
         {
@@ -525,7 +472,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'timein',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 110,
+            maxWidth: 120,
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
@@ -545,7 +492,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'timeout',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 110,
+            maxWidth: 120,
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
@@ -561,11 +508,11 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             },
         },
         {
-            field: 'total',
+            field: 'totalHours',
             headerName: 'Total Hours',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 80,
+            maxWidth: 130,
             align: "left",
             headerAlign: "left",
         },
@@ -574,16 +521,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'Break Time',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 80,
+            maxWidth: 130,
             align: "left",
             headerAlign: "left",
         },
         {
-            field: 'ot',
+            field: 'overtime',
             headerName: 'OT',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 80,
+            maxWidth: 100,
             align: "left",
             headerAlign: "left",
         },
@@ -592,7 +539,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'Status',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 80,
+            maxWidth: 100,
             align: "left",
             headerAlign: "left",
         },
@@ -601,16 +548,18 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             headerName: 'Work Hours',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 110,
+            maxWidth: 140,
             align: "left",
-            headerAlign: "left",            
+            headerAlign: "left",
         },
         {
             field: 'action',
             headerName: 'action',
             headerClassName: 'uppercase',
             flex: 1,
-            minWidth: 80,
+            minWidth: 100,
+            align: "right",
+            headerAlign: "right",
             renderCell: (params) => {
                 // Safely check if this is a total row (id starts with 'total-')
                 const rowId = params?.row?.id;
@@ -620,7 +569,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 }
                 // For all other rows (ids can be numbers or strings), show actions
                 return (
-                    <div className='flex items-center gap-2 justify-start h-full'>
+                    <div className='flex items-center gap-2 justify-end h-full'>
                         <PermissionWrapper
                             functionalityName="Time Card"
                             moduleName="Clock-In-Out"
@@ -651,49 +600,34 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
         },
     ];
 
-    // Columns for grouped view (use precomputed fields, no action column)
     const groupedColumns = columns
         .map(col => {
+            // Remove maxWidth so the 9 remaining columns fill the full table width evenly
+            // eslint-disable-next-line no-unused-vars
+            const { maxWidth, ...rest } = col;
+
             if (col.field === 'regular') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.regular || '00:00'}</div>,
-                };
+                return { ...rest, renderCell: (params) => <div>{params?.row?.regular}</div> };
             }
             if (col.field === 'breakTime') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.breakTime || '00:00'}</div>,
-                };
+                return { ...rest, renderCell: (params) => <div>{params.row.breakTime || '-'}</div> };
             }
             if (col.field === 'workHours') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.workHours || '00:00'}</div>,
-                };
+                return { ...rest, renderCell: (params) => <div>{params.row.workHours || '00:00'}</div> };
             }
             if (col.field === 'ot') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.overtime || '00:00'}</div>,
-                };
+                return { ...rest, renderCell: (params) => <div>{params.row.overtime || '00:00'}</div> };
             }
             if (col.field === 'total') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.totalHours || '00:00'}</div>,
-                };
+                return { ...rest, renderCell: (params) => <div>{params.row.totalHours || '00:00'}</div> };
             }
             if (col.field === 'status') {
-                return {
-                    ...col,
-                    renderCell: (params) => <div>{params.row.status || "-"}</div>,
-                };
+                return { ...rest, renderCell: (params) => <div>{params.row.status || "-"}</div> };
             }
 
-            return col;
+            return rest;
         })
-    // .filter(col => col.field !== 'action');
+        .filter(col => col.field !== 'userName');
     const getRowId = (row) => {
         if (selectedTab === 0) {
             return row.rowId;
@@ -839,7 +773,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                         </div>
                         {rows?.map((user) => (
                             <div key={user.id} className="mb-6 border p-4 rounded-lg shadow-sm">
-                                <h3 className="text-lg font-semibold mb-3 text-gray-700 capitalize text-center">{user.username}</h3>
+                                <h3 className="text-lg font-semibold mb-3 text-gray-700 capitalize text-center">{user.username} - {user.department}</h3>
                                 <DataTable
                                     columns={groupedColumns}
                                     rows={user?.data || []}
@@ -860,7 +794,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                     </div>
                 )}
 
-                <div className="self-stretch md:inline-flex justify-start items-center gap-10 mt-5">
+                {/* <div className="self-stretch md:inline-flex justify-start items-center gap-10 mt-5">
                     <div className="md:inline-flex flex-col justify-center items-start gap-3">
                         <div className="inline-flex justify-start items-center gap-[15px]">
                             <div className="justify-start text-xs font-bold  uppercase leading-normal tracking-tight">Total Hours :</div>
@@ -874,12 +808,12 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             <div className="justify-start text-xs font-medium uppercase leading-normal tracking-tight">{formatHoursToHrMin(getTotalOT(rows))}</div>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {showPdfContent && (
                 <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
-                    <DetailedPDFTable data={rows} companyInfo={companyInfo} startDate={watch("startDate")} endDate={watch("endDate")} />
+                    <DetailedPDFTable data={rows} companyInfo={companyInfo} startDate={watch("startDate")} endDate={watch("endDate")} selectedTab={selectedTab} />
                 </div>
             )}
             <AddClockInOut open={openInOutModel} handleClose={handleCloseInOutModal} employeeList={users} getRecords={handleCallFilterAPI} id={clockInOutId} />
