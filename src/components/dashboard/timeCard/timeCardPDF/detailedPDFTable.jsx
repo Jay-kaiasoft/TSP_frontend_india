@@ -4,36 +4,6 @@ import './timeCardPDF.css'
 const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }) => {
     // ── helpers shared by both modes ──────────────────────────────────────────
 
-    const formatDuration = (timeIn, timeOut) => {
-        if (!timeOut) return '-';
-        const diff = new Date(timeOut) - new Date(timeIn);
-        if (diff <= 0) return '0 sec';
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const parts = [];
-        if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
-        if (hours > 0) parts.push(`${hours} hr${hours > 1 ? 's' : ''}`);
-        if (minutes > 0) parts.push(`${minutes} min${minutes > 1 ? 's' : ''}`);
-        return parts.join(' ');
-    };
-
-    const formatTotalDuration = (totalMs) => {
-        const minutes = Math.floor((totalMs / (1000 * 60)) % 60);
-        const hours = Math.floor((totalMs / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(totalMs / (1000 * 60 * 60 * 24));
-        const parts = [];
-        if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
-        if (hours > 0) parts.push(`${hours} hr${hours > 1 ? 's' : ''}`);
-        if (minutes > 0) parts.push(`${minutes} min${minutes > 1 ? 's' : ''}`);
-        return parts.join(' ');
-    };
-
-    const formatHoursToHrMin = (hours) => {
-        const hrs = Math.floor(hours);
-        const mins = Math.floor((hours - hrs) * 60);
-        return `${hrs} hr ${mins} min`;
-    };
 
     // ── Shared page header (logo / company / period / report title) ────────────
     const pageHeader = (reportTitle) => (
@@ -72,29 +42,30 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
         </div>
     );
 
+    // helper: sum "H hr M min" strings from summary rows
+    const sumTimeField = (entries, field) => {
+        let totalMinutes = 0;
+        entries.forEach(row => {
+            const val = row[field];
+            if (val && typeof val === 'string' && val.includes(':')) {
+                const [h, m] = val.split(':').map(Number);
+                totalMinutes += h * 60 + m;
+            } else if (val && typeof val === 'string' && val.includes('hr')) {
+                // "H hr M min" format
+                const hrMatch = val.match(/(\d+)\s*hr/);
+                const minMatch = val.match(/(\d+)\s*min/);
+                totalMinutes += (hrMatch ? parseInt(hrMatch[1]) * 60 : 0) + (minMatch ? parseInt(minMatch[1]) : 0);
+            }
+        });
+        const hrs = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        return `${hrs} hr ${mins} min`;
+    };
+
     // ── TAB 0 – User Summary ──────────────────────────────────────────────────
     // data = array of { id, username, data: [{ rowId, createdOn, timeIn, timeOut,
     //   regular, overtime, totalHours, workHours, breakTime, status }] }
     if (selectedTab === 0) {
-        // helper: sum "H hr M min" strings from summary rows
-        const sumTimeField = (entries, field) => {
-            let totalMinutes = 0;
-            entries.forEach(row => {
-                const val = row[field];
-                if (val && typeof val === 'string' && val.includes(':')) {
-                    const [h, m] = val.split(':').map(Number);
-                    totalMinutes += h * 60 + m;
-                } else if (val && typeof val === 'string' && val.includes('hr')) {
-                    // "H hr M min" format
-                    const hrMatch = val.match(/(\d+)\s*hr/);
-                    const minMatch = val.match(/(\d+)\s*min/);
-                    totalMinutes += (hrMatch ? parseInt(hrMatch[1]) * 60 : 0) + (minMatch ? parseInt(minMatch[1]) : 0);
-                }
-            });
-            const hrs = Math.floor(totalMinutes / 60);
-            const mins = totalMinutes % 60;
-            return `${hrs} hr ${mins} min`;
-        };
 
         return (
             <div className="overflow-x-auto h-full">
@@ -119,7 +90,7 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                 <table className="min-w-full border-collapse border border-black pdf-table">
                                     <thead>
                                         <tr>
-                                            {['Day', 'Regular (HR)', 'Time In', 'Time Out', 'Total Hours', 'Break Time', 'OT', 'Status', 'Work Hours'].map(col => (
+                                            {['Day', 'Regular (HR)', 'Time In', 'Time Out', 'Total Hours', 'Break Time', 'OT', 'Work Hours', 'Status'].map(col => (
                                                 <th key={col} className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5">
                                                     {col}
                                                 </th>
@@ -149,8 +120,8 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                                     <td className="border border-black text-center text-sm h-10">{row.totalHours || '-'}</td>
                                                     <td className="border border-black text-center text-sm h-10">{row.breakTime || '-'}</td>
                                                     <td className="border border-black text-center text-sm h-10">{row.overtime || '-'}</td>
-                                                    <td className="border border-black text-center text-sm h-10">{row.status || '-'}</td>
                                                     <td className="border border-black text-center text-sm h-10">{row.workHours || '-'}</td>
+                                                    <td className="border border-black text-center text-sm h-10">{row.status || '-'}</td>
                                                 </tr>
                                             );
                                         })}
@@ -165,8 +136,8 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'totalHours')}</td>
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'breakTime')}</td>
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'overtime')}</td>
-                                                <td className="border border-black text-center text-sm h-10">-</td>
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'workHours')}</td>
+                                                <td className="border border-black text-center text-sm h-10">-</td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -179,41 +150,24 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
         );
     }
 
-    // ── TAB 1 – All Entries (Detailed) ────────────────────────────────────────
+    // ── TAB 1 & 2 – All Entries (Detailed) ───────────────────────────────────
     // data = flat array of individual entries; build per-user groups here
     const map = new Map();
     data?.forEach(entry => {
-        const { userId, userName, firstName, lastName, timeIn, timeOut, companyShiftDto, createdOn, hourlyRate } = entry;
+        const { userId, userName, firstName, lastName, timeIn, timeOut, companyShiftDto, createdOn, hourlyRate, regular, totalHours, breakTime, overtime, workHours, status } = entry;
         const rate = parseFloat(hourlyRate) || 0;
         if (!map.has(userId)) {
             map.set(userId, { userId, userName, firstName, lastName, hourlyRate: rate, records: [] });
         }
-        map.get(userId).records.push({ timeIn, timeOut, createdOn, companyShiftDto, hourlyRate: rate });
+        map.get(userId).records.push({ timeIn, timeOut, createdOn, companyShiftDto, hourlyRate: rate, regular, totalHours, breakTime, overtime, workHours, status });
     });
     const result = Array.from(map.values());
 
-    const getTotalDurationInMs = (records) =>
-        records?.reduce((total, row) => {
-            if (row.timeIn && row.timeOut) {
-                const diff = new Date(row.timeOut) - new Date(row.timeIn);
-                if (diff > 0) return total + diff;
-            }
-            return total;
-        }, 0) || 0;
-
-    const getTotalOT = (records) =>
-        records?.reduce((total, row) => {
-            const tIn = new Date(handleConvertUTCDateToLocalDate(row?.timeIn));
-            const tOut = new Date(handleConvertUTCDateToLocalDate(row?.timeOut));
-            const totalHours = parseFloat(row?.companyShiftDto?.totalHours) || 0;
-            const workedHours = (tOut - tIn) / (1000 * 60 * 60);
-            return total + (workedHours > totalHours ? workedHours - totalHours : 0);
-        }, 0) || 0;
 
     const detailedHeader = () => (
         <thead>
             <tr>
-                {['Day', 'Time In', 'Time Out', 'Regular', 'OT', 'Total'].map(col => (
+                {['Day', 'Regular(HR)', 'Time In', 'Time Out', 'Total Hours', 'Break Time', 'OT', 'Work Hours', 'Status'].map(col => (
                     <th key={col} className="border border-black py-2 px-2 text-center text-sm bg-gray-300 h-5">{col}</th>
                 ))}
             </tr>
@@ -242,53 +196,51 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                             {detailedHeader()}
                             <tbody>
                                 {user?.records?.map((record, i) => {
-                                    const timeIn = new Date(handleConvertUTCDateToLocalDate(record?.timeIn));
-                                    const timeOut = new Date(handleConvertUTCDateToLocalDate(record?.timeOut));
+                                    const timeIn = record?.timeIn 
+                                        ? new Date(handleConvertUTCDateToLocalDate(record?.timeIn))
+                                        : null;
+                                    const timeOut = record?.timeOut
+                                        ? new Date(handleConvertUTCDateToLocalDate(record?.timeOut))
+                                        : null;
                                     const createdOn = handleFormateUTCDateToLocalDate(record?.createdOn);
-                                    const totalHours = parseFloat(record?.companyShiftDto?.totalHours) || 0;
-                                    const durationMs = timeOut - timeIn;
-                                    const workedHours = durationMs / (1000 * 60 * 60);
-                                    let otHours = workedHours > totalHours ? workedHours - totalHours : 0;
-                                    const otWhole = Math.floor(otHours);
-                                    const otMins = Math.floor((otHours - otWhole) * 60);
-                                    const formattedOT = otWhole > 0 || otMins > 0
-                                        ? `${otWhole > 0 ? `${otWhole} hrs` : ''}${otMins > 0 ? ` ${otMins} min` : ''}`.trim()
-                                        : '00:00';
 
                                     return (
                                         <tr key={i} className="border border-black">
                                             <td className="border border-black text-center text-sm h-10">{createdOn}</td>
+                                            <td className="border border-black text-center text-sm h-10">{record?.regular || '-'}</td>
                                             <td className="border border-black text-center text-sm h-10">
-                                                {timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                {timeIn ? timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '-'}
                                             </td>
                                             <td className="border border-black text-center text-sm h-10">
-                                                {timeOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                {timeOut ? timeOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : '-'}
                                             </td>
-                                            <td className="border border-black text-center text-sm h-10">
-                                                {record?.companyShiftDto?.totalHours} h
-                                            </td>
-                                            <td className="border border-black text-center text-sm h-10">{formattedOT}</td>
-                                            <td className="border border-black text-center text-sm h-10">
-                                                {formatDuration(
-                                                    handleConvertUTCDateToLocalDate(record?.timeIn),
-                                                    handleConvertUTCDateToLocalDate(record?.timeOut)
-                                                )}
-                                            </td>
+                                            <td className="border border-black text-center text-sm h-10">{record?.totalHours || '-'}</td>
+                                            <td className="border border-black text-center text-sm h-10">{record?.breakTime || '-'}</td>
+                                            <td className="border border-black text-center text-sm h-10">{record?.overtime || '-'}</td>
+                                            <td className="border border-black text-center text-sm h-10">{record?.workHours || '-'}</td>
+                                            <td className="border border-black text-center text-sm h-10">{record?.status || '-'}</td>
                                         </tr>
                                     );
                                 })}
 
                                 {/* Totals row */}
-                                <tr className="border border-black">
+                                <tr className="border border-black bg-gray-50 font-bold">
                                     <td className="border border-black text-sm h-10 text-end pr-5" colSpan={4}>
-                                        <strong>Total:</strong>
+                                        Total:
                                     </td>
                                     <td className="border border-black text-center text-sm h-10">
-                                        <strong>{formatHoursToHrMin(getTotalOT(user?.records))}</strong>
+                                        {sumTimeField(user?.records, 'totalHours')}
                                     </td>
                                     <td className="border border-black text-center text-sm h-10">
-                                        <strong>{formatTotalDuration(getTotalDurationInMs(user?.records))}</strong>
+                                        {sumTimeField(user?.records, 'breakTime')}
                                     </td>
+                                    <td className="border border-black text-center text-sm h-10">
+                                        {sumTimeField(user?.records, 'overtime')}
+                                    </td>
+                                    <td className="border border-black text-center text-sm h-10">
+                                        {sumTimeField(user?.records, 'workHours')}
+                                    </td>
+                                    <td className="border border-black text-center text-sm h-10">-</td>
                                 </tr>
                             </tbody>
                         </table>
