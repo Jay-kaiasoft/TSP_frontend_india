@@ -476,9 +476,12 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                return params.row?.timeIn ? (
+                // We use parseDDMMYYYYTime because the API returns a string in local time format.
+                // We must convert it to a Date object to use .toLocaleTimeString().
+                const timeIn = params.row?.timeIn ? parseDDMMYYYYTime(params.row.timeIn) : null;
+                return timeIn ? (
                     <div>
-                        {handleConvertUTCDateToLocalDate(params.row?.timeIn)?.toLocaleTimeString([], {
+                        {timeIn.toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true,
@@ -496,9 +499,12 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                return params.row?.timeOut ? (
+                // We use parseDDMMYYYYTime because the API returns a string in local time format.
+                // We must convert it to a Date object to use .toLocaleTimeString().
+                const timeOut = params.row?.timeOut ? parseDDMMYYYYTime(params.row.timeOut) : null;
+                return timeOut ? (
                     <div>
-                        {handleConvertUTCDateToLocalDate(params.row?.timeOut)?.toLocaleTimeString([], {
+                        {timeOut.toLocaleTimeString([], {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true,
