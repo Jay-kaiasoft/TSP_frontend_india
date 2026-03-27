@@ -476,8 +476,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                // We use parseDDMMYYYYTime because the API returns a string in local time format.
-                // We must convert it to a Date object to use .toLocaleTimeString().
                 const timeIn = params.row?.timeIn ? parseDDMMYYYYTime(params.row.timeIn) : null;
                 return timeIn ? (
                     <div>
@@ -485,7 +483,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true,
-                        })}
+                        })
+                        }
                     </div>
                 ) : <span>-</span>;
             },
@@ -499,8 +498,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             align: "left",
             headerAlign: "left",
             renderCell: (params) => {
-                // We use parseDDMMYYYYTime because the API returns a string in local time format.
-                // We must convert it to a Date object to use .toLocaleTimeString().
                 const timeOut = params.row?.timeOut ? parseDDMMYYYYTime(params.row.timeOut) : null;
                 return timeOut ? (
                     <div>
@@ -508,7 +505,8 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: true,
-                        })}
+                        })
+                        }
                     </div>
                 ) : <span>-</span>;
             },
@@ -634,6 +632,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             return rest;
         })
         .filter(col => col.field !== 'userName');
+
     const getRowId = (row) => {
         if (selectedTab === 0) {
             return row.rowId;
@@ -779,7 +778,16 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                         </div>
                         {rows?.map((user) => (
                             <div key={user.id} className="mb-6 border p-4 rounded-lg shadow-sm">
-                                <h3 className="text-lg font-semibold mb-3 text-gray-700 capitalize text-center">{user.username} - {user.department}</h3>
+                                <div className='flex justify-start items-center mb-3'>
+                                    <div className='grow'>
+                                        <h3 className="text-lg font-semibold text-gray-700 capitalize text-start">{user.username} - {user.department}</h3>
+                                    </div>
+                                    <div>
+                                        <p className="text-lg font-medium text-gray-700 capitalize text-end">
+                                            Present: {user.presentCount || '0'} &nbsp;&nbsp;&nbsp; Absent: {user.absentCount || '0'} &nbsp;&nbsp;&nbsp; Weekly-Off: {user.weeklyOffCount || '0'} &nbsp;&nbsp;&nbsp; Holiday: {user.holidayCount || '0'}
+                                        </p>
+                                    </div>
+                                </div>
                                 <DataTable
                                     columns={groupedColumns}
                                     rows={user?.data || []}

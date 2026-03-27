@@ -3,7 +3,17 @@ import './timeCardPDF.css'
 
 const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }) => {
     // ── helpers shared by both modes ──────────────────────────────────────────
-
+    const parseDDMMYYYYTime = (s) => {
+        if (!s) return null;
+        const [datePart, timePartRaw] = s.split(",").map(t => t.trim());
+        if (!datePart || !timePartRaw) return null;
+        const [dd, mm, yyyy] = datePart.split("/").map(Number);
+        const [timePart, ampm] = timePartRaw.split(" ");
+        let [hh, min, ss] = timePart.split(":").map(Number);
+        if (ampm === "PM" && hh < 12) hh += 12;
+        if (ampm === "AM" && hh === 12) hh = 0;
+        return new Date(yyyy, mm - 1, dd, hh, min, ss);
+    };
 
     // ── Shared page header (logo / company / period / report title) ────────────
     const pageHeader = (reportTitle) => (
@@ -82,8 +92,18 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                 <div className="border-t border-black my-4" />
 
                                 {/* Employee name */}
-                                <div className="text-center font-bold text-lg text-gray-900 mb-3 capitalize">
+                                {/* <div className="text-center font-bold text-lg text-gray-900 mb-3 capitalize">
                                     {user.username} - {user.department}
+                                </div> */}
+                                <div className='flex justify-start items-center mb-5'>
+                                    <div className='grow'>
+                                        <h3 className="text-lg font-semibold text-black capitalize text-start">{user.username} - {user.department}</h3>
+                                    </div>
+                                    <div>
+                                        <p className="text-lg font-medium text-black capitalize text-end">
+                                            Present: {user.presentCount || '0'} &nbsp;&nbsp;&nbsp; Absent: {user.absentCount || '0'} &nbsp;&nbsp;&nbsp; Weekly-Off: {user.weeklyOffCount || '0'} &nbsp;&nbsp;&nbsp; Holiday: {user.holidayCount || '0'}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 {/* Summary table – same columns as the UI */}
@@ -99,12 +119,8 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                     </thead>
                                     <tbody>
                                         {entries.map((row, i) => {
-                                            const timeIn = row.timeIn
-                                                ? new Date(handleConvertUTCDateToLocalDate(row.timeIn))
-                                                : null;
-                                            const timeOut = row.timeOut
-                                                ? new Date(handleConvertUTCDateToLocalDate(row.timeOut))
-                                                : null;
+                                            const timeIn = row?.timeIn ? parseDDMMYYYYTime(row.timeIn) : null;
+                                            const timeOut = row?.timeOut ? parseDDMMYYYYTime(row.timeOut) : null;
                                             const day = handleFormateUTCDateToLocalDate(row.createdOn);
 
                                             return (
@@ -134,7 +150,7 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                                 <td className="border border-black text-center text-sm h-10">-</td>
                                                 <td className="border border-black text-center text-sm h-10">-</td>
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'totalHours')}</td>
-                                                <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'breakTime')}</td>
+                                                <td className="border border-black text-center text-sm h-10">-</td>
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'overtime')}</td>
                                                 <td className="border border-black text-center text-sm h-10">{sumTimeField(entries, 'workHours')}</td>
                                                 <td className="border border-black text-center text-sm h-10">-</td>
@@ -196,12 +212,8 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                             {detailedHeader()}
                             <tbody>
                                 {user?.records?.map((record, i) => {
-                                    const timeIn = record?.timeIn 
-                                        ? new Date(handleConvertUTCDateToLocalDate(record?.timeIn))
-                                        : null;
-                                    const timeOut = record?.timeOut
-                                        ? new Date(handleConvertUTCDateToLocalDate(record?.timeOut))
-                                        : null;
+                                    const timeIn = record?.timeIn ? parseDDMMYYYYTime(record.timeIn) : null;
+                                    const timeOut = record?.timeOut ? parseDDMMYYYYTime(record.timeOut) : null;
                                     const createdOn = handleFormateUTCDateToLocalDate(record?.createdOn);
 
                                     return (
@@ -232,7 +244,7 @@ const DetailedPDFTable = ({ companyInfo, data, startDate, endDate, selectedTab }
                                         {sumTimeField(user?.records, 'totalHours')}
                                     </td>
                                     <td className="border border-black text-center text-sm h-10">
-                                        {sumTimeField(user?.records, 'breakTime')}
+                                        -
                                     </td>
                                     <td className="border border-black text-center text-sm h-10">
                                         {sumTimeField(user?.records, 'overtime')}
