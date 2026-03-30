@@ -41,6 +41,12 @@ const extractDateFromTimeIn = (timeIn) => {
     return d.format(DISPLAY_DATE_FORMAT); // 👉 "31/12/2025"
 };
 
+const parseLocalTime = (timeStr) => {
+    if (!timeStr) return null;
+    const d = dayjs(timeStr, API_DATETIME_FORMATS, true);
+    return d.isValid() ? d : null;
+};
+
 const combineDateAndTime = (dateVal, timeVal) => {
     if (!dateVal || !timeVal) return null;
 
@@ -134,11 +140,13 @@ export function AddClockInOut({ open, handleClose, employeeList, getRecords, id 
         if (id && open) {
             const response = await getUserInOutRecord(id);
             if (response?.data?.status === 200) {
-                reset(response.data?.result);
-
-                setValue("date", extractDateFromTimeIn(response.data?.result?.timeIn));
-                setValue("timeIn", apiToLocalTime(response.data?.result?.timeIn));
-                setValue("timeOut", apiToLocalTime(response.data?.result?.timeOut));
+                const result = response.data?.result;
+                reset({
+                    ...result,
+                    date: extractDateFromTimeIn(result?.timeIn),
+                    timeIn: parseLocalTime(result?.timeIn),
+                    timeOut: parseLocalTime(result?.timeOut)
+                });
             }
         }
     };
