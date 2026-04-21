@@ -31,9 +31,9 @@ export const getCompanyEmployee = async (id) => {
     }
 }
 
-export const getEmployeePFReport = async (companyId, type, filter) => {
+export const getEmployeePFReport = async (params) => {
     try {
-        const response = axiosInterceptor().get(`${companyEmployeeURL}/getEmployeePFAndPTReport/${companyId}/${type}/${filter}`)
+        const response = axiosInterceptor().get(`${companyEmployeeURL}/getEmployeePFAndPTReport?${params}`)
         return response
 
     } catch (error) {

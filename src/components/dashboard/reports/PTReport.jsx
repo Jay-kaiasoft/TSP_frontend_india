@@ -8,6 +8,7 @@ import Button from "../../common/buttons/button";
 import CustomIcons from "../../common/icons/CustomIcons";
 import { getCompanyDetails } from "../../../service/companyDetails/companyDetailsService";
 import PTPDFTable from "./PdfTable/PTPDFTable";
+import { filterOptionsByMonth } from "../../../service/common/commonService";
 
 const filterOptions = [
     { id: 1, title: 'Last 1 Month', value: 1 },
@@ -19,7 +20,7 @@ const filterOptions = [
 const PTReport = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const [employees, setEmployees] = useState([]);
-    const [filter, setFilter] = useState(filterOptions[0]);
+    const [filter, setFilter] = useState();
     const [loadingPdf, setLoadingPdf] = useState(false);
     const [showPdfContent, setShowPdfContent] = useState(false);
     const [companyInfo, setCompanyInfo] = useState()
@@ -27,23 +28,38 @@ const PTReport = () => {
 
     const handleGetAllEmployees = async () => {
         setEmployees([]);
+        let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (userTimeZone === "Asia/Kolkata") {
+            userTimeZone = "Asia/Calcutta";
+        }
+        const params = {
+            companyId: userInfo?.companyId,
+            type: "PT",
+            month: filter,
+            userTimeZone: userTimeZone
+        }
+        const queryString = new URLSearchParams(params).toString();
+        const res = await getEmployeePFReport(queryString);
+        if (res?.data?.status === 200) {
+            let data = res?.data?.result?.map((item, index) => ({
+                ...item,
+                rowId: index + 1
+            })) || [];
 
-        const res = await getEmployeePFReport(userInfo?.companyId, "PT", filter?.value);
-        let data = res.data.result?.map((item, index) => ({
-            ...item,
-            rowId: index + 1
-        })) || [];
+            // Handle PF
+            if (data.length > 0) {
+                const totalPF = data?.reduce((sum, emp) => sum + (Number(emp.pt_amount) || 0), 0);
 
-        const totalPT = data.reduce((sum, emp) => sum + (Number(emp.pt_amount) || 0), 0);
+                data.push({
+                    rowId: 'total',
+                    userName: 'Total',
+                    pt_amount: totalPF,
+                    isTotalRow: true
+                });
+            }
 
-        data.push({
-            rowId: 'total',
-            userName: 'Total',
-            pt_amount: totalPT,
-            isTotalRow: true
-        });
-
-        setEmployees(data);
+            setEmployees(data);
+        }
     };
 
     const handleGetCompanyInfo = async () => {
@@ -101,7 +117,7 @@ const PTReport = () => {
             align: "right",
             headerAlign: "right",
             renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },       
+        },
         {
             field: 'pt_amount',
             headerName: 'Total PT Amount',
@@ -122,7 +138,7 @@ const PTReport = () => {
     const generatePDF = async () => {
         setShowPdfContent(true);
         setLoadingPdf(true);
- 
+
         setTimeout(async () => {
             const pdf = new jsPDF("p", "mm", "a4");
             const margin = 10;
@@ -178,12 +194,12 @@ const PTReport = () => {
         <div className='px-3 lg:px-0'>
             <div className="my-3 w-60">
                 <Select
-                    options={filterOptions}
+                    options={filterOptionsByMonth}
                     label={"Filter by Duration"}
                     placeholder="Select Duration"
-                    value={filter?.id}
+                    value={filter + 1}
                     onChange={(_, newValue) => {
-                        setFilter(newValue?.value ? newValue : filterOptions[0]);
+                        setFilter(newValue?.value);
                     }}
                 />
             </div>
@@ -193,7 +209,7 @@ const PTReport = () => {
                     columns={columnsPT}
                     rows={employees}
                     getRowId={getRowId}
-                    height={550}
+                    height={500}
                     showButtons={true}
                     buttons={actionButtons}
                 />

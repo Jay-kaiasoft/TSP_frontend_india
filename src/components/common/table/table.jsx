@@ -1,10 +1,18 @@
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridOverlay } from '@mui/x-data-grid';
 import Input from '../input/input';
 import { useTheme } from '@mui/material';
 import CustomIcons from '../icons/CustomIcons';
 import { useMemo } from 'react';
 
 const paginationModel = { page: 0, pageSize: 50 };
+
+const CustomNoRowsOverlay = () => {
+    return (
+        <GridOverlay style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <div style={{ color: '#6d6d6d', fontSize: '15px' }}>No rows</div>
+        </GridOverlay>
+    );
+};
 
 export default function DataTable({
     checkboxSelection = false,
@@ -25,12 +33,12 @@ export default function DataTable({
 
     // Prepare rows for DataGrid: add the footer row with a flag
     const dataGridRows = useMemo(() => {
-        if (footerRowData) {
+        if (rows?.length > 0 && footerRowData) {
             // Add isTotalRow flag to the footer row
             const footerRow = { ...footerRowData, isTotalRow: true };
             return [...rows, footerRow];
         }
-        return rows;
+        return rows || [];
     }, [rows, footerRowData]);
 
     // Apply class names to the total row
@@ -109,7 +117,11 @@ export default function DataTable({
                 getRowId={getRowId}
                 checkboxSelection={checkboxSelection}
                 getRowClassName={getRowClassName}
+                slots={{
+                    noRowsOverlay: CustomNoRowsOverlay,
+                }}
                 sx={{
+                    height: height || 550,
                     maxHeight: height || 550,
                     color: theme.palette.primary.text.main,
                     overflow: 'auto',

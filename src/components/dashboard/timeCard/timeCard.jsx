@@ -14,7 +14,7 @@ import timezone from 'dayjs/plugin/timezone';
 import 'dayjs/plugin/timezone';
 
 import { deleteUserInOut, getAllEntriesByUserId, getAllRecordsGroupByUser } from '../../../service/userInOut/userInOut';
-import { handleConvertUTCDateToLocalDate, handleFormateUTCDateToLocalDate } from '../../../service/common/commonService';
+import { filterOptionsByMonth, handleFormateUTCDateToLocalDate } from '../../../service/common/commonService';
 import { getAllEmployeeListByCompanyId } from '../../../service/companyEmployee/companyEmployeeService';
 import { connect } from 'react-redux';
 import { handleSetTitle, setAlert } from '../../../redux/commonReducers/commonReducers';
@@ -29,20 +29,6 @@ import { getAllDepartment } from '../../../service/department/departmentService'
 import { AddClockInOut } from '../../models/clockInOut/addClockInOut';
 import AlertDialog from '../../common/alertDialog/alertDialog';
 
-const filterOptions = [
-    { id: 1, title: 'January', value: 0 },
-    { id: 2, title: 'February', value: 1 },
-    { id: 3, title: 'March', value: 2 },
-    { id: 4, title: 'April', value: 3 },
-    { id: 5, title: 'May', value: 4 },
-    { id: 6, title: 'June', value: 5 },
-    { id: 7, title: 'July', value: 6 },
-    { id: 8, title: 'August', value: 7 },
-    { id: 9, title: 'September', value: 8 },
-    { id: 10, title: 'October', value: 9 },
-    { id: 11, title: 'November', value: 10 },
-    { id: 12, title: 'December', value: 11 }
-];
 
 const tabData = [
     { label: 'User Summary' },
@@ -270,6 +256,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             params.append("departmentIds", departmentIds);
         }
 
+
         const start = parseDDMMYYYY(watch("startDate"));
         const end = parseDDMMYYYY(watch("endDate"));
 
@@ -330,8 +317,20 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
             params.append("departmentIds", departmentIds);
         }
 
-        const start = parseDDMMYYYY(watch("startDate"));
-        const end = parseDDMMYYYY(watch("endDate"));
+        const start = parseDDMMYYYY(watch("startDate") ? watch("startDate") : (() => {
+            const today = new Date();
+            const day = "01";
+            const month = (today.getMonth() + 1).toString().padStart(2, "0");
+            const year = today.getFullYear();
+            return `${day}/${month}/${year}`;
+        })());
+        const end = parseDDMMYYYY(watch("endDate") ? watch("endDate") : (() => {
+            const today = new Date();
+            const day = "01";
+            const month = (today.getMonth() + 1).toString().padStart(2, "0");
+            const year = today.getFullYear();
+            return `${day}/${month}/${year}`;
+        })());
 
         if (start) params.append("startDate", watch("startDate"));
 
@@ -361,9 +360,6 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
     };
 
     const handleCallFilterAPI = () => {
-        if (watch("startDate") === null || watch("endDate") === null) {
-            return;
-        }
         if (selectedTab === 0) {
             handleGetAllRecordsGroupByUser()
         } else {
@@ -378,7 +374,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
 
         const today = new Date();
         const lastMonth = today.getMonth();
-        const defaultFilter = filterOptions?.find(option => option.value === lastMonth);
+        const defaultFilter = filterOptionsByMonth?.find(option => option.value === lastMonth);
         setFilter(defaultFilter);
 
         handleGetCompanyInfo()
@@ -702,7 +698,7 @@ const TimeCard = ({ handleSetTitle, setAlert }) => {
                 <div className='grid grid-col-12 md:grid-cols-6 gap-3 items-center'>
                     <div>
                         <Select
-                            options={filterOptions}
+                            options={filterOptionsByMonth}
                             label={"Filter by Duration"}
                             placeholder="Select duration"
                             value={filter?.id}

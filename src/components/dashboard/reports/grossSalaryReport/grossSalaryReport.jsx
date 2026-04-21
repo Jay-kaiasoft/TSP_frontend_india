@@ -31,16 +31,18 @@ const GrossSalaryReport = () => {
                     ...item,
                     rowId: index + 1
                 })) || [];
-                const totalPF = data.reduce((sum, emp) => sum + (Number(emp.totalPf) || 0), 0);
-                const totalPT = data.reduce((sum, emp) => sum + (Number(emp.totalPt) || 0), 0);
-                const totalNetSalary = data.reduce((sum, emp) => sum + (Number(emp.totalSalary) || 0), 0);
-                data.push({
-                    rowId: 'Total',
-                    totalPf: totalPF,
-                    totalPt: totalPT,
-                    totalSalary: totalNetSalary,
-                    isTotalRow: true
-                });
+                if (data.length > 0) {
+                    const totalPF = data.reduce((sum, emp) => sum + (Number(emp.totalPf) || 0), 0);
+                    const totalPT = data.reduce((sum, emp) => sum + (Number(emp.totalPt) || 0), 0);
+                    const totalNetSalary = data.reduce((sum, emp) => sum + (Number(emp.totalSalary) || 0), 0);
+                    data.push({
+                        rowId: 'Total',
+                        totalPf: totalPF,
+                        totalPt: totalPT,
+                        totalSalary: totalNetSalary,
+                        isTotalRow: true
+                    });
+                }
                 setData(data)
             }
         }

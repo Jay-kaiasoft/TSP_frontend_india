@@ -8,13 +8,7 @@ import Button from "../../common/buttons/button";
 import CustomIcons from "../../common/icons/CustomIcons";
 import { getCompanyDetails } from "../../../service/companyDetails/companyDetailsService";
 import PFPDFTable from "./PdfTable/PFPDFTable";
-
-const filterOptions = [
-    { id: 1, title: 'Last 1 Month', value: 1 },
-    { id: 2, title: 'Last 3 Months', value: 3 },
-    { id: 3, title: 'Last 6 Months', value: 6 },
-    { id: 4, title: 'Last 1 Year', value: 12 }
-];
+import { filterOptionsByMonth } from "../../../service/common/commonService";
 
 const PFReport = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
@@ -22,28 +16,43 @@ const PFReport = () => {
     const [loadingPdf, setLoadingPdf] = useState(false);
     const [showPdfContent, setShowPdfContent] = useState(false);
     const [companyInfo, setCompanyInfo] = useState()
-    const [filter, setFilter] = useState(filterOptions[0]);
+    const [filter, setFilter] = useState(0);
 
     const handleGetAllEmployees = async () => {
         setEmployees([]);
+        let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (userTimeZone === "Asia/Kolkata") {
+            userTimeZone = "Asia/Calcutta";
+        }
+        const params = {
+            companyId: userInfo?.companyId,
+            type: "PF",
+            month: filter,
+            userTimeZone: userTimeZone
+        }
+        const queryString = new URLSearchParams(params).toString();
+        const res = await getEmployeePFReport(queryString);
+        if (res?.data.status === 200) {
 
-        const res = await getEmployeePFReport(userInfo?.companyId, "PF", filter?.value);
-        let data = res?.data?.result?.map((item, index) => ({
-            ...item,
-            rowId: index + 1
-        })) || [];
+            let data = res?.data?.result?.map((item, index) => ({
+                ...item,
+                rowId: index + 1
+            })) || [];
 
-        // Handle PF
-        const totalPF = data.reduce((sum, emp) => sum + (Number(emp.total_amount) || 0), 0);
+            // Handle PF
+            if (data.length > 0) {
+                const totalPF = data.reduce((sum, emp) => sum + (Number(emp.total_amount) || 0), 0);
 
-        data.push({
-            rowId: 'total',
-            userName: 'Total',
-            total_amount: totalPF,
-            isTotalRow: true
-        });
+                data.push({
+                    rowId: 'total',
+                    userName: 'Total',
+                    total_amount: totalPF,
+                    isTotalRow: true
+                });
+            }
 
-        setEmployees(data);
+            setEmployees(data);
+        }
     };
 
     const handleGetCompanyInfo = async () => {
@@ -213,12 +222,12 @@ const PFReport = () => {
         <div className='px-3 lg:px-0'>
             <div className="my-3 w-60">
                 <Select
-                    options={filterOptions}
+                    options={filterOptionsByMonth}
                     label={"Filter by Duration"}
                     placeholder="Select Duration"
-                    value={filter?.id}
+                    value={filter + 1}
                     onChange={(_, newValue) => {
-                        setFilter(newValue?.value ? newValue : filterOptions[0]);
+                        setFilter(newValue?.value);
                     }}
                 />
             </div>
@@ -228,7 +237,7 @@ const PFReport = () => {
                     columns={columns}
                     rows={employees}
                     getRowId={getRowId}
-                    height={550}
+                    height={500}
                     showButtons={true}
                     buttons={actionButtons}
                 />

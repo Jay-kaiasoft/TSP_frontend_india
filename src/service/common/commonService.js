@@ -637,3 +637,18 @@ export const speakMessage = (message) => {
         console.error("TTS error:", err);
     }
 };
+
+export const filterOptionsByMonth = [
+    { id: 1, title: 'January', value: 0 },
+    { id: 2, title: 'February', value: 1 },
+    { id: 3, title: 'March', value: 2 },
+    { id: 4, title: 'April', value: 3 },
+    { id: 5, title: 'May', value: 4 },
+    { id: 6, title: 'June', value: 5 },
+    { id: 7, title: 'July', value: 6 },
+    { id: 8, title: 'August', value: 7 },
+    { id: 9, title: 'September', value: 8 },
+    { id: 10, title: 'October', value: 9 },
+    { id: 11, title: 'November', value: 10 },
+    { id: 12, title: 'December', value: 11 }
+];
