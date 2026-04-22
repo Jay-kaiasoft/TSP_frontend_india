@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import Cookies from 'js-cookie';
 
 import { ReactComponent as User } from "../../../../assets/svgs/user-alt.svg";
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import { createEmployee, deleteEmployeeAadharImage, deleteEmployeeImage, getCompanyEmployee, getLastUserId, updateEmployee, uploadEmployeeAadharImage, uploadEmployeeImage } from '../../../../service/companyEmployee/companyEmployeeService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -33,6 +33,8 @@ import FileInputBox from '../../../common/fileInput/FileInputBox';
 import Checkbox from '../../../common/checkBox/checkbox';
 import { getAllOvertimeRules } from '../../../../service/overtimeRules/overtimeRulesService';
 import { getAllWeekOffTemplate } from '../../../../service/weeklyOff/WeeklyOffService';
+import { createDeduction, deleteDeduction, getAllDeductions } from '../../../../service/deductions/deductionsService';
+import Components from '../../../muiComponents/components';
 
 const GenderOptions = [
     { id: 1, title: "Male" },
@@ -86,6 +88,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
         "Employee Info",
         "Employment Info",
         "PayRoll Info",
+        "Allowance & Deduction",
         "Direact Deposite",
         "Face Registration"
     ])
@@ -115,6 +118,10 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     const [dialogLogin, setDialogLogin] = useState({ open: false, title: '', message: '', actionButtonText: '' });
     const [oldData, setOldData] = useState({ userName: null, password: null });
     const [saveNewData, setSaveNewData] = useState(null);
+    const [dialogDelete, setDialogDelete] = useState({ open: false, title: '', message: '', actionButtonText: '' });
+    const [deleteId, setDeleteId] = useState(null)
+    const [deleteIndex, setDeleteIndex] = useState(null)
+    const [deleteType, setDeleteType] = useState(null)
 
     const {
         handleSubmit,
@@ -185,8 +192,64 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
             confirmAccountNumber: "",
             address: "",
             passbookImage: "",
+
+            allowances: [],
+            deductions: []
         },
     });
+
+    const { fields: allowanceFields, append: appendAllowance, remove: removeAllowance } = useFieldArray({
+        control,
+        name: "allowances",
+    });
+
+    const { fields: deductionFields, append: appendDeduction, remove: removeDeduction } = useFieldArray({
+        control,
+        name: "deductions",
+    });
+
+    const handleOpenDialogDelete = (rowData, index) => {
+        setDeleteId(parseInt(rowData.id))
+        setDeleteIndex(index)
+        setDeleteType(rowData.type)
+        setDialogDelete({
+            open: true,
+            title: rowData.type === "Allowance" ? 'Delete Allowance' : 'Delete Deduction',
+            message: `Are you sure, Do you want to delete ${rowData.type === "Allowance" ? 'Allowance' : 'Deduction'}?`,
+            actionButtonText: 'Delete',
+        });
+    }
+
+    const handleCloseDeleteDialog = () => {
+        setDialogDelete({
+            open: false,
+            title: '',
+            message: '',
+            actionButtonText: ''
+        });
+        setDeleteId(null)
+        setDeleteIndex(null)
+        setDeleteType(null)
+    }
+
+    const handleDeleteDeduction = async () => {
+        if (deleteId) {
+            const res = await deleteDeduction(deleteId)
+            if (res?.data?.status === 200) {
+                handleGetAllDeductions()
+                handleCloseDeleteDialog()
+            } else {
+                setAlert({ open: true, message: res?.data?.message, type: "error" })
+            }
+        } else {
+            handleCloseDeleteDialog()
+            if (deleteType === "Allowance") {
+                removeAllowance(deleteIndex)
+            } else {
+                removeDeduction(deleteIndex)
+            }
+        }
+    }
 
     const handleOpenDialogLogin = (data) => {
         setSaveNewData(data)
@@ -323,7 +386,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
         if (activeStep === 0) {
             handleBackToManageEmployee()
         }
-        else if (activeStep === 3) {
+        else if (activeStep === 4) {
             if (activeTaxStep !== 0) {
                 setActiveTaxStep((prev) => prev - 1)
             } else {
@@ -400,7 +463,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
 
     const handleUploadPassbookImage = (companyId, bankId) => {
         if (!bankPassbookImage) {
-            if (steps?.length === 5) {
+            if (steps?.length === 6) {
                 setActiveStep((prev) => prev + 1)
                 return
             } else {
@@ -408,7 +471,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                 navigate("/dashboard/manageemployees")
                 return
             }
-            return
         } else {
             const formData = new FormData();
             formData.append("files", bankPassbookImage);
@@ -422,7 +484,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                         if (res.data.status !== 200) {
                             setAlert({ open: true, message: res?.data?.message, type: "error" })
                         } else {
-                            if (steps?.length === 5) {
+                            if (steps?.length === 6) {
                                 setActiveStep((prev) => prev + 1)
                                 return
                             } else {
@@ -571,8 +633,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     };
 
     const handleGetEmployeeRoles = async () => {
-        if (companyId) {
-            const res = await getAllCompanyRole(companyId)
+        if (activeStep === 1 && userInfo?.companyId) {
+            const res = await getAllCompanyRole(userInfo?.companyId)
             if (res?.data?.status === 200) {
                 const data = res?.data?.result?.map((item) => {
                     return {
@@ -586,8 +648,8 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     }
 
     const handleGetCompanyLocations = async () => {
-        if (companyId) {
-            const res = await getAllActiveLocationsByCompanyId(companyId)
+        if (activeStep === 1 && userInfo?.companyId) {
+            const res = await getAllActiveLocationsByCompanyId(userInfo?.companyId)
             if (res?.data?.status === 200) {
                 const data = res?.data?.result?.map((item) => {
                     return {
@@ -601,53 +663,60 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     }
 
     const handleGetAllDepartment = async () => {
-        const response = await getAllDepartment(userInfo?.companyId)
-        if (response?.data?.result?.length === 0) {
-            setDepartments([]);
-            handleOpenDialog();
-            return;
-        }
-        const data = response?.data?.result?.map((item) => {
-            return {
-                id: item.id,
-                title: item.departmentName
+        if (activeStep === 1 && userInfo?.companyId) {
+            const response = await getAllDepartment(userInfo?.companyId)
+            if (response?.data?.result?.length === 0) {
+                setDepartments([]);
+                handleOpenDialog();
+                return;
             }
-        })
-        setDepartments(data)
+            const data = response?.data?.result?.map((item) => {
+                return {
+                    id: item.id,
+                    title: item.departmentName
+                }
+            })
+            setDepartments(data)
+
+        }
     }
 
     const handleGetAllUserType = async () => {
-        const res = await getAllEmployeeType()
-        const data = res?.data?.result?.map((item) => {
-            return {
-                id: item.id,
-                title: item.name
-            }
-        })
-        setEmployeeType(data)
+        if (activeStep === 1) {
+            const res = await getAllEmployeeType()
+            const data = res?.data?.result?.map((item) => {
+                return {
+                    id: item.id,
+                    title: item.name
+                }
+            })
+            setEmployeeType(data)
+        }
     }
 
     const handleGetAllShift = async () => {
-        const res = await getAllShifts(companyId);
-        if (res?.data?.result?.length === 0) {
-            setShifts([]);
-            handleOpenDialog();
-            return;
+        if (activeStep === 1 && companyId) {
+            const res = await getAllShifts(companyId);
+            if (res?.data?.result?.length === 0) {
+                setShifts([]);
+                handleOpenDialog();
+                return;
+            }
+            const data = res?.data?.result?.map((item) => {
+                const isHourly = item?.shiftType === "Hourly";
+
+                const timeDisplay = isHourly
+                    ? `${item.totalHours} hrs`
+                    : `${formatUtcToLocal(item?.startTime)} - ${formatUtcToLocal(item?.endTime)}`;
+
+                return {
+                    id: item.id,
+                    title: `${item.shiftName} (${item.shiftType} - ${timeDisplay})`,
+                };
+            });
+
+            setShifts(data);
         }
-        const data = res?.data?.result?.map((item) => {
-            const isHourly = item?.shiftType === "Hourly";
-
-            const timeDisplay = isHourly
-                ? `${item.totalHours} hrs`
-                : `${formatUtcToLocal(item?.startTime)} - ${formatUtcToLocal(item?.endTime)}`;
-
-            return {
-                id: item.id,
-                title: `${item.shiftName} (${item.shiftType} - ${timeDisplay})`,
-            };
-        });
-
-        setShifts(data);
     };
 
     const handleGetAllStatesByCountryId = async (id) => {
@@ -668,7 +737,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     }
 
     const handleGetAllOvertimeRules = async () => {
-        if (userInfo?.companyId) {
+        if (activeStep === 2 && userInfo?.companyId) {
             const response = await getAllOvertimeRules(userInfo?.companyId);
             if (response?.data?.status === 200) {
                 const data = response?.data?.result?.map((item) => {
@@ -683,7 +752,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     }
 
     const handleGetAllWeeklyOff = async () => {
-        if (userInfo?.companyId) {
+        if (userInfo?.companyId && activeStep === 2) {
             const response = await getAllWeekOffTemplate(userInfo?.companyId);
             if (response?.data?.status === 200) {
                 const data = response?.data?.result?.map((item) => {
@@ -693,6 +762,29 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                     }
                 })
                 setWeeklyOff(data)
+            }
+        }
+    }
+
+    const handleGetAllDeductions = async () => {
+        if (activeStep === 3) {
+            const res = await getAllDeductions(id)
+            if (res.data.status === 200) {
+                const data = res.data.result || [];
+                const allowances = data?.filter((item) => item?.type === "Allowance")?.map((item) => ({
+                    id: item.id,
+                    type: item.type,
+                    label: item.label,
+                    amount: item.amount
+                }));
+                const deductions = data?.filter((item) => item?.type === "Deduction")?.map((item) => ({
+                    id: item.id,
+                    type: item.type,
+                    label: item.label,
+                    amount: item.amount
+                }));
+                setValue("allowances", allowances || []);
+                setValue("deductions", deductions || []);
             }
         }
     }
@@ -724,14 +816,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
             earlyExitPenaltyRule: data.earlyExitPenaltyRule ? 1 : 0,
         }
         if (activeStep === 2) {
-            // if (watch("employeeTypeId") === 3 && !watch("isPf")) {
-            //     setAlert({ open: true, message: "PF is required", type: "error" })
-            //     return
-            // }
-            // if (watch("employeeTypeId") === 3 && !watch("isPt")) {
-            //     setAlert({ open: true, message: "PT is required", type: "error" })
-            //     return
-            // }
             if (id) {
                 if (oldData?.userName !== watch("userName") || oldData?.password !== watch("password")) {
                     handleOpenDialogLogin(newData);
@@ -764,6 +848,31 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
             }
         }
         else if (activeStep === 3) {
+            const payload = watch("allowances").concat(watch("deductions")).map((row) => {
+                return {
+                    ...row,
+                    id: row.id || null,
+                    amount: parseInt(row.amount),
+                    employeeId: parseInt(row.employeeId || id)
+                }
+            })
+            const response = await createDeduction(payload)
+            if (response?.data?.status === 200) {
+                if (saveAndExit) {
+                    handleSetTitle("Manage Employees");
+                    navigate("/dashboard/manageemployees");
+                }
+                else {
+                    handleGetAllDeductions()
+                    setActiveStep((prev) => prev + 1)
+                }
+            }
+            else {
+                setAlert({ open: true, message: response?.data?.message, type: "error" })
+                return
+            }
+        }
+        else if (activeStep === 4) {
             if (watch("accountId")) {
                 const response = await updateEmployeeBankInfo(watch("accountId"), { ...newData, employeeId: id || watch("employeeId") })
                 if (response?.data?.status === 200) {
@@ -798,18 +907,19 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
     }, [])
 
     useEffect(() => {
-        handleGetAllOvertimeRules()
-        handleGetEmployee();
-        handleGetAllUserType()
         handleGetAllDepartment()
         handleGetAllShift()
         handleGetAllWeeklyOff()
-    }, [id])
-
-    useEffect(() => {
+        handleGetAllDeductions()
+        handleGetAllOvertimeRules()
+        handleGetAllUserType()
         handleGetCompanyLocations()
         handleGetEmployeeRoles();
-    }, [companyId])
+    }, [activeStep])
+
+    useEffect(() => {
+        handleGetEmployee();
+    }, [id])
 
     useEffect(() => {
         handleGetAllStatesByCountryId(102)
@@ -1712,28 +1822,6 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                                                             />
                                                         </div>
 
-                                                        {/* <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
-                                                            <Controller
-                                                                name="basicSalary"
-                                                                control={control}
-                                                                rules={{
-                                                                    required: watch("isPf") ? "Basic Salary is required" : false,
-                                                                }}
-                                                                render={({ field }) => (
-                                                                    <Input
-                                                                        {...field}
-                                                                        label="Basic Salary"
-                                                                        type={`text`}
-                                                                        error={errors?.basicSalary}
-                                                                        onChange={(e) => {
-                                                                            const numericValue = e.target.value.replace(/[^0-9]/g, '');
-                                                                            field.onChange(numericValue);
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                            />
-                                                        </div> */}
-
                                                         <div className={`transition-all duration-500 ${watch("isPf") ? "opacity-100 text-opacity-100 bg-opacity-100 block" : "opacity-0 hidden"}`}>
                                                             <Controller
                                                                 name="pfType"
@@ -2040,6 +2128,159 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                             {
                                 activeStep === 3 && (
                                     <>
+                                        <div className='mb-6 font-medium text-center text-[28px] text-[#262B43]'>
+                                            <p style={{ color: theme.palette.primary.text.main }}>Allowance & Deduction</p>
+                                        </div>
+
+                                        {/* Allowance Section */}
+                                        <div className='border rounded-lg bg-white p-4 mb-6 h-44 overflow-y-auto'>
+                                            <div className='mb-4 flex justify-start items-center gap-3'>
+                                                <div className='grow'>
+                                                    <h3 className='text-md font-semibold capitalize'>Allowances</h3>
+                                                </div>
+                                                <div>
+                                                    <div
+                                                        onClick={() => appendAllowance({ employeeId: parseInt(id), type: "Allowance", label: "", amount: "" })}
+                                                        className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white cursor-pointer'
+                                                    >
+                                                        <Components.IconButton>
+                                                            <CustomIcons iconName={'fa-solid fa-plus'} css='text-white h-4 w-4' />
+                                                        </Components.IconButton>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {allowanceFields?.map((item, index) => (
+                                                <div key={item.id} className='flex justify-start items-center gap-3 mb-3'>
+                                                    <div className='w-full'>
+                                                        <Controller
+                                                            name={`allowances.${index}.label`}
+                                                            control={control}
+                                                            rules={{ required: "Allowance Type is required" }}
+                                                            render={({ field }) => (
+                                                                <Input
+                                                                    {...field}
+                                                                    label="Allowance Type"
+                                                                    type="text"
+                                                                    error={errors?.allowances?.[index]?.label}
+                                                                    onChange={(e) => {
+                                                                        const value = e.target.value;
+                                                                        field.onChange(value);
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div className='w-full'>
+                                                        <Controller
+                                                            name={`allowances.${index}.amount`}
+                                                            control={control}
+                                                            rules={{ required: "Amount is required" }}
+                                                            render={({ field }) => (
+                                                                <Input
+                                                                    {...field}
+                                                                    label="Amount"
+                                                                    type="text"
+                                                                    error={errors?.allowances?.[index]?.amount}
+                                                                    onChange={(e) => {
+                                                                        const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                        field.onChange(numericValue);
+                                                                    }}
+                                                                    endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Components.IconButton onClick={() => handleOpenDialogDelete(item, index)}>
+                                                            <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-red-600 h-4 w-4' />
+                                                        </Components.IconButton>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {allowanceFields.length === 0 && (
+                                                <p className='text-gray-500 text-center py-6'>No allowances added yet.</p>
+                                            )}
+                                        </div>
+
+                                        {/* Deduction Section */}
+                                        <div className='border rounded-lg bg-white p-4 h-44 overflow-y-auto'>
+                                            <div className='mb-4 flex justify-start items-center gap-3'>
+                                                <div className='grow'>
+                                                    <h3 className='text-md font-semibold capitalize'>Deductions</h3>
+                                                </div>
+                                                <div>
+                                                    <div
+                                                        onClick={() => appendDeduction({ employeeId: parseInt(id), type: "Deduction", label: "", amount: "" })}
+                                                        className='bg-green-600 h-8 w-8 flex justify-center items-center rounded-full text-white cursor-pointer'
+                                                    >
+                                                        <Components.IconButton>
+                                                            <CustomIcons iconName={'fa-solid fa-plus'} css='text-white h-4 w-4' />
+                                                        </Components.IconButton>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {deductionFields?.map((item, index) => (
+                                                <div key={item.id} className='flex justify-start items-center gap-3 mb-3'>
+                                                    <div className='w-full'>
+                                                        <Controller
+                                                            name={`deductions.${index}.label`}
+                                                            control={control}
+                                                            rules={{ required: "Deduction Type is required" }}
+                                                            render={({ field }) => (
+                                                                <Input
+                                                                    {...field}
+                                                                    label="Deduction Type"
+                                                                    type="text"
+                                                                    error={errors?.deductions?.[index]?.label}
+                                                                    onChange={(e) => {
+                                                                        const value = e.target.value;
+                                                                        field.onChange(value);
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div className='w-full'>
+                                                        <Controller
+                                                            name={`deductions.${index}.amount`}
+                                                            control={control}
+                                                            rules={{ required: "Amount is required" }}
+                                                            render={({ field }) => (
+                                                                <Input
+                                                                    {...field}
+                                                                    label="Amount"
+                                                                    type="text"
+                                                                    error={errors?.deductions?.[index]?.amount}
+                                                                    onChange={(e) => {
+                                                                        const numericValue = e.target.value.replace(/[^0-9]/g, '');
+                                                                        field.onChange(numericValue);
+                                                                    }}
+                                                                    endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Components.IconButton onClick={() => handleOpenDialogDelete(item, index)}>
+                                                            <CustomIcons iconName={'fa-solid fa-trash'} css='cursor-pointer text-red-600 h-4 w-4' />
+                                                        </Components.IconButton>
+                                                    </div>
+                                                </div>
+                                            ))}
+
+                                            {deductionFields.length === 0 && (
+                                                <p className='text-gray-500 text-center py-6'>No deductions added yet.</p>
+                                            )}
+                                        </div>
+                                    </>
+                                )
+                            }
+                            {
+                                activeStep === 4 && (
+                                    <>
                                         <div className='mb-2 font-medium text-center text-[28px] text-[#262B43]'>
                                             <p style={{ color: theme.palette.primary.text.main, }}>Direact Deposite</p>
                                         </div>
@@ -2213,7 +2454,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                                 )
                             }
                             {
-                                (!id && activeStep === 4) && (
+                                (!id && activeStep === 5) && (
                                     <>
                                         <div className='mb-5 font-medium text-center text-[28px] text-[#262B43]'>
                                             <p style={{ color: theme.palette.primary.text.main }}>
@@ -2249,17 +2490,17 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
 
                             <div className='flex justify-end gap-3 mt-6'>
                                 {
-                                    activeStep !== 4 && (
+                                    activeStep !== 5 && (
                                         <>
                                             <div>
                                                 <Button useFor='disabled' type={'button'} text={activeStep === 0 ? "Cancel" : "Back"} onClick={handleBack} />
                                             </div>
 
                                             <div>
-                                                <Button value="save" type={'submit'} text={activeStep === 3 ? "Submit" : "Next"} isLoading={loading} />
+                                                <Button value="save" type={'submit'} text={activeStep === 4 ? "Submit" : "Next"} isLoading={loading} />
                                             </div>
                                             {
-                                                (id && activeStep === 2) && (
+                                                (id && (activeStep === 2 || activeStep === 3)) && (
                                                     <div>
                                                         <Button type={'submit'} value="saveAndExit" text={"Submit & Exit"} isLoading={loading} />
                                                     </div>
@@ -2277,6 +2518,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
             <AlertDialog open={dialog.open} title={dialog.title} message={dialog.message} actionButtonText={dialog.actionButtonText} handleAction={handleCreateShift} handleClose={handleCloseDialog} />
             <AlertDialog open={dialogFaceRegistration.open} title={dialogFaceRegistration.title} message={dialogFaceRegistration.message} actionButtonText={dialogFaceRegistration.actionButtonText} handleAction={handleDeleteFaceRegistration} handleClose={handleCloseFaceRegistrationDialog} />
             <AlertDialog open={dialogLogin.open} title={dialogLogin.title} message={dialogLogin.message} actionButtonText={dialogLogin.actionButtonText} handleAction={handleUpdate} handleClose={handleCloseDialogLogin} />
+            <AlertDialog open={dialogDelete.open} title={dialogDelete.title} message={dialogDelete.message} actionButtonText={dialogDelete.actionButtonText} handleAction={handleDeleteDeduction} handleClose={handleCloseDeleteDialog} />
 
             <FaceRegistration open={showFaceRegistration} handleClose={handleCloseFaceRegistration} employeeId={watch("employeeId") || id} type="register" />
         </div>
