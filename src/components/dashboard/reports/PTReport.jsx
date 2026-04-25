@@ -10,17 +10,11 @@ import { getCompanyDetails } from "../../../service/companyDetails/companyDetail
 import PTPDFTable from "./PdfTable/PTPDFTable";
 import { filterOptionsByMonth } from "../../../service/common/commonService";
 
-const filterOptions = [
-    { id: 1, title: 'Last 1 Month', value: 1 },
-    { id: 2, title: 'Last 3 Months', value: 3 },
-    { id: 3, title: 'Last 6 Months', value: 6 },
-    { id: 4, title: 'Last 1 Year', value: 12 }
-];
 
 const PTReport = () => {
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const [employees, setEmployees] = useState([]);
-    const [filter, setFilter] = useState();
+    const [filter, setFilter] = useState(new Date().getMonth());
     const [loadingPdf, setLoadingPdf] = useState(false);
     const [showPdfContent, setShowPdfContent] = useState(false);
     const [companyInfo, setCompanyInfo] = useState()
@@ -90,47 +84,25 @@ const PTReport = () => {
             headerClassName: 'uppercase',
             flex: 1,
             sortable: false,
-            maxWidth: 300,
+            minWidth: 300,
             renderCell: (params) =>
                 params.row.isTotalRow
                     ? <strong className='font-semibold'>Total</strong>
                     : params.value
         },
         {
-            field: 'gross_salary',
-            headerName: 'Gross Salary(Monthly)',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 250,
-            align: "right",
-            sortable: false,
-            headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },
-        {
-            field: 'total_gross_salary',
-            headerName: 'Total Gross Salary',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 300,
-            sortable: false,
-            align: "right",
-            headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },
-        {
             field: 'pt_amount',
             headerName: 'Total PT Amount',
             headerClassName: 'uppercase',
             flex: 1,
-            maxWidth: 300,
+            minWidth: 300,
             sortable: false,
             align: "right",
             headerAlign: "right",
             renderCell: (params) =>
                 params.row.isTotalRow
-                    ? <strong className='font-semibold'>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</strong>
-                    : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
+                    ? <strong className='font-semibold'>₹{params.value ? params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) : 0}</strong>
+                    : <span>₹{params.value ? params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) : 0}</span>
         }
     ];
 
@@ -217,7 +189,7 @@ const PTReport = () => {
             {
                 showPdfContent && (
                     <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
-                        <PTPDFTable data={employees} companyInfo={companyInfo} filter={filter} />
+                        <PTPDFTable data={employees} companyInfo={companyInfo} period={filterOptionsByMonth?.find(option => option?.value === filter)?.title} />
                     </div>
                 )
             }

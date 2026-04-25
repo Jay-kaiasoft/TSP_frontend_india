@@ -54,7 +54,7 @@ const numberToWords = (num) => {
     return output + ' Only';
 };
 
-const SalarySlip = ({ data, companyInfo }) => {  
+const SalarySlip = ({ data, companyInfo }) => {
     return (
         <div className="font-inter antialiased bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen grid grid-cols-1 place-items-center gap-8">
             {
@@ -106,10 +106,14 @@ const SalarySlip = ({ data, companyInfo }) => {
                                         </thead>
 
                                         <tbody>
-                                            <tr className="hover:bg-gray-50">
-                                                <td className="p-3 border-b border-gray-100">Basic Salary</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
-                                            </tr>
+                                            {
+                                                employee?.basicSalary && (
+                                                    <tr className="hover:bg-gray-50">
+                                                        <td className="p-3 border-b border-gray-100">Basic Salary</td>
+                                                        <td className="p-3 border-b border-gray-100 text-right">₹{employee?.basicSalary?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                                    </tr>
+                                                )
+                                            }
 
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Earn Salary</td>
@@ -120,7 +124,14 @@ const SalarySlip = ({ data, companyInfo }) => {
                                                 <td className="p-3 border-b border-gray-100">Over Time</td>
                                                 <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
-
+                                            {
+                                                employee?.allowanceList?.map((row, rowIndex) => (
+                                                    <tr className="hover:bg-gray-50" key={rowIndex}>
+                                                        <td className="p-3 border-b border-gray-100">{row?.label}</td>
+                                                        <td className="p-3 border-b border-gray-100 text-right">₹{row?.amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                                    </tr>
+                                                ))
+                                            }
                                             <tr className="font-bold">
                                                 <td className="p-3 border-t border-b-2">Gross Earnings</td>
                                                 <td className="p-3 border-t border-b-2 text-right">₹{employee?.totalEarnings?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
@@ -154,6 +165,14 @@ const SalarySlip = ({ data, companyInfo }) => {
                                                 <td className="p-3 border-b border-gray-100">Other Deductions</td>
                                                 <td className="p-3 border-b border-gray-100 text-right">₹{employee?.otherDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
+                                            {
+                                                employee?.deductionsList?.map((row, rowIndex) => (
+                                                    <tr className="hover:bg-gray-50" key={rowIndex}>
+                                                        <td className="p-3 border-b border-gray-100">{row?.label}</td>
+                                                        <td className="p-3 border-b border-gray-100 text-right">₹{row?.amount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                                    </tr>
+                                                ))
+                                            }
                                             <tr className="font-bold">
                                                 <td className="p-3 border-t border-b-2">Total Deductions</td>
                                                 <td className="p-3 border-t border-b-2 text-right">₹{employee?.totalDeductions?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>

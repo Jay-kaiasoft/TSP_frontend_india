@@ -304,11 +304,17 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
     }, [row, watch("selectedDepartmentId"), department]);
 
     const calculateTotals = (dataToSum) => {
+        const basicSalary = dataToSum.reduce((sum, item) => sum + (item.basicSalary || 0), 0);
+        const otAmount = dataToSum.reduce((sum, item) => sum + (item.otAmount || 0), 0);
+        const totalAllowance = dataToSum.reduce((sum, item) => sum + (item.totalAllowance || 0), 0);
         const totalEarnings = dataToSum.reduce((sum, item) => sum + (item.totalEarnings || 0), 0);
+        const totalPfAmount = dataToSum.reduce((sum, item) => sum + (item.totalPfAmount || 0), 0);
+        const ptAmount = dataToSum.reduce((sum, item) => sum + (item.ptAmount || 0), 0);
+        const deduction = dataToSum.reduce((sum, item) => sum + (item.deduction || 0), 0);
         const otherDeductions = dataToSum.reduce((sum, item) => sum + (item.otherDeductions || 0), 0);
         const totalDeductions = dataToSum.reduce((sum, item) => sum + (item.totalDeductions || 0), 0);
         const netSalary = dataToSum.reduce((sum, item) => sum + (item.netSalary || 0), 0);
-        return { totalEarnings, otherDeductions, totalDeductions, netSalary };
+        return { basicSalary, otAmount, totalAllowance, totalEarnings, totalPfAmount, ptAmount, deduction, otherDeductions, totalDeductions, netSalary };
     };
 
     const groupedDepartmentTotals = useMemo(() => {
@@ -328,12 +334,13 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
             id: uniqueId, // DataGrid requires an 'id' field
             rowId: 'Total', // This will appear in the '#' column
             employeeName: null, // This will appear in the 'Employee Name' column
-            departmentName: '', // Empty for total row
-            basicSalary: null,
-            otAmount: null,
-            totalPfAmount: null,
-            ptAmount: null,
+            basicSalary: totals.basicSalary,
+            otAmount: totals.otAmount,
+            totalAllowance: totals.totalAllowance,
             totalEarnings: totals.totalEarnings,
+            totalPfAmount: totals.totalPfAmount,
+            ptAmount: totals.ptAmount,
+            deduction: totals.deduction,
             otherDeductions: totals.otherDeductions || 0, // Ensure this field exists
             totalDeductions: totals.totalDeductions,
             netSalary: totals.netSalary,
@@ -343,16 +350,24 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
 
     const columns = useMemo(() => {
         const baseColumns = [
-            // { field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 100, sortable: false, disableColumnMenu: true },
             { field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 180, sortable: false, disableColumnMenu: true },
-            { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', flex: 1, maxWidth: 180, sortable: false, disableColumnMenu: true },
             {
                 field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
+                sortable: false,
+                align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.row?.basicSalary ? params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) : 0}</span>
+            },
+            {
+                field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
                 sortable: false,
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
             {
-                field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', flex: 1, maxWidth: 120,
+                field: 'totalAllowance', headerName: 'Total Allowance', headerClassName: 'uppercase', flex: 1, maxWidth: 180,
+                sortable: false,
+                align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
+            },
+            {
+                field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
                 sortable: false,
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
@@ -367,7 +382,7 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
             {
-                field: 'totalEarnings', headerName: 'Total Earnings', headerClassName: 'uppercase', flex: 1, maxWidth: 200,
+                field: 'deduction', headerName: 'Deduction', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
                 sortable: false,
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
@@ -387,11 +402,6 @@ const GenerateSalary = ({ setAlert, handleSetTitle }) => {
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
         ];
-
-        const isSalaried = row.some(item => item.employeeType === 'Salaried');
-        if (!isSalaried) {
-            return baseColumns.filter(col => col.field !== 'basicSalary');
-        }
         return baseColumns;
     }, [row]);
 

@@ -238,8 +238,8 @@ const SalaryReport = ({ handleSetTitle }) => {
             { field: 'employeeName', headerName: 'Employee Name', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 180 },
             { field: 'departmentName', headerName: 'Department', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 180 },
             {
-                field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 150,
-                align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
+                field: 'basicSalary', headerName: 'Basic Salary', headerClassName: 'uppercase', flex: 1, maxWidth: 150,
+                align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.row?.basicSalary ? params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 }) : 0}</span>
             },
             {
                 field: 'otAmount', headerName: 'OT (₹)', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 120,
@@ -295,11 +295,6 @@ const SalaryReport = ({ handleSetTitle }) => {
                 },
             },
         ];
-
-        const isSalaried = row.some(item => item.employeeType === 'Salaried');
-        if (!isSalaried) {
-            return baseColumns.filter(col => col.field !== 'basicSalary');
-        }
         return baseColumns;
     }, [row]);
 

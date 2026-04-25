@@ -19,7 +19,6 @@ const SalaryStatementPDFTable = ({
     filter = [],
     selectedYear = null,
 }) => {
-
     const getFilterTitle = () => {
         if (!filter || filter.length === 0) return "";
 

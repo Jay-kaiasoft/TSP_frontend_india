@@ -16,7 +16,7 @@ const PFReport = () => {
     const [loadingPdf, setLoadingPdf] = useState(false);
     const [showPdfContent, setShowPdfContent] = useState(false);
     const [companyInfo, setCompanyInfo] = useState()
-    const [filter, setFilter] = useState(0);
+    const [filter, setFilter] = useState(new Date().getMonth());
 
     const handleGetAllEmployees = async () => {
         setEmployees([]);
@@ -73,38 +73,27 @@ const PFReport = () => {
 
     const columns = [
         {
-            field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 50,
+            field: 'rowId', headerName: '#', headerClassName: 'uppercase', flex: 1, maxWidth: 100,
             sortable: false,
             renderCell: (params) =>
                 params.row.isTotalRow ? null : <span>{params.value}</span>
         },
         {
-            field: 'userName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, maxWidth: 300,
+            field: 'userName', headerName: 'Employee Name', headerClassName: 'uppercase', flex: 1, minWidth: 300,
             sortable: false,
             renderCell: (params) => params.row.isTotalRow ? <strong className='font-semibold'>Total</strong> : params.value
         },
-        {
-            field: 'basic_salary',
-            headerName: 'Basic Salary(Monthly)',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 300,
-            sortable: false,
-            align: "right",
-            headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },
-        {
-            field: 'total_basic_salary',
-            headerName: 'Total Basic Salary',
-            headerClassName: 'uppercase',
-            flex: 1,
-            maxWidth: 200,
-            align: "right",
-            sortable: false,
-            headerAlign: "right",
-            renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
-        },
+        // {
+        //     field: 'basic_salary',
+        //     headerName: 'Basic Salary(Monthly)',
+        //     headerClassName: 'uppercase',
+        //     flex: 1,
+        //     maxWidth: 300,
+        //     sortable: false,
+        //     align: "right",
+        //     headerAlign: "right",
+        //     renderCell: (params) => params.row.isTotalRow ? null : <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
+        // },
         // {
         //     field: 'totalDays',
         //     headerName: 'Total Days',
@@ -130,7 +119,7 @@ const PFReport = () => {
             headerName: 'Employee PF',
             headerClassName: 'uppercase',
             flex: 1,
-            maxWidth: 300,
+            minWidth: 300,
             align: "right",
             sortable: false,
             headerAlign: "right",
@@ -141,7 +130,7 @@ const PFReport = () => {
             headerName: 'Employer PF',
             headerClassName: 'uppercase',
             flex: 1,
-            maxWidth: 300,
+            minWidth: 300,
             align: "right",
             sortable: false,
             headerAlign: "right",
@@ -152,7 +141,7 @@ const PFReport = () => {
             headerName: 'Total PF',
             headerClassName: 'uppercase',
             flex: 1,
-            maxWidth: 150,
+            minWidth: 150,
             align: "right",
             sortable: false,
             headerAlign: "right",
@@ -245,7 +234,7 @@ const PFReport = () => {
 
             {showPdfContent && (
                 <div className='absolute top-0 left-0 z-[-1] w-[180vh] opacity-0'>
-                    <PFPDFTable data={employees} companyInfo={companyInfo} filter={filter} />
+                    <PFPDFTable data={employees} companyInfo={companyInfo} period={filterOptionsByMonth?.find(option => option?.value === filter)?.title} />
                 </div>
             )}
         </div>
