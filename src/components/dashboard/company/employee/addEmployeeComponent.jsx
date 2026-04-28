@@ -166,7 +166,7 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
             hiredDate: new Date(),
             isActive: 1,
             checkGeofence: false,
-            // isPf: false,
+            isPf: false,
             // pfType: "",
             // pfPercentage: 0,
             // pfAmount: 0,
@@ -1804,52 +1804,73 @@ const AddEmployeeComponent = ({ setAlert, handleSetTitle, handleSetUserDetails }
                                                                 )}
                                                             />
                                                         </div>
-
-                                                        <div className='col-span-2 w-52'>
-                                                            <Controller
-                                                                name="isPt"
-                                                                control={control}
-                                                                render={({ field }) => (
-                                                                    <Checkbox
-                                                                        text={'PT(Professional Tax)'}
-                                                                        onChange={(e) => {
-                                                                            field.onChange(e.target.checked)
-                                                                            if (!e.target.checked) {
-                                                                                setValue("ptAmount", "");
-                                                                            }
-                                                                        }}
-                                                                        checked={field.value}
-                                                                    />
-                                                                )}
-                                                            />
-
-                                                        </div>
-
-                                                        <div className={`col-span-2 transition-all duration-500 ${watch("isPt") ? "opacity-100 text-opacity-100 bg-opacity-100" : "opacity-0 mt-0"}`}>
-                                                            <Controller
-                                                                name="ptAmount"
-                                                                control={control}
-                                                                rules={{
-                                                                    required: watch("isPt") ? "PT Amount is required" : false,
-                                                                }}
-                                                                render={({ field }) => (
-                                                                    <Input
-                                                                        {...field}
-                                                                        label="PT Amount"
-                                                                        type={`text`}
-                                                                        error={errors?.ptAmount}
-                                                                        onChange={(e) => {
-                                                                            let value = e.target.value;
-                                                                            if (/^\d*\.?\d*$/.test(value)) {
-                                                                                field.onChange(value);
-                                                                            }
-                                                                        }}
-                                                                        endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
-                                                                    />
-                                                                )}
-                                                            />
-                                                        </div>
                                                     </>
+                                                )
+                                            }
+                                            <div className='col-span-2 grid grid-cols-2 gap-3'>
+                                                <Controller
+                                                    name="isPf"
+                                                    control={control}
+                                                    render={({ field }) => (
+                                                        <Checkbox
+                                                            text={'PF(Provident Fund)'}
+                                                            onChange={(e) => {
+                                                                field.onChange(e.target.checked)
+                                                            }}
+                                                            checked={field.value}
+                                                        />
+                                                    )}
+                                                />
+                                                {
+                                                    watch("employeeTypeId") === 3 && (
+                                                        <Controller
+                                                            name="isPt"
+                                                            control={control}
+                                                            render={({ field }) => (
+                                                                <Checkbox
+                                                                    text={'PT(Professional Tax)'}
+                                                                    onChange={(e) => {
+                                                                        field.onChange(e.target.checked)
+                                                                        if (!e.target.checked) {
+                                                                            setValue("ptAmount", "");
+                                                                        }
+                                                                    }}
+                                                                    checked={field.value}
+                                                                />
+                                                            )}
+                                                        />
+                                                    )
+                                                }
+
+                                            </div>
+
+                                            {
+                                                watch("employeeTypeId") === 3 && (
+
+                                                    <div className={`col-span-2 transition-all duration-500 ${watch("isPt") ? "opacity-100 text-opacity-100 bg-opacity-100" : "opacity-0 mt-0"}`}>
+                                                        <Controller
+                                                            name="ptAmount"
+                                                            control={control}
+                                                            rules={{
+                                                                required: watch("isPt") ? "PT Amount is required" : false,
+                                                            }}
+                                                            render={({ field }) => (
+                                                                <Input
+                                                                    {...field}
+                                                                    label="PT Amount"
+                                                                    type={`text`}
+                                                                    error={errors?.ptAmount}
+                                                                    onChange={(e) => {
+                                                                        let value = e.target.value;
+                                                                        if (/^\d*\.?\d*$/.test(value)) {
+                                                                            field.onChange(value);
+                                                                        }
+                                                                    }}
+                                                                    endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
+                                                                />
+                                                            )}
+                                                        />
+                                                    </div>
                                                 )
                                             }
 
