@@ -159,7 +159,7 @@ const SalarySlip = ({ data, companyInfo }) => {
                                             </tr>
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Provident Fund</td>
-                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.totalPfAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
+                                                <td className="p-3 border-b border-gray-100 text-right">₹{employee?.pfAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</td>
                                             </tr>
                                             <tr className="hover:bg-gray-50">
                                                 <td className="p-3 border-b border-gray-100">Other Deductions</td>

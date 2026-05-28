@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { setAlert } from '../../../redux/commonReducers/commonReducers';
 import CustomIcons from '../../common/icons/CustomIcons';
 import { getHistory, updateSalaryStatement } from '../../../service/salaryStatementHistory/salaryStatementHistoryService';
+import { getCompanyEmployee } from '../../../service/companyEmployee/companyEmployeeService';
 
 const BootstrapDialog = styled(Components.Dialog)(({ theme }) => ({
     '& .MuiDialogContent-root': {
@@ -37,6 +38,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
 
     const [loading, setLoading] = useState(false);
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const [userData, setUserData] = useState(null);
 
     const {
         watch,
@@ -66,6 +68,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
             month: "",
             totalDays: "",
             totalWorkingDays: "",
+            totalWorkingHours: "",
             note: "",
         },
     });
@@ -92,9 +95,106 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
             month: "",
             totalDays: "",
             totalWorkingDays: "",
+            totalWorkingHours: "",
         });
         handleClose();
     };
+
+    const handleGetData = async () => {
+        if (!id) return;
+
+        const response = await getHistory(id);
+        if (response.data.status === 200) {
+            reset(response.data.result);
+            if (response.data.result?.totalWorkingHours != null) {
+                await handleGetUserData(response.data.result.employeeId);
+            }
+        } else {
+            setAlert({ message: response.data.message, type: 'error' });
+        }
+    };
+
+    const handleGetUserData = async (employeeId) => {
+        try {
+            const res = await getCompanyEmployee(employeeId);
+            if (res.data.status === 200) {
+                setUserData(res.data.result);
+            } else {
+                setAlert({ message: res.data.message, type: 'error' });
+            }
+        } catch (error) {
+            setAlert({ message: "Failed to fetch user data", type: 'error' });
+        }
+    }
+
+    const calculateSalaryStatement = () => {
+        const basicSalary = parseInt(watch("basicSalary")) || 0;
+        const totalPaidDays = parseInt(watch("totalPaidDays")) || 0;
+        const totalWorkingDays = parseInt(watch("totalWorkingDays")) || 0;
+        const otAmount = parseInt(watch("otAmount")) || 0;
+        const ptAmount = parseInt(watch("ptAmount")) || 0;
+        const otherDeductions = parseInt(watch("otherDeductions")) || 0;
+
+        // 1. Calculate Total Earnings
+        let totalSalary = 0;
+        if (userData?.hourlyRate && watch("totalWorkingHours") !== undefined && watch("totalWorkingHours") !== null) {
+            const hourlyRate = parseFloat(userData.hourlyRate) || 0;
+            const totalWorkingHours = parseFloat(watch("totalWorkingHours")) || 0;
+            totalSalary = parseInt(totalWorkingHours * hourlyRate) || 0;
+        } else {
+            const daySalary = parseInt(basicSalary / 30) || 0;
+            totalSalary = parseInt(daySalary * (totalWorkingDays + totalPaidDays)) || 0;
+        }
+        const totalEarnings = otAmount + totalSalary;
+
+        // 2. Calculate Deductions excluding PF
+        const deductionsExcludingPF = ptAmount + otherDeductions;
+
+        // 3. Calculate Net Salary before PF (as per user: "pf always count after totalEarnings - totalDeductions")
+        const netSalaryBeforePF = totalEarnings - deductionsExcludingPF;
+
+        // 4. Calculate PF percentage & amount based on netSalaryBeforePF
+        const pfPercentage = 12; // Fixed PF percentage as 12%
+        let totalPF = 0;
+        if (netSalaryBeforePF > 15000) {
+            totalPF = 1800;
+        } else if (netSalaryBeforePF > 0) {
+            totalPF = parseInt((netSalaryBeforePF * pfPercentage) / 100) || 0;
+        } else {
+            totalPF = 0;
+        }
+
+        // 5. Calculate Final Deductions (including PF)
+        const totalDeductions = totalPF + ptAmount + otherDeductions;
+
+        // 6. Calculate Final Net Salary
+        const netSalary = totalEarnings - totalDeductions;
+
+        // 7. Update form values in a single batch
+        setValue("totalEarnings", totalEarnings);
+        setValue("pfAmount", totalPF);
+        setValue("totalPfAmount", totalPF);
+        setValue("pfPercentage", netSalaryBeforePF > 15000 ? null : pfPercentage);
+        setValue("totalDeductions", totalDeductions);
+        setValue("netSalary", netSalary);
+    };
+
+    useEffect(() => {
+        calculateSalaryStatement();
+    }, [
+        watch("basicSalary"),
+        watch("totalPaidDays"),
+        watch("totalWorkingDays"),
+        watch("totalWorkingHours"),
+        watch("otAmount"),
+        watch("ptAmount"),
+        watch("otherDeductions"),
+        userData
+    ]);
+
+    useEffect(() => {
+        handleGetData();
+    }, [id])
 
     const submit = async (data) => {
         const newData = {
@@ -117,78 +217,6 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
             }
         }
     }
-
-    const handleGetData = async () => {
-        if (!id) return;
-
-        const response = await getHistory(id);
-        if (response.data.status === 200) {
-            reset(response.data.result);
-        } else {
-            setAlert({ message: response.data.message, type: 'error' });
-        }
-    };
-
-
-    const calculateTotalEarnings = () => {
-        const basicSalary = parseInt(watch("basicSalary")) || 0;
-        const totalPaidDays = parseInt(watch("totalPaidDays")) || 0;
-        const otAmount = parseInt(watch("otAmount")) || 0;
-
-        const totalWorkingDays = parseInt(watch("totalWorkingDays")) || 0;
-
-        const daySalary = parseInt(basicSalary / 30) || 0;
-        const totalSalary = parseInt(daySalary * (totalWorkingDays + totalPaidDays));
-        const totalEarnings = otAmount + totalSalary;
-
-        setValue("totalEarnings", parseInt(totalEarnings) || 0);
-    };
-
-    const calculateNetSalary = () => {
-        const totalEarnings = parseInt(watch("totalEarnings")) || 0;
-        const totalDeductions = parseInt(watch("totalDeductions")) || 0;
-
-        const netSalary = totalEarnings - totalDeductions;
-        setValue("netSalary", parseInt(netSalary) || 0);
-    };
-
-    const calculateTotalPFPercentage = () => {
-        const basicSalary = parseInt(watch("basicSalary")) || 0;
-        const pfPercentage = parseInt(watch("pfPercentage")) || 0;
-        const pfAmount = parseInt(watch("pfAmount")) || 0
-        const ptAmount = parseInt(watch("ptAmount")) || 0;
-        const otherDeductions = parseInt(watch("otherDeductions")) || 0;
-
-        let totalPF = 0;
-        if (pfPercentage > 0) {
-            totalPF = parseInt((basicSalary * pfPercentage) / 100) > 900 ? 900 : parseInt((basicSalary * pfPercentage) / 100);
-            setValue("totalPfAmount", parseInt(totalPF) > 900 ? 900 : parseInt(totalPF));
-        }
-        if (pfAmount > 0) {
-            setValue("totalPfAmount", parseInt(pfAmount) > 200 ? 200 : parseInt(pfAmount));
-        }
-
-        const totalDeductions = totalPF + ptAmount + otherDeductions;
-        setValue("totalDeductions", parseInt(totalDeductions) || 0);
-    };
-
-
-    useEffect(() => {
-        calculateTotalEarnings();
-        calculateTotalPFPercentage();
-    }, [watch("otAmount"), watch("totalWorkingDays")]);
-
-    useEffect(() => {
-        calculateNetSalary();
-    }, [watch("totalEarnings"), watch("otherDeductions"), watch("totalDeductions")]);
-
-    useEffect(() => {
-        calculateTotalPFPercentage();
-    }, [watch("pfPercentage"), watch("pfAmount"), watch("ptAmount")]);
-
-    useEffect(() => {
-        handleGetData();
-    }, [id])
 
     return (
         <React.Fragment>
@@ -221,41 +249,89 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                             <div className='flex justify-start items-center gap-2 col-span-2'>
                                 <p>Employee Name :</p>
                                 <span className='font-semibold'>{watch("employeeName")}</span>
-                            </div>                       
-                            <div className='flex justify-start items-center gap-2 col-span-2'>
-                                <p>Basic Salary :</p>
-                                <span className='font-semibold'>₹{parseInt(watch("basicSalary")).toLocaleString("en-IN")}</span>
                             </div>
+                            {
+                                userData?.hourlyRate ? (
+                                    <div className='flex justify-start items-center gap-2 col-span-2'>
+                                        <p>Hourly Rate :</p>
+                                        <span className='font-semibold'>₹{(parseFloat(userData?.hourlyRate) || 0).toLocaleString("en-IN")}</span>
+                                    </div>
+                                ) : (
+                                    <div className='flex justify-start items-center gap-2 col-span-2'>
+                                        <p>Basic Salary :</p>
+                                        <span className='font-semibold'>₹{(parseInt(watch("basicSalary")) || 0).toLocaleString("en-IN")}</span>
+                                    </div>
+                                )
+                            }
                             <div className='flex justify-start items-center gap-2 col-span-2'>
                                 <p>Total Paid Days :</p>
-                                <span className='font-semibold'>{watch("totalPaidDays")}</span>
+                                <span className='font-semibold'>{watch("totalPaidDays") || 0}</span>
                             </div>
                         </div>
 
                         <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-                            <Controller
-                                name="totalWorkingDays"
-                                control={control}
-                                rules={{
-                                    required: "Working days is required",
-                                }}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        label="Working Days"
-                                        type="text"
-                                        error={errors.totalWorkingDays}
-                                        onChange={(e) => {
-                                            const value = e.target.value.replace(/[^0-9]/g, '');
-                                            if (parseInt(value) > parseInt(31)) {
-                                                return;
-                                            } else {
-                                                field.onChange(value);
-                                            }
+                            {
+                                watch("totalWorkingHours") !== null ? (
+                                    <Controller
+                                        name="totalWorkingHours"
+                                        control={control}
+                                        rules={{
+                                            required: "Working hours is required",
                                         }}
+                                        render={({ field }) => (
+                                            <Input
+                                                {...field}
+                                                label="Working Hours"
+                                                type="text"
+                                                error={errors.totalWorkingHours}
+                                                onChange={(e) => {
+                                                    let value = e.target.value;
+
+                                                    // 1. Remove any character that isn't a digit or a dot
+                                                    value = value.replace(/[^0-9.]/g, '');
+
+                                                    // 2. Prevent multiple dots (keep only the first one)
+                                                    const parts = value.split('.');
+                                                    if (parts.length > 2) {
+                                                        value = parts[0] + '.' + parts.slice(1).join('');
+                                                    }
+
+                                                    // 3. Limit to 2 digits after the dot
+                                                    if (parts[1] && parts[1].length > 2) {
+                                                        value = parts[0] + '.' + parts[1].substring(0, 2);
+                                                    }
+
+                                                    field.onChange(value);
+                                                }}
+                                            />
+                                        )}
                                     />
-                                )}
-                            />
+                                ) : (
+                                    <Controller
+                                        name="totalWorkingDays"
+                                        control={control}
+                                        rules={{
+                                            required: "Working days is required",
+                                        }}
+                                        render={({ field }) => (
+                                            <Input
+                                                {...field}
+                                                label="Working Days"
+                                                type="text"
+                                                error={errors.totalWorkingDays}
+                                                onChange={(e) => {
+                                                    const value = e.target.value.replace(/[^0-9]/g, '');
+                                                    if (parseInt(value) > parseInt(31)) {
+                                                        return;
+                                                    } else {
+                                                        field.onChange(value);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                )
+                            }
                             <Controller
                                 name="otAmount"
                                 control={control}
@@ -277,7 +353,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                 )}
                             />
                             {
-                                watch("pfAmount") !== null ? (
+                                watch("pfAmount") !== null && (
                                     <Controller
                                         name="pfAmount"
                                         control={control}
@@ -296,33 +372,35 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                                         field.onChange(value);
                                                     }
                                                 }}
+                                                // disabled={true}
                                                 endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                             />
                                         )}
                                     />
-                                ) : watch("pfPercentage") !== null ? (
-                                    <Controller
-                                        name="pfPercentage"
-                                        control={control}
-                                        rules={{
-                                            required: "PF percentage is required",
-                                        }}
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                label="PF Percentage"
-                                                type={`text`}
-                                                error={errors.pfPercentage}
-                                                value={watch("pfPercentage") || ""}
-                                                onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    field.onChange(value);
-                                                }}
-                                                endIcon={<CustomIcons iconName={`fa-solid fa-percent`} css={'text-gray-500'} />}
-                                            />
-                                        )}
-                                    />
-                                ) : null
+                                )
+                                // ) : watch("pfPercentage") !== null ? (
+                                //     <Controller
+                                //         name="pfPercentage"
+                                //         control={control}
+                                //         rules={{
+                                //             required: "PF percentage is required",
+                                //         }}
+                                //         render={({ field }) => (
+                                //             <Input
+                                //                 {...field}
+                                //                 label="PF Percentage"
+                                //                 type={`text`}
+                                //                 error={errors.pfPercentage}
+                                //                 value={watch("pfPercentage") || ""}
+                                //                 onChange={(e) => {
+                                //                     const value = e.target.value.replace(/[^0-9]/g, '');
+                                //                     field.onChange(value);
+                                //                 }}
+                                //                 endIcon={<CustomIcons iconName={`fa-solid fa-percent`} css={'text-gray-500'} />}
+                                //             />
+                                //         )}
+                                //     />
+                                // ) : null
                             }
                             {
                                 (watch("pfPercentage") !== null || watch("pfAmount") !== null) ? (
@@ -370,7 +448,6 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                                         onChange={(e) => {
                                             const value = e.target.value.replace(/[^0-9]/g, '');
                                             field.onChange(value);
-                                            calculateTotalPFPercentage();
                                         }}
                                         endIcon={<CustomIcons iconName={`fa-solid fa-indian-rupee-sign`} css={'text-gray-500'} />}
                                     />
@@ -381,17 +458,17 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                         <div className='flex justify-start items-center my-2 gap-5'>
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Total Earnings :</p>
-                                <span className='font-semibold'>₹{parseInt(watch("totalEarnings")).toLocaleString("en-IN")}</span>
+                                <span className='font-semibold'>₹{(parseInt(watch("totalEarnings")) || 0).toLocaleString("en-IN")}</span>
                             </div>
 
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Total Deductions :</p>
-                                <span className='font-semibold'>₹{parseInt(watch("totalDeductions")).toLocaleString("en-IN")}</span>
+                                <span className='font-semibold'>₹{(parseInt(watch("totalDeductions")) || 0).toLocaleString("en-IN")}</span>
                             </div>
 
                             <div className='flex justify-start items-center gap-2'>
                                 <p>Net Salary :</p>
-                                <span className='font-semibold'>₹{parseInt(watch("netSalary")).toLocaleString("en-IN")}</span>
+                                <span className='font-semibold'>₹{(parseInt(watch("netSalary")) || 0).toLocaleString("en-IN")}</span>
                             </div>
                         </div>
 
@@ -422,7 +499,7 @@ function SalaryStatementModel({ setAlert, open, handleClose, id, handleGetStatem
                     </Components.DialogActions>
                 </form>
             </BootstrapDialog>
-        </React.Fragment>
+        </React.Fragment >
     );
 }
 

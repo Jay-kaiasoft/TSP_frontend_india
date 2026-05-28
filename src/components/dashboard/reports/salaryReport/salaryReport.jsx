@@ -223,7 +223,7 @@ const SalaryReport = ({ handleSetTitle }) => {
             departmentName: '', // Empty for total row
             basicSalary: null,
             otAmount: null,
-            totalPfAmount: null,
+            pfAmount: null,
             ptAmount: null,
             totalEarnings: totals.totalEarnings,
             otherDeductions: totals.otherDeductions || 0, // Ensure this field exists
@@ -246,7 +246,7 @@ const SalaryReport = ({ handleSetTitle }) => {
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
             {
-                field: 'totalPfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 120,
+                field: 'pfAmount', headerName: 'PF (₹)', headerClassName: 'uppercase', sortable: false, flex: 1, maxWidth: 120,
                 align: "right", headerAlign: "right", renderCell: (params) => <span>₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 })}</span>
             },
             {
