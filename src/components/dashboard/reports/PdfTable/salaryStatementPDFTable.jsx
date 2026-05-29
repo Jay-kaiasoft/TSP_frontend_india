@@ -35,17 +35,18 @@ const SalaryStatementPDFTable = ({
 
     const renderEmployeeRow = (emp, index) => (
         <tr key={`${emp.employeeId}-${emp.month}`}>
-            <td className="border border-gray-300 text-center text-sm py-4 px-4 align-middle"> {/* Increased padding */}
+            <td className="border border-gray-300 text-center text-sm py-4 px-4 align-middle whitespace-nowrap"> {/* Increased padding */}
                 {index + 1}
             </td>
-            <td className="border border-gray-300 text-left text-sm py-4 px-4 align-middle font-medium text-gray-800">{emp.employeeName}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{emp.basicSalary?.toLocaleString('en-IN')}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{emp.otAmount?.toLocaleString('en-IN')}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{emp.pfAmount?.toLocaleString('en-IN')}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle">₹{emp.ptAmount?.toLocaleString('en-IN')}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-semibold">₹{emp.totalEarnings?.toLocaleString('en-IN')}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-semibold">₹{emp.totalDeductions?.toLocaleString('en-IN')}</td> {/* Increased padding */}
-            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-bold">₹{emp.netSalary?.toLocaleString('en-IN')}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-left text-sm py-4 px-4 align-middle font-medium text-gray-800 whitespace-nowrap">{emp.employeeName}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle whitespace-nowrap">{emp.basicSalary ? '₹' + emp.basicSalary?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle whitespace-nowrap">{emp.otAmount ? '₹' + emp.otAmount?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle whitespace-nowrap">{emp.pfAmount ? '₹' + emp.pfAmount?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle whitespace-nowrap">{emp.ptAmount ? '₹' + emp.ptAmount?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-semibold whitespace-nowrap">{emp.totalEarnings ? '₹' + emp.totalEarnings?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-semibold whitespace-nowrap">{emp.otherDeductions ? '₹' + emp.otherDeductions?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-semibold whitespace-nowrap">{emp.totalDeductions ? '₹' + emp.totalDeductions?.toLocaleString('en-IN') : "-"}</td> {/* Increased padding */}
+            <td className="border border-gray-300 text-right text-sm py-4 px-4 align-middle font-bold whitespace-nowrap">₹{emp.netSalary?.toLocaleString('en-IN')}</td> {/* Increased padding */}
         </tr>
     );
 
@@ -54,6 +55,7 @@ const SalaryStatementPDFTable = ({
 
         const totals = {
             earnings: employeeList.reduce((sum, emp) => sum + (emp.totalEarnings || 0), 0),
+            otherDeductions: employeeList.reduce((sum, emp) => sum + (emp.otherDeductions || 0), 0),
             deductions: employeeList.reduce((sum, emp) => sum + (emp.totalDeductions || 0), 0),
             netSalary: employeeList.reduce((sum, emp) => sum + (emp.netSalary || 0), 0),
         };
@@ -67,15 +69,16 @@ const SalaryStatementPDFTable = ({
                 <table className="min-w-full border-collapse">
                     <thead>
                         <tr>
-                            <th className="border border-gray-300 py-3 px-4 text-center text-sm font-bold text-gray-700 capitalize align-middle">#</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-left text-sm font-bold text-gray-700 capitalize align-middle">Name</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Basic (₹)</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">OT (₹)</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">PF (₹)</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">PT (₹)</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Total Earnings (₹)</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Total Deductions (₹)</th> {/* Increased padding */}
-                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle">Net Salary (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-center text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">#</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-left text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">Name</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">Basic (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">OT (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">PF (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">PT (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">Total Earnings (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">Other Deductions (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">Total Deductions (₹)</th> {/* Increased padding */}
+                            <th className="border border-gray-300 py-3 px-4 text-right text-sm font-bold text-gray-700 capitalize align-middle whitespace-nowrap">Net Salary (₹)</th> {/* Increased padding */}
                         </tr>
                     </thead>
                     <tbody>
@@ -83,10 +86,11 @@ const SalaryStatementPDFTable = ({
 
                         {employeeList.length > 0 && (
                             <tr className="font-bold border-t-2 border-gray-400">
-                                <td colSpan={6} className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle">Total:</td> {/* Increased padding */}
-                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800">₹{totals.earnings.toLocaleString('en-IN')}</td> {/* Increased padding */}
-                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800">₹{totals.deductions.toLocaleString('en-IN')}</td> {/* Increased padding */}
-                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800">₹{totals.netSalary.toLocaleString('en-IN')}</td> {/* Increased padding */}
+                                <td colSpan={6} className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle whitespace-nowrap">Total:</td> {/* Increased padding */}
+                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800 whitespace-nowrap">₹{totals.earnings.toLocaleString('en-IN')}</td> {/* Increased padding */}
+                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800 whitespace-nowrap">₹{totals.otherDeductions.toLocaleString('en-IN')}</td> {/* Increased padding */}
+                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800 whitespace-nowrap">₹{totals.deductions.toLocaleString('en-IN')}</td> {/* Increased padding */}
+                                <td className="border border-gray-300 py-3 px-4 text-right text-sm capitalize align-middle text-gray-800 whitespace-nowrap">₹{totals.netSalary.toLocaleString('en-IN')}</td> {/* Increased padding */}
                             </tr>
                         )}
                     </tbody>
@@ -126,7 +130,7 @@ const SalaryStatementPDFTable = ({
 
     return (
         <div className="overflow-x-auto h-full bg-white">
-            <div id="salary-table-container" style={{ width: '1000px', border: '2px solid black', padding: '16px' }}>
+            <div id="salary-table-container" style={{ width: '1150px', border: '2px solid black', padding: '16px' }}>
 
                 {/* Header Section */}
                 <div className="flex items-center justify-between border-b border-gray-400 pb-6 mb-8">
